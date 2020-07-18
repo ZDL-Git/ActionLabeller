@@ -53,19 +53,22 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
         self.btn_open_video.clicked.connect(self.slot_open_file)
         self.spin_interval.textChanged.connect(self.set_interval)
-        self.line_jumpto.textChanged.connect(self.jump_to)
-        # self.label_timeline.installEventFilter(self)
+        self.line_jumpto.textChanged.connect(
+            lambda text: text and global_.mySignals.jump_to.emit(int(text), None, global_.Emitter.L_JUMPTO))
+        # self.label_note.installEventFilter(self)
         self.label_show.installEventFilter(self)
-        # self.table_timeline.installEventFilter(self)
 
         self.state_mouse_pressing = False
         self.state_mouse_last_point = None
 
         def init_buttons():
             # self.btn_play.clicked.connect(self.pause_or_resume)
-            self.btn_play.clicked.connect(global_.mySignals.video_pause.emit)
+            self.btn_play.clicked.connect(global_.mySignals.video_pause_or_resume.emit)
             self.btn_to_head.clicked.connect(self.to_head)
             self.btn_to_tail.clicked.connect(self.to_tail)
+            self.btn_test.clicked.connect(
+                lambda: Log.error(self.table_timeline.width(), self.table_timeline.columnWidth(0),
+                                  self.table_timeline._center_col()))
 
         def init_settings():
             global_.Settings.v_interval = int(self.spin_interval.text())
@@ -80,21 +83,26 @@ class MyApp(QMainWindow, Ui_MainWindow):
         init_buttons()
         init_settings()
 
+        self.btn_open_video.setFocus()
         self.table_timeline.__init_later__()
         global_.mySignals.jump_to.connect(self.common_slot)
+        global_.mySignals.follow_to.connect(self.slot_follow_to)
 
     def common_slot(self, *arg):
         print(f'common slot print:', arg)
 
     def slot_open_file(self):
-        got = QFileDialog.getOpenFileName(self, "Open Image", "/Users/zdl/Downloads/下载-视频",
-                                          "Image Files (*.mp4 *.jpg *.bmp)")
+        # TODO
+        # got = QFileDialog.getOpenFileName(self, "Open Image", "/Users/zdl/Downloads/下载-视频",
+        #                                   "Image Files (*.mp4 *.jpg *.bmp)")
+        got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
         Log.info(got)
         fname = got[0]
         if fname:
             video = Video(fname)
             self.table_timeline.set_column_count(video.get_info()['frame_c'])
             self.label_show.set_video(video)
+            self.btn_play.click()
 
     def to_head(self):
         self.cur_index = 0
@@ -105,20 +113,21 @@ class MyApp(QMainWindow, Ui_MainWindow):
     def set_interval(self):
         global_.Settings.v_interval = int(self.spin_interval.text() or 1)
 
-    def jump_to(self, to=None):
-        to = to or self.line_jumpto.text()
-        if to:
-            to = int(to)
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, to)
-            self.cur_index = to
-            self.flush_frame()
+    def slot_follow_to(self, emitter, to):
+        # to = to or self.line_jumpto.text()
+        # if to:
+        #     to = int(to)
+        #     self.cap.set(cv2.CAP_PROP_POS_FRAMES, to)
+        #     self.cur_index = to
+        #     self.flush_frame()
+        self.label_note.setText(f'frame {to}')
 
     def eventFilter(self, source, event):
         if event.type() != 12:
-            print(f'event type {event.type()} source {source}')
+            Log.debug(f'etype {event.type()} source {source}')
         else:
             return False
-        if source is self.label_timeline:
+        if source is self.label_note:
             if event.type() == QEvent.MouseButtonPress:
                 print("pressed...")
                 self.pause()
@@ -159,6 +168,11 @@ class MyApp(QMainWindow, Ui_MainWindow):
         # if event.type() == QEvent.
         return super(QMainWindow, self).eventFilter(source, event)
 
+    # def resizeEvent(self, e):
+    #     pass
+    # Log.warn(self.table_timeline.width())
+    # super(MyApp, self).resizeEvent(e)
+
     # def flush_frame(self, reverse=False):
     #     """ Slot function to capture frame and process it
     #     """
@@ -181,7 +195,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
     #         q_pixmap = QPixmap.fromImage(q_image)
     #         self.v_buffer.append((q_pixmap, self.cur_index))
     #         self.label_show.setPixmap(q_pixmap)
-    #         self.label_timeline.setText(f'frame:{self.cur_index}')
+    #         self.label_note.setText(f'frame:{self.cur_index}')
     #     elif not ret:
     #         self.cap.release()
     #         # self.timer_video.stop()
@@ -195,7 +209,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
         shadowEffect.setOffset(0)
         shadowEffect.setBlurRadius(8)
         self.label_show.setGraphicsEffect(shadowEffect)
-        self.label_timeline.setGraphicsEffect(shadowEffect)
+        self.label_note.setGraphicsEffect(shadowEffect)
 
         vheader = self.table_timeline.verticalHeader()
         vheader.setDefaultSectionSize(5)

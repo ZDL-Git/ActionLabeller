@@ -2,6 +2,7 @@ import cv2
 import collections
 
 import global_
+from utils import Log
 
 
 class Video:
@@ -11,7 +12,7 @@ class Video:
         self._cap = cv2.VideoCapture(self.fname)
         self._info = None
         self.cur_index = -1
-        self.schedule_index = None
+        self.scheduled = None
         self.frames_buffer = collections.deque(maxlen=100)
 
     def get_info(self):
@@ -37,9 +38,16 @@ class Video:
                           'fps': fps}
         return self._info
 
-    def read(self, index=None):
-        if index is None:
+    def schedule(self, index, bias, emitter):
+        Log.debug(index, bias, self.cur_index)
+        if index == -1:
+            index = self.cur_index + bias
+        self.scheduled = emitter, max(0, min(index, self.get_info()['frame_c'] - 1))
+
+    def read(self):
+        if self.scheduled is None:
             self.cur_index += global_.Settings.v_interval
+            emitter = global_.Emitter.TIMER
             if global_.Settings.v_interval > 80:
                 self._cap.set(cv2.CAP_PROP_POS_FRAMES, self.cur_index)
                 gap = 1
@@ -49,17 +57,21 @@ class Video:
                 gap -= 1
                 ret, frame = self._cap.read()
                 if not ret:
-                    return None
+                    return None, None, None
         else:
-            gap = index - self.cur_index
+            emitter, schedule_index = self.scheduled
+            self.scheduled = None
+
+            gap = schedule_index - self.cur_index
             if gap > 80 or gap < 1:
-                self._cap.set(cv2.CAP_PROP_POS_FRAMES, index)
+                self._cap.set(cv2.CAP_PROP_POS_FRAMES, schedule_index)
                 gap = 1
             while gap:
                 gap -= 1
                 ret, frame = self._cap.read()
                 if not ret:
-                    return None
-            self.cur_index = index
+                    return None, None, None
+            self.cur_index = schedule_index
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        return frame
+        # self.frames_buffer.append((self.cur_index, frame))
+        return emitter, self.cur_index, frame
