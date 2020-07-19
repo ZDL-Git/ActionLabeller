@@ -26,6 +26,7 @@ class MyTableWidget(QTableWidget):
         self.pressed_cell_pos = None
         self.entry_row_index = None
         self.cellClicked.connect(self.slot_cellClicked)
+        self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
         self.cellActivated.connect(self.slot_cellActivated)
         self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
         self.cellPressed.connect(self.slot_cellPressed)
@@ -35,6 +36,8 @@ class MyTableWidget(QTableWidget):
 
     # FIXME
     def __init_later__(self):
+        self.setHorizontalHeaderLabels([str(i) for i in range(self.columnCount())])
+
         header = self.horizontalHeader()
         header.sectionPressed.disconnect()
         header.sectionClicked.connect(self.slot_horizontalHeaderClicked)
@@ -67,8 +70,11 @@ class MyTableWidget(QTableWidget):
         #     pass
 
     def keyReleaseEvent(self, e: QKeyEvent) -> None:
+        Log.debug('here', e.key())
         if e.key() == Qt.Key_Control:
             self.key_control_pressing = False
+        elif e.key() in [Qt.Key_Backspace, Qt.Key_D]:
+            self._del_selected_label()
 
     def wheelEvent(self, e: QWheelEvent) -> None:
         print(f'wheel{e.angleDelta()}')
@@ -106,16 +112,47 @@ class MyTableWidget(QTableWidget):
 
         global_.mySignals.jump_to.emit(index, None, global_.Emitter.T_HSCROLL)
 
+    def slot_cellDoubleClicked(self, r, c):
+        selection_range = self._select_label(r, c)
+        if not selection_range:
+            return
+        start_at = selection_range.leftColumn()
+        stop_at = selection_range.rightColumn()
+        global_.mySignals.jump_to.emit(start_at, None, global_.Emitter.T_LABEL)
+        global_.mySignals.video_start.emit(stop_at)
+
+    def _cell_label(self) -> QTableWidgetSelectionRange:
+        pass
+
+    def _selected_colors(self):
+        pass
+
+    def _neighbor_color(self, r, c):
+        if c - 1 >= 0 and self.item(r, c - 1) and self.item(r, c - 1).background() != Qt.white:
+            return self.item(r, c - 1).background()
+        elif c + 1 < self.columnCount() and self.item(r, c + 1) and self.item(r, c + 1).background() != Qt.white:
+            return self.item(r, c + 1).background()
+        else:
+            return None
+
+    def _refer_color(self, rect: QTableWidgetSelectionRange):
+        l, r, t, b = rect.leftColumn(), rect.rightColumn(), rect.topRow(), rect.bottomRow()
+        colors = set()
+        for r in range(t, b + 1):
+            for c in range(l, r + 1):
+                if self.item(r, c) and self.item(r, c).background():
+                    pass
+
     def slot_cellClicked(self, r, c):
-        print(f'uuuuuuu {r} {c}')
-        # if self.item(r, c) and self.item(r, c).background() is not Qt.white:
+        Log.debug(r, c)
+        self._select_label(r, c)
+        # if self.item(r, c).background() != Qt.white:
+        #     Log.debug('clear color')
         #     self.item(r, c).setBackground(Qt.white)
-        # elif self.item(r, c - 1) and self.item(r, c - 1).background() is not Qt.white:
-        #     self.setItem(r, c, QTableWidgetItem(''))
-        #     self.item(r, c).setBackground(self.item(r, c - 1).background())
         # else:
-        #     self.setItem(r, c, QTableWidgetItem(''))
-        #     self.item(r, c).setBackground(QColor(QRandomGenerator().global_().generate()))
+        #     n_color = self._neighbor_color(r, c)
+        #     if n_color:
+        #         self.item(r, c).setBackground(n_color)
 
     def slot_cellPressed(self, r, c):
         Log.info('here', r, c, self.item(r, c))
@@ -123,12 +160,13 @@ class MyTableWidget(QTableWidget):
         global_.mySignals.video_pause.emit()
         if not self.item(r, c):
             self.setItem(r, c, QTableWidgetItem(''))
-            # self.item(r, c).setBackground(Qt.white)
+            self.item(r, c).setBackground(Qt.white)
+            # Log.warn(self.item(r, c).background() == Qt.white)
             # self.item(r, c).setText('10')
-        # if self.item(r, c).background().color() is not QColor(Qt.white):
+        # if self.item(r, c).background() != Qt.white:
         #     Log.debug('clear color')
         #     self.item(r, c).setBackground(Qt.white)
-        # elif self.item(r, c - 1) and self.item(r, c - 1).background() is not Qt.white:
+        # elif self.item(r, c - 1) and self.item(r, c - 1).background() != Qt.white:
         #     Log.debug('follow left neighbour color')
         #     self.item(r, c).setBackground(self.item(r, c - 1).background())
         # else:
@@ -141,14 +179,18 @@ class MyTableWidget(QTableWidget):
     def slot_itemSelectionChanged(self):
         Log.info('here')
         rect = self.selectedRanges() and self.selectedRanges()[0]
-        if rect:
-            l, r, t, b = rect.leftColumn(), rect.rightColumn(), rect.topRow(), rect.bottomRow()
-            Log.debug('l r t b', l, r, t, b)
-            if l != r or t != b:
-                r_color = QColor(QRandomGenerator().global_().generate())
-                for c in range(l, r + 1):
-                    self.setItem(self.pressed_cell_pos[0], c, QTableWidgetItem(''))
-                    self.item(self.pressed_cell_pos[0], c).setBackground(r_color)
+        if not rect:
+            return
+        l, r, t, b = rect.leftColumn(), rect.rightColumn(), rect.topRow(), rect.bottomRow()
+        Log.debug('l r t b', l, r, t, b)
+        if l != r or t != b:
+            if self.item(*self.pressed_cell_pos) and self.item(*self.pressed_cell_pos).background() != Qt.white:
+                color = self.item(*self.pressed_cell_pos).background()
+            else:
+                color = QColor(QRandomGenerator().global_().generate())
+            for c in range(l, r + 1):
+                self.setItem(self.pressed_cell_pos[0], c, QTableWidgetItem(''))
+                self.item(self.pressed_cell_pos[0], c).setBackground(color)
 
     def slot_horizontalHeaderClicked(self, i):
         Log.info('index', i)
@@ -188,6 +230,31 @@ class MyTableWidget(QTableWidget):
     #         return col - 1
     #     return QVariant()
 
+    def _select_label(self, row, col):
+        if not self.item(row, col) or self.item(row, col).background() == Qt.white:
+            return None
+        color = self.item(row, col).background()
+        l = r = col
+        for ci in range(col - 1, -1, -1):
+            if self.item(row, ci) and self.item(row, ci).background() == color:
+                l = ci
+            else:
+                break
+        for ci in range(col + 1, self.columnCount()):
+            if self.item(row, ci) and self.item(row, ci).background() == color:
+                r = ci
+            else:
+                break
+        selection_range = QTableWidgetSelectionRange(row, l, row, r)
+        self.setRangeSelected(selection_range, True)
+        return selection_range
+
+    def _del_selected_label(self):
+        Log.error('here')
+        for iterm in self.selectedItems():
+            iterm.setBackground(Qt.white)
+        self.setRangeSelected(self.selectedRanges()[0], False)
+
 
 class MyVideoLabelWidget(QLabel):
 
@@ -205,7 +272,7 @@ class MyVideoLabelWidget(QLabel):
         global_.mySignals.jump_to.connect(self.slot_jump_to)
         global_.mySignals.timer_video.timeout.connect(self.timer_flush_frame)
         global_.mySignals.video_pause_or_resume.connect(self.pause_or_resume)
-        global_.mySignals.video_start.connect(self.start)
+        global_.mySignals.video_start.connect(self.slot_start)
         global_.mySignals.video_pause.connect(self.pause)
 
     def set_video(self, video):
@@ -228,17 +295,19 @@ class MyVideoLabelWidget(QLabel):
         if self.video_playing:
             self.pause()
         else:
-            self.start()
+            self.slot_start(stop_at=-1)
 
     def pause(self):
         # self.timer_video.stop()
         self.video_playing = False
 
-    def start(self):
+    def slot_start(self, stop_at):
         # self.timer_video.start()
         if not self.video_obj:
             return
         self.video_playing = True
+        if stop_at != -1:
+            self.video_obj.stop_at = stop_at
 
     def timer_flush_frame(self):
         if self.video_obj is None:

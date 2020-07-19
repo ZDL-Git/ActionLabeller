@@ -54,12 +54,16 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.btn_open_video.clicked.connect(self.slot_open_file)
         self.spin_interval.textChanged.connect(self.set_interval)
         self.line_jumpto.textChanged.connect(
-            lambda text: text and global_.mySignals.jump_to.emit(int(text), None, global_.Emitter.L_JUMPTO))
+            lambda text: text and global_.mySignals.jump_to.emit(int(text), None, global_.Emitter.Line_JUMPTO))
         # self.label_note.installEventFilter(self)
         self.label_show.installEventFilter(self)
 
         self.state_mouse_pressing = False
         self.state_mouse_last_point = None
+
+        # self.verticalLayout_7.setFocus()
+        # self.setWindowFlags(Qt.WindowStaysOnTopHint)
+        self.btn_stop.click()
 
         def init_buttons():
             # self.btn_play.clicked.connect(self.pause_or_resume)
@@ -68,7 +72,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
             self.btn_to_tail.clicked.connect(self.to_tail)
             self.btn_test.clicked.connect(
                 lambda: Log.error(self.table_timeline.width(), self.table_timeline.columnWidth(0),
-                                  self.table_timeline._center_col()))
+                                  self.table_timeline._center_col(), global_.mySignals.timer_video.setInterval(10)))
 
         def init_settings():
             global_.Settings.v_interval = int(self.spin_interval.text())

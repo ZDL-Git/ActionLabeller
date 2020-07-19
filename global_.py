@@ -11,7 +11,7 @@ class MySignals(QObject):
     follow_to = pyqtSignal(Enum, int)  # emitter,index
     video_pause_or_resume = pyqtSignal()
     video_pause = pyqtSignal()
-    video_start = pyqtSignal()
+    video_start = pyqtSignal(int)  # stopAt
 
     timer_video = QTimer()
 
@@ -33,7 +33,8 @@ class Emitter(Enum):
     T_HHEADER = 2
     T_HSCROLL = 3
     T_WHEEL = 4
-    L_JUMPTO = 5
+    T_LABEL = 5
+    Line_JUMPTO = 6
 
 
 mySignals = MySignals()

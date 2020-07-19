@@ -163,7 +163,7 @@
            <number>20</number>
           </property>
           <property name="columnCount">
-           <number>10</number>
+           <number>50</number>
           </property>
           <attribute name="horizontalHeaderDefaultSectionSize">
            <number>20</number>
@@ -218,6 +218,46 @@
           <row/>
           <row/>
           <row/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
+          <column/>
           <column/>
           <column/>
           <column/>
@@ -489,6 +529,9 @@ border: 1 solid gray;</string>
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="focusPolicy">
+                       <enum>Qt::TabFocus</enum>
                       </property>
                       <property name="text">
                        <string>Open</string>
@@ -1156,6 +1199,35 @@ border: 1 solid gray;</string>
    <header>widgets.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>btn_open_video</tabstop>
+  <tabstop>line_jumpto</tabstop>
+  <tabstop>combo_speed</tabstop>
+  <tabstop>spin_interval</tabstop>
+  <tabstop>table_timeline</tabstop>
+  <tabstop>btn_stop</tabstop>
+  <tabstop>btn_to_head</tabstop>
+  <tabstop>pushButton_9</tabstop>
+  <tabstop>pushButton_8</tabstop>
+  <tabstop>btn_play</tabstop>
+  <tabstop>pushButton_10</tabstop>
+  <tabstop>pushButton_11</tabstop>
+  <tabstop>btn_to_tail</tabstop>
+  <tabstop>listView_2</tabstop>
+  <tabstop>combo_sortby</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>pushButton_5</tabstop>
+  <tabstop>pushButton_4</tabstop>
+  <tabstop>table_labeled</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>listView</tabstop>
+  <tabstop>lineEdit_2</tabstop>
+  <tabstop>lineEdit_3</tabstop>
+  <tabstop>lineEdit_4</tabstop>
+  <tabstop>pushButton_2</tabstop>
+  <tabstop>pushButton_3</tabstop>
+  <tabstop>btn_test</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

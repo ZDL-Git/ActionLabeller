@@ -13,6 +13,7 @@ class Video:
         self._info = None
         self.cur_index = -1
         self.scheduled = None
+        self.stop_at = None
         self.frames_buffer = collections.deque(maxlen=100)
 
     def get_info(self):
@@ -43,9 +44,12 @@ class Video:
         if index == -1:
             index = self.cur_index + bias
         self.scheduled = emitter, max(0, min(index, self.get_info()['frame_c'] - 1))
+        self.stop_at = None
 
     def read(self):
         if self.scheduled is None:
+            if self.stop_at and self.cur_index + global_.Settings.v_interval > self.stop_at:
+                return None, None, None
             self.cur_index += global_.Settings.v_interval
             emitter = global_.Emitter.TIMER
             if global_.Settings.v_interval > 80:
