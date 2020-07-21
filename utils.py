@@ -42,12 +42,16 @@ class Log:
 
     @classmethod
     def print_in_color(cls, *txt_msg, back_tupple, fore_tupple=(36, 33, 20)):
-        rf, gf, bf = fore_tupple
-        rb, gb, bb = back_tupple
-        msg = '{0}' + ' '.join(map(str, txt_msg))
-        mat = '\33[38;2;' + str(rf) + ';' + str(gf) + ';' + str(bf) + ';48;2;' + str(rb) + ';' + str(gb) + ';' + str(
-            bb) + 'm'
-        print(msg.format(mat), '\33[0m')
+        try:
+            rf, gf, bf = fore_tupple
+            rb, gb, bb = back_tupple
+            mat = '\33[38;2;' + str(rf) + ';' + str(gf) + ';' + str(bf) + ';48;2;' + str(rb) + ';' + str(
+                gb) + ';' + str(
+                bb) + 'm'
+            msg = mat + ' '.join(map(str, txt_msg))
+            print(msg, '\33[0m')
+        except RecursionError as e:
+            print(*txt_msg)
 
     @classmethod
     def _get_func_and_no(cls):

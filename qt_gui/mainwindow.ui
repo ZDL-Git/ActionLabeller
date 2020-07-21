@@ -105,7 +105,7 @@
          </widget>
         </item>
         <item>
-         <widget class="MyTableWidget" name="table_timeline">
+         <widget class="TimeLineTableWidget" name="table_timeline">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
             <horstretch>0</horstretch>
@@ -426,7 +426,7 @@ border: 1 solid gray;</string>
                       </widget>
                      </item>
                      <item row="5" column="1">
-                      <widget class="QLineEdit" name="line_jumpto">
+                      <widget class="QLineEdit" name="input_jumpto">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                          <horstretch>0</horstretch>
@@ -486,9 +486,6 @@ border: 1 solid gray;</string>
                          <width>125</width>
                          <height>0</height>
                         </size>
-                       </property>
-                       <property name="styleSheet">
-                        <string notr="true"/>
                        </property>
                        <property name="alignment">
                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -823,7 +820,7 @@ border: 1 solid gray;</string>
        </layout>
       </item>
       <item>
-       <layout class="QGridLayout" name="right_half_layout" columnstretch="0">
+       <layout class="QGridLayout" name="right_half_layout" rowstretch="3,2" columnstretch="0">
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
@@ -911,7 +908,7 @@ border: 1 solid gray;</string>
               <number>6</number>
              </property>
              <item row="0" column="0">
-              <widget class="QTableWidget" name="table_labeled">
+              <widget class="LabeledTableWidget" name="table_labeled">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
                  <horstretch>0</horstretch>
@@ -930,6 +927,9 @@ border: 1 solid gray;</string>
                  <height>0</height>
                 </size>
                </property>
+               <property name="editTriggers">
+                <set>QAbstractItemView::NoEditTriggers</set>
+               </property>
                <property name="alternatingRowColors">
                 <bool>true</bool>
                </property>
@@ -937,7 +937,7 @@ border: 1 solid gray;</string>
                 <bool>true</bool>
                </property>
                <property name="columnCount">
-                <number>3</number>
+                <number>4</number>
                </property>
                <attribute name="horizontalHeaderCascadingSectionResizes">
                 <bool>false</bool>
@@ -963,6 +963,7 @@ border: 1 solid gray;</string>
                  <string>end</string>
                 </property>
                </column>
+               <column/>
               </widget>
              </item>
             </layout>
@@ -982,7 +983,7 @@ border: 1 solid gray;</string>
            <enum>QTabWidget::North</enum>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <property name="iconSize">
            <size>
@@ -1010,8 +1011,54 @@ border: 1 solid gray;</string>
             <property name="bottomMargin">
              <number>6</number>
             </property>
+            <property name="verticalSpacing">
+             <number>0</number>
+            </property>
             <item row="0" column="0">
-             <widget class="QListView" name="listView"/>
+             <widget class="LabelTempTableWidget" name="table_label_temp">
+              <property name="columnCount">
+               <number>3</number>
+              </property>
+              <column>
+               <property name="text">
+                <string>Action Name</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Label Color</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Default</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QPushButton" name="btn_new_label_temp">
+                <property name="text">
+                 <string>New Temp</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_del_label_temp">
+                <property name="text">
+                 <string>Del Temp</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
@@ -1130,15 +1177,56 @@ border: 1 solid gray;</string>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab_3">
+          <widget class="QWidget" name="tab">
            <attribute name="title">
-            <string>Page</string>
+            <string>Eval</string>
            </attribute>
-           <layout class="QGridLayout" name="gridLayout">
-            <item row="0" column="0">
-             <widget class="QPushButton" name="btn_test">
+           <layout class="QGridLayout" name="gridLayout_9" rowstretch="3,2,0">
+            <property name="leftMargin">
+             <number>6</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>6</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
+            </property>
+            <item row="2" column="0">
+             <widget class="QPushButton" name="btn_eval">
               <property name="text">
-               <string>Test</string>
+               <string>Eval</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QPlainTextEdit" name="ptext_eval_in">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="focusPolicy">
+               <enum>Qt::StrongFocus</enum>
+              </property>
+              <property name="placeholderText">
+               <string>Input Expression</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QTextBrowser" name="textb_eval_out">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="placeholderText">
+               <string>Eval Result</string>
               </property>
              </widget>
             </item>
@@ -1161,14 +1249,14 @@ border: 1 solid gray;</string>
      <height>22</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menuInfo">
     <property name="title">
-     <string>File</string>
+     <string>Info</string>
     </property>
-    <addaction name="actionOpen_Video"/>
-    <addaction name="actionOpen_image_dir"/>
+    <addaction name="actionWebsite"/>
+    <addaction name="actionAuthor"/>
    </widget>
-   <addaction name="menuFile"/>
+   <addaction name="menuInfo"/>
   </widget>
   <action name="actionsfeb">
    <property name="text">
@@ -1185,11 +1273,21 @@ border: 1 solid gray;</string>
     <string>Open image dir</string>
    </property>
   </action>
+  <action name="actionWebsite">
+   <property name="text">
+    <string>Website</string>
+   </property>
+  </action>
+  <action name="actionAuthor">
+   <property name="text">
+    <string>Author</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>MyTableWidget</class>
+   <class>TimeLineTableWidget</class>
    <extends>QTableWidget</extends>
    <header>widgets.h</header>
   </customwidget>
@@ -1198,10 +1296,20 @@ border: 1 solid gray;</string>
    <extends>QLabel</extends>
    <header>widgets.h</header>
   </customwidget>
+  <customwidget>
+   <class>LabeledTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>widgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LabelTempTableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>widgets.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>btn_open_video</tabstop>
-  <tabstop>line_jumpto</tabstop>
+  <tabstop>input_jumpto</tabstop>
   <tabstop>combo_speed</tabstop>
   <tabstop>spin_interval</tabstop>
   <tabstop>table_timeline</tabstop>
@@ -1220,13 +1328,11 @@ border: 1 solid gray;</string>
   <tabstop>pushButton_4</tabstop>
   <tabstop>table_labeled</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>listView</tabstop>
   <tabstop>lineEdit_2</tabstop>
   <tabstop>lineEdit_3</tabstop>
   <tabstop>lineEdit_4</tabstop>
   <tabstop>pushButton_2</tabstop>
   <tabstop>pushButton_3</tabstop>
-  <tabstop>btn_test</tabstop>
  </tabstops>
  <resources/>
  <connections/>
