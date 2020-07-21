@@ -36,7 +36,8 @@ class Video:
                           'width': img.shape[1],
                           'height': img.shape[0],
                           'channels': img.shape[2],
-                          'fps': fps}
+                          'fps': fps,
+                          'Tms': 1000 / fps}
         return self._info
 
     def schedule(self, index, bias, emitter):
@@ -49,6 +50,7 @@ class Video:
     def read(self):
         if self.scheduled is None:
             if self.stop_at and self.cur_index + global_.Settings.v_interval > self.stop_at:
+                self.stop_at = None
                 return None, None, None
             self.cur_index += global_.Settings.v_interval
             emitter = global_.Emitter.TIMER
@@ -61,6 +63,7 @@ class Video:
                 gap -= 1
                 ret, frame = self._cap.read()
                 if not ret:
+                    self.schedule(0, None, global_.Emitter.V_PLAYER)
                     return None, None, None
         else:
             emitter, schedule_index = self.scheduled

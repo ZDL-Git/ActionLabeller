@@ -53,7 +53,7 @@ class TimeLineTableWidget(QTableWidget):
         self.cellClicked.connect(self.slot_cellClicked)
         self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
         self.cellActivated.connect(self.slot_cellActivated)
-        self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
+        # self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
 
         # global_.mySignals.jump_to.connect(self.slot_jump_to)
         global_.mySignals.follow_to.connect(self.slot_follow_to)
@@ -127,6 +127,41 @@ class TimeLineTableWidget(QTableWidget):
     def mousePressEvent(self, e):
         Log.debug('here')
         super().mousePressEvent(e)
+
+    def mouseReleaseEvent(self, e):
+        Log.debug('here')
+        super().mouseReleaseEvent(e)
+        if not self.entry_cell_pos:
+            return
+        rect = self.selectedRanges() and self.selectedRanges()[-1]
+        if not rect:
+            return
+        l, r, t, b = rect.leftColumn(), rect.rightColumn(), rect.topRow(), rect.bottomRow()
+        Log.debug('l r t b', l, r, t, b)
+        if l == r and t == b or b - t == self.rowCount() - 1:
+            return
+        entry_item = self.item(*self.entry_cell_pos)
+        if entry_item.background() == Qt.white:
+            name, color = g_get_action()
+            if name is None:
+                return
+        else:
+            name, color = entry_item.toolTip(), entry_item.background()
+        changed = False
+        for c in range(l, r + 1):
+            item = self.item(self.entry_cell_pos[0], c)
+            if item:
+                if item.background() != color:
+                    changed = True
+            else:
+                item = QTableWidgetItem('')
+            item.setBackground(color)
+            item.setToolTip(name)
+            self.setItem(self.entry_cell_pos[0], c, item)
+        if changed:
+            found_label = self._detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
+            if found_label is not None:
+                global_.mySignals.label_created.emit(found_label, global_.Emitter.T_LABEL)
 
     # def horizontalScrollbarValueChanged(self, p_int):
     #     Log.debug('here', p_int)
@@ -226,30 +261,6 @@ class TimeLineTableWidget(QTableWidget):
 
     def slot_itemSelectionChanged(self):
         Log.info('here')
-        if not self.entry_cell_pos:
-            return
-        rect = self.selectedRanges() and self.selectedRanges()[-1]
-        if not rect:
-            return
-        l, r, t, b = rect.leftColumn(), rect.rightColumn(), rect.topRow(), rect.bottomRow()
-        Log.debug('l r t b', l, r, t, b)
-        if l == r and t == b or b - t == self.rowCount() - 1:
-            return
-        entry_item = self.item(*self.entry_cell_pos)
-        if entry_item.background() != Qt.white:
-            name, color = entry_item.toolTip(), entry_item.background()
-        else:
-            name, color = g_get_action()
-            if color is None:
-                return
-        for c in range(l, r + 1):
-            item = QTableWidgetItem('')
-            item.setBackground(color)
-            item.setToolTip(name)
-            self.setItem(self.entry_cell_pos[0], c, item)
-        found_label = self._detect_label(*self.entry_cell_pos)
-        if found_label is not None:
-            global_.mySignals.label_created.emit(found_label, global_.Emitter.T_LABEL)
 
     def slot_horizontalHeaderClicked(self, i):
         Log.info('index', i)
@@ -279,8 +290,15 @@ class TimeLineTableWidget(QTableWidget):
         hscrollbar.setSliderPosition(pos)
 
     def set_column_count(self, c):
+
+        # def _lazy_exec(self):
         self.setColumnCount(c)
         self.setHorizontalHeaderLabels([str(i) for i in range(c)])
+        # FIXME: It is a trick,set all labels is too slow,but implements view is too expensive
+        # self.horizontalHeader().moveSection(c - 1, 0)
+        # self.setHorizontalHeaderItem(c - 1, QTableWidgetItem('0'))
+
+        # QTimer.singleShot(1000, lambda x=self: _lazy_exec(x))
         # self.insertColumn(0)
 
     # def headerData(self, col, orientation, role):
@@ -511,7 +529,8 @@ class LabelTempTableWidget(QTableWidget):
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         for i in range(2):
-            self._new_action(f"action{i + 1}", Qt.red if i == 0 else Qt.yellow, Qt.Checked if i == 0 else Qt.Unchecked)
+            self._new_action(f"action{i + 1}", QColor('#fe8a71') if i == 0 else QColor('#0e9aa7'),
+                             Qt.Checked if i == 0 else Qt.Unchecked)
 
         global g_get_action
         g_get_action = self.get_default_action
@@ -540,7 +559,7 @@ class LabelTempTableWidget(QTableWidget):
     def slot_del_selected_action(self):
         Log.debug('here')
         if QMessageBox.Cancel == QMessageBox.warning(self, 'ActionLabel Warning',
-                                                     "All the related labels will be deleted, are you sure?",
+                                                     "All you sure to delete action template?",
                                                      QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
             return
         rows = set()
@@ -552,13 +571,23 @@ class LabelTempTableWidget(QTableWidget):
     def get_default_action(self):
         rows = self.rowCount()
         if rows == 0:
-            QMessageBox.warning(self, 'ActionLabel',
-                                "Please add action first!",
-                                QMessageBox.Ok, QMessageBox.Ok)
+            QMessageBox.information(self, 'ActionLabel',
+                                    "Please add action first!",
+                                    QMessageBox.Ok, QMessageBox.Ok)
             return None, None
+
+        actions = {}
         for r in range(rows):
+            actions[self.item(r, 0).text()] = self.item(r, 1).background()
             if self.item(r, 2).checkState() == Qt.Checked:
+                if not self.item(r, 0).text():
+                    QMessageBox.information(self, 'ActionLabel',
+                                            "Please complete action name first!",
+                                            QMessageBox.Ok, QMessageBox.Ok)
                 return self.item(r, 0).text(), self.item(r, 1).background()
+        action, ok_pressed = QInputDialog.getItem(self, "ActionLabel", "Actions:", list(actions.keys()), 0, False)
+        if ok_pressed and action:
+            return action, actions[action]
 
         return None, None
 
@@ -587,6 +616,11 @@ class LabelTempTableWidget(QTableWidget):
     def slot_test(self, *arg):
         Log.debug(*arg)
 
+    # TODO
+    class ActionSelectDialog(QDialog):
+        def __init__(self, parent=None):
+            QDialog.__init__(self)
+
 
 class MyVideoLabelWidget(QLabel):
 
@@ -605,7 +639,7 @@ class MyVideoLabelWidget(QLabel):
         global_.mySignals.timer_video.timeout.connect(self.timer_flush_frame)
         global_.mySignals.video_pause_or_resume.connect(self.pause_or_resume)
         global_.mySignals.video_start.connect(self.slot_start)
-        global_.mySignals.video_pause.connect(self.pause)
+        global_.mySignals.video_pause.connect(self.slot_pause)
 
     def set_video(self, video):
         self.video_obj = video
@@ -625,21 +659,22 @@ class MyVideoLabelWidget(QLabel):
 
     def pause_or_resume(self):
         if self.video_playing:
-            self.pause()
+            self.slot_pause()
         else:
             self.slot_start(stop_at=-1)
 
-    def pause(self):
-        # self.timer_video.stop()
+    def slot_pause(self):
         self.video_playing = False
 
     def slot_start(self, stop_at):
         # self.timer_video.start()
         if not self.video_obj:
             return
-        self.video_playing = True
-        if stop_at != -1:
+        if stop_at == -1:
+            self.video_obj.stop_at = None
+        else:
             self.video_obj.stop_at = stop_at
+        self.video_playing = True
 
     def timer_flush_frame(self):
         if self.video_obj is None:

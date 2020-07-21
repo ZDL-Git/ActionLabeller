@@ -24,7 +24,8 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.combo_sortby.addItems(['timestamp', 'filename'])
         self.combo_sortby.setCurrentIndex(1)
 
-        self.spin_interval.textChanged.connect(self.set_interval)
+        self.spin_interval.textChanged.connect(self.slot_interval_changed)
+        self.combo_speed.currentTextChanged.connect(self.slot_speed_changed)
         self.input_jumpto.textChanged.connect(
             lambda text: text and global_.mySignals.jump_to.emit(int(text), None, global_.Emitter.INPUT_JUMPTO))
         self.label_show.installEventFilter(self)
@@ -41,6 +42,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
         def init_settings():
             global_.Settings.v_interval = int(self.spin_interval.text())
+            # global_.Settings.v_speed = float(self.combo_speed.currentText())
 
         def prettify():
             shadowEffect = QGraphicsDropShadowEffect()
@@ -65,7 +67,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.state_mouse_pressing = False
         self.state_mouse_last_point = None
 
-        global_.mySignals.timer_start()
         global_.mySignals.follow_to.connect(self.slot_follow_to)
 
     def common_slot(self, *arg):
@@ -73,16 +74,17 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
     def slot_open_file(self):
         # TODO
-        # got = QFileDialog.getOpenFileName(self, "Open Image", "/Users/zdl/Downloads/下载-视频",
-        #                                   "Image Files (*.mp4 *.jpg *.bmp)")
-        got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
+        got = QFileDialog.getOpenFileName(self, "Open Image", "/Users/zdl/Downloads/下载-视频",
+                                          "Image Files (*.mp4 *.jpg *.bmp)")
+        # got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
         Log.info(got)
         fname = got[0]
         if fname:
             video = Video(fname)
             self.table_timeline.set_column_count(video.get_info()['frame_c'])
             self.label_show.set_video(video)
-            self.btn_play.click()
+            global_.mySignals.timer_start(1000 / video.get_info()['fps'] / float(self.combo_speed.currentText()))
+            global_.mySignals.video_start.emit(-1)
 
     def to_head(self):
         pass
@@ -90,11 +92,16 @@ class MyApp(QMainWindow, Ui_MainWindow):
     def to_tail(self):
         pass
 
-    def set_interval(self):
+    def slot_interval_changed(self):
         global_.Settings.v_interval = int(self.spin_interval.text() or 1)
 
+    def slot_speed_changed(self):
+        Log.debug('here')
+        new_speed = 1000 / self.label_show.video_obj.get_info()['fps'] / float(self.combo_speed.currentText())
+        global_.mySignals.timer_video.setInterval(new_speed)
+
     def slot_follow_to(self, emitter, to):
-        self.label_note.setText(f'frame {to}')
+        self.label_note.setText(f'Frame {to}')
 
     def eventFilter(self, source, event):
         if event.type() != 12:

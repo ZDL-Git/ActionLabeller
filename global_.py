@@ -37,6 +37,7 @@ class MySignals(QObject):
 class Settings:
     pass
     v_interval = None
+    # v_speed = None
 
 
 class Emitter(Enum):
@@ -47,6 +48,7 @@ class Emitter(Enum):
     T_LABEL = 5
     T_LABELED = 6
     T_TEMP = 7
+    V_PLAYER = 8
     INPUT_JUMPTO = 10
 
 
