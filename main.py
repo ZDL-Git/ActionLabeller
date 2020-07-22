@@ -27,7 +27,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.spin_interval.textChanged.connect(self.slot_interval_changed)
         self.combo_speed.currentTextChanged.connect(self.slot_speed_changed)
         self.input_jumpto.textChanged.connect(
-            lambda text: text and global_.mySignals.jump_to.emit(int(text), None, global_.Emitter.INPUT_JUMPTO))
+            lambda text: text and global_.mySignals.schedule.emit(int(text), -1, -1, global_.Emitter.INPUT_JUMPTO))
         self.label_show.installEventFilter(self)
 
         def init_buttons():
@@ -73,7 +73,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
         Log.debug(f'common slot print:', arg)
 
     def slot_open_file(self):
-        # TODO
         got = QFileDialog.getOpenFileName(self, "Open Image", "/Users/zdl/Downloads/下载-视频",
                                           "Image Files (*.mp4 *.jpg *.bmp)")
         # got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
@@ -84,7 +83,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
             self.table_timeline.set_column_count(video.get_info()['frame_c'])
             self.label_show.set_video(video)
             global_.mySignals.timer_start(1000 / video.get_info()['fps'] / float(self.combo_speed.currentText()))
-            global_.mySignals.video_start.emit(-1)
+            global_.mySignals.video_start.emit()
 
     def to_head(self):
         pass
@@ -104,10 +103,9 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.label_note.setText(f'Frame {to}')
 
     def eventFilter(self, source, event):
-        if event.type() != 12:
-            Log.debug(f'etype {event.type()} source {source}')
-        else:
+        if event.type() == 12:
             return False
+        # Log.debug(f'etype {event.type()} source {source}')
         if source is self.label_note:
             if event.type() == QEvent.MouseButtonPress:
                 print("pressed...")

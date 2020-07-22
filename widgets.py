@@ -12,7 +12,7 @@ from utils import *
 from typing import List
 
 
-class TableDecorators(object):
+class TableDecorators:
     @classmethod
     def dissort(cls, func):
         def func_wrapper(*arg):
@@ -74,21 +74,22 @@ class TimeLineTableWidget(QTableWidget):
         # self.installEventFilter(self)
 
     def eventFilter(self, source, event):
-        Log.debug('here', source, event)
+        # Log.debug('here', source, event)
         if source == self.horizontalScrollBar():
             if event.type() == QEvent.MouseButtonPress:
                 self.mouse_pressing_hscrollbar = True
-                global_.mySignals.video_pause.emit()
+                # global_.mySignals.video_pause.emit()
             elif event.type() == QEvent.MouseButtonRelease:
                 self.mouse_pressing_hscrollbar = False
             # elif event.type() == QScrollBar.sliderPressed:
             #     Log.error('here')
             else:
-                Log.error(event.type())
+                pass
+                # Log.error(event.type())
         return False
 
     def keyPressEvent(self, e: QKeyEvent) -> None:
-        print(f'mytable {e} {e.key()} {e.type()}')
+        Log.debug(f'mytable {e} {e.key()} {e.type()}')
         if e.key() == Qt.Key_Control:
             self.key_control_pressing = True
             self.hcenter_before_wheeling = self._center_col()
@@ -122,7 +123,7 @@ class TimeLineTableWidget(QTableWidget):
         else:
             bias = 2 if idler_forward else -2
             # self._col_scroll(bias) # conflicts with follow_to
-            global_.mySignals.jump_to.emit(-1, bias, global_.Emitter.T_WHEEL)
+            global_.mySignals.schedule.emit(-1, bias, -1, global_.Emitter.T_WHEEL)
 
     def mousePressEvent(self, e):
         Log.debug('here')
@@ -153,11 +154,14 @@ class TimeLineTableWidget(QTableWidget):
             if item:
                 if item.background() != color:
                     changed = True
+                    item.setBackground(color)
+                    item.setToolTip(name)
             else:
+                changed = True
                 item = QTableWidgetItem('')
-            item.setBackground(color)
-            item.setToolTip(name)
-            self.setItem(self.entry_cell_pos[0], c, item)
+                item.setBackground(color)
+                item.setToolTip(name)
+                self.setItem(self.entry_cell_pos[0], c, item)
         if changed:
             found_label = self._detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
             if found_label is not None:
@@ -191,11 +195,11 @@ class TimeLineTableWidget(QTableWidget):
 
     def slot_sliderMoved(self, pos):
         Log.debug(pos)
-        col_c = self.columnCount()
-        hscrollbar = self.horizontalScrollBar()
-        index = (col_c - 1) * pos / hscrollbar.maximum()
+        # col_c = self.columnCount()
+        # hscrollbar = self.horizontalScrollBar()
+        index = (self.columnCount() - 1) * pos / self.horizontalScrollBar().maximum()
 
-        global_.mySignals.jump_to.emit(index, None, global_.Emitter.T_HSCROLL)
+        global_.mySignals.schedule.emit(index, -1, -1, global_.Emitter.T_HSCROLL)
         # self.selectColumn(index)  # crash bug
 
     def slot_cellDoubleClicked(self, r, c):
@@ -204,8 +208,8 @@ class TimeLineTableWidget(QTableWidget):
             self._emit_video_play(label.begin, label.end)
 
     def _emit_video_play(self, start_at, stop_at=-1):
-        global_.mySignals.jump_to.emit(start_at, None, global_.Emitter.T_LABEL)
-        global_.mySignals.video_start.emit(stop_at)
+        global_.mySignals.schedule.emit(start_at, -1, stop_at, global_.Emitter.T_LABEL)
+        global_.mySignals.video_start.emit()
 
     def _selected_colors(self):
         pass
@@ -240,8 +244,9 @@ class TimeLineTableWidget(QTableWidget):
         Log.info('here', r, c, self.item(r, c))
         global_.mySignals.video_pause.emit()
         if not self.item(r, c):
-            self.setItem(r, c, QTableWidgetItem(''))
-            self.item(r, c).setBackground(Qt.white)
+            item = QTableWidgetItem('')
+            item.setBackground(Qt.white)
+            self.setItem(r, c, item)
         self.mouse_pressing_item = True
         self.entry_cell_pos = (r, c)
         # Log.warn(self.item(r, c).background() == Qt.white)
@@ -264,24 +269,22 @@ class TimeLineTableWidget(QTableWidget):
 
     def slot_horizontalHeaderClicked(self, i):
         Log.info('index', i)
-        global_.mySignals.jump_to.emit(i, None, global_.Emitter.T_HHEADER)
+        global_.mySignals.schedule.emit(i, -1, -1, global_.Emitter.T_HHEADER)
 
     def slot_follow_to(self, emitter, index):
         if emitter == global_.Emitter.T_HSCROLL:
             return
-        Log.error(emitter)
         self._col_to_center(index)
 
     def _center_col(self):  # only supports static case
         t_width = self.width()  # no vertical header
-        return self.columnAt(t_width / 2)
+        return self.columnAt(int(t_width / 2))
 
     def _col_to_center(self, index):
         hscrollbar = self.horizontalScrollBar()
         # bias_to_center = self.width() / 2 / self.columnWidth(0)
         bias_to_center = hscrollbar.pageStep() / 2
         to = index - bias_to_center
-        Log.debug(index, to)
         hscrollbar.setSliderPosition(max(0, to))
 
     def _col_scroll(self, bias):
@@ -291,15 +294,11 @@ class TimeLineTableWidget(QTableWidget):
 
     def set_column_count(self, c):
 
-        # def _lazy_exec(self):
         self.setColumnCount(c)
+        # FIXME: Set all labels is too slow, but implements view is too expensive
         self.setHorizontalHeaderLabels([str(i) for i in range(c)])
-        # FIXME: It is a trick,set all labels is too slow,but implements view is too expensive
         # self.horizontalHeader().moveSection(c - 1, 0)
         # self.setHorizontalHeaderItem(c - 1, QTableWidgetItem('0'))
-
-        # QTimer.singleShot(1000, lambda x=self: _lazy_exec(x))
-        # self.insertColumn(0)
 
     # def headerData(self, col, orientation, role):
     #     Log.warn('here')
@@ -348,7 +347,6 @@ class TimeLineTableWidget(QTableWidget):
     def _del_label(self, label: ActionLabel):
         for c in range(label.begin, label.end + 1):
             self.item(label.timeline_row, c).setBackground(Qt.white)
-            # TODO
 
     def _del_selected_label_cells(self):
         Log.info('here')
@@ -356,7 +354,6 @@ class TimeLineTableWidget(QTableWidget):
         for item in self.selectedItems():
             if item.background() != Qt.white:
                 item.setBackground(Qt.white)
-                # TODO
                 item_row = item.row()
                 if item_row in label_cells:
                     label_cells[item_row].append(item.column())
@@ -537,7 +534,6 @@ class LabelTempTableWidget(QTableWidget):
 
     def slot_cellChanged(self, r, c):
         Log.debug(r, c)
-        Log.debug(self.item(r, c).checkState())
         if self.item(r, c).checkState() == Qt.Checked:
             self._unselect_others(except_=r)
         elif self.item(r, c).checkState() == 0:
@@ -635,7 +631,7 @@ class MyVideoLabelWidget(QLabel):
         # self.cellActivated.connect(self.slot_cellActivated)
         # self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
         # self.cellPressed.connect(self.slot_cellPressed)
-        global_.mySignals.jump_to.connect(self.slot_jump_to)
+        global_.mySignals.schedule.connect(self.slot_schedule)
         global_.mySignals.timer_video.timeout.connect(self.timer_flush_frame)
         global_.mySignals.video_pause_or_resume.connect(self.pause_or_resume)
         global_.mySignals.video_start.connect(self.slot_start)
@@ -644,15 +640,15 @@ class MyVideoLabelWidget(QLabel):
     def set_video(self, video):
         self.video_obj = video
 
-    def slot_jump_to(self, index, bias, emitter):
+    def slot_schedule(self, jump_to, bias, stop_at, emitter):
         # index: related signal defined to receive int parameters, None will be cast to large number 146624904,
         #        hence replace None with -1
-        if index != -1:
+        if jump_to != -1:
             bias = None
-        Log.info('here', index, bias)
+        Log.info('here', jump_to, bias)
 
         if self.video_obj:
-            self.video_obj.schedule(index, bias, emitter)
+            self.video_obj.schedule(jump_to, bias, stop_at, emitter)
 
     def mousePressEvent(self, e):
         self.pause_or_resume()
@@ -661,25 +657,22 @@ class MyVideoLabelWidget(QLabel):
         if self.video_playing:
             self.slot_pause()
         else:
-            self.slot_start(stop_at=-1)
+            self.slot_start()
 
     def slot_pause(self):
+        Log.info('here')
         self.video_playing = False
 
-    def slot_start(self, stop_at):
+    def slot_start(self):
         # self.timer_video.start()
         if not self.video_obj:
             return
-        if stop_at == -1:
-            self.video_obj.stop_at = None
-        else:
-            self.video_obj.stop_at = stop_at
         self.video_playing = True
 
     def timer_flush_frame(self):
         if self.video_obj is None:
             return
-        if not self.video_playing and self.video_obj.scheduled is None:
+        if not self.video_playing and not self.video_obj.scheduled:
             return
 
         emitter, i, frame = self.video_obj.read()

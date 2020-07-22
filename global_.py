@@ -9,11 +9,11 @@ from utils import *
 
 
 class MySignals(QObject):
-    jump_to = pyqtSignal(int, int, Enum)  # index,bias,emitter
+    schedule = pyqtSignal(int, int, int, Enum)  # jumpTo,bias,stopAt,emitter
     follow_to = pyqtSignal(Enum, int)  # emitter,index
     video_pause_or_resume = pyqtSignal()
     video_pause = pyqtSignal()
-    video_start = pyqtSignal(int)  # stopAt
+    video_start = pyqtSignal()
 
     label_selected = pyqtSignal(ActionLabel, Enum)
     label_created = pyqtSignal(ActionLabel, Enum)
