@@ -12,10 +12,10 @@ class MyApp(QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
-        self.model = TimelineItemModel(20, 330000)
+        self.model = TimelineItemModel(20, 50)
         self.table_timeline.setModel(self.model)
 
-        self.combo_speed.addItems(['0.5', '0.75', '1', '1.25', '1.5', '1.75'])
+        self.combo_speed.addItems(['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75'])
         self.combo_speed.setCurrentIndex(2)
         self.combo_sortby.addItems(['timestamp', 'filename'])
         self.combo_sortby.setCurrentIndex(1)
@@ -60,6 +60,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.table_labeled.__init_later__()
         self.table_label_temp.__init_later__()
 
+        global_.g_status_prompt = self.label_note.setText
         global_.mySignals.follow_to.connect(self.slot_follow_to)
 
     def common_slot(self, *arg):
@@ -67,7 +68,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
 
     def slot_open_file(self):
         got = QFileDialog.getOpenFileName(self, "Open Image", "/Users/zdl/Downloads/下载-视频",
-                                          "Image Files (*.mp4 *.jpg *.bmp)")
+                                          "Media Files (*.mp4 *.jpg *.bmp)", options=QFileDialog.ReadOnly)
         # got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
         Log.info(got)
         fname = got[0]
@@ -93,7 +94,7 @@ class MyApp(QMainWindow, Ui_MainWindow):
         global_.mySignals.timer_video.setInterval(new_speed)
 
     def slot_follow_to(self, emitter, to):
-        self.label_note.setText(f'Frame {to}')
+        global_.g_status_prompt(f'Frame {to}')
 
     def eventFilter(self, source, event):
         if event.type() == 12:

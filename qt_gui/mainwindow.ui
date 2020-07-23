@@ -175,10 +175,10 @@ border-radius: 10px;
 border: 1 solid gray;</string>
           </property>
           <property name="text">
-           <string>TextLabel</string>
+           <string>......</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>

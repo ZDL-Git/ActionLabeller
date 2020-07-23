@@ -195,8 +195,7 @@ class LabelTempTableWidget(QTableWidget):
             self._new_action(f"action{i + 1}", QColor('#fe8a71') if i == 0 else QColor('#0e9aa7'),
                              Qt.Checked if i == 0 else Qt.Unchecked)
 
-        global g_get_action
-        g_get_action = self.get_default_action
+        global_.g_get_action = self.get_default_action
 
     def slot_cellChanged(self, r, c):
         Log.debug(r, c)
@@ -289,11 +288,10 @@ class TimelineTableView(QTableView):
         super(TimelineTableView, self).__init__(parent)
 
         self.key_control_pressing = False
-        self.mouse_pressing_hscrollbar = False
-        self.mouse_pressing_item = False
         self.entry_cell_pos = None
         self.label_clicked = None
         self.hcenter_before_wheeling = None
+        self.current_column = None
 
         self.clicked.connect(self.slot_cellClicked)
         self.pressed.connect(self.slot_cellPressed)
@@ -302,7 +300,7 @@ class TimelineTableView(QTableView):
 
         # global_.mySignals.jump_to.connect(self.slot_jump_to)
         global_.mySignals.follow_to.connect(self.slot_follow_to)
-        global_.mySignals.labeled_selected.connect(self.slot_labeled_selected)
+        global_.mySignals.labeled_selected.connect(self.slot_label_play)
         # global_.mySignals.labeled_update.connect(self.slot_labeled_update)
         global_.mySignals.labeled_delete.connect(self.slot_labeled_delete)
 
@@ -332,7 +330,8 @@ class TimelineTableView(QTableView):
             global_.mySignals.label_cells_delete.emit(cells_deleted, global_.Emitter.T_LABEL)
         elif e.key() == Qt.Key_R:
             if self.label_clicked is not None:
-                self._emit_video_play(self.label_clicked.begin, self.label_clicked.end)
+                self._label_play(self.label_clicked)
+                # self._emit_video_play(self.label_clicked.begin, self.label_clicked.end)
 
     def mouseReleaseEvent(self, e):
         Log.debug('here')
@@ -353,7 +352,7 @@ class TimelineTableView(QTableView):
             return
         entry_item = self.model().item(*self.entry_cell_pos)
         if entry_item.background() == Qt.white:
-            name, color = g_get_action()
+            name, color = global_.g_get_action()
             if name is None:
                 return
         else:
@@ -391,7 +390,7 @@ class TimelineTableView(QTableView):
             self.horizontalHeader().setDefaultSectionSize(col_width_to)
             self._col_to_center(self.hcenter_before_wheeling)
         else:
-            bias = 2 if idler_forward else -2
+            bias = -2 if idler_forward else 2
             # self._col_scroll(bias) # conflicts with follow_to
             global_.mySignals.schedule.emit(-1, bias, -1, global_.Emitter.T_WHEEL)
 
@@ -403,7 +402,6 @@ class TimelineTableView(QTableView):
             item = QStandardItem('')
             item.setBackground(Qt.white)
             self.model().setItem(r, c, item)
-        self.mouse_pressing_item = True
         self.entry_cell_pos = (r, c)
 
     def slot_cellClicked(self, qindex):
@@ -421,7 +419,10 @@ class TimelineTableView(QTableView):
         r, c = qindex.row(), qindex.column()
         label = self._detect_label(r, c)  # type:ActionLabel
         if label is not None:
-            self._emit_video_play(label.begin, label.end)
+            self._label_play(label)
+            # self._emit_video_play(label.begin, label.end)
+        else:
+            global_.g_status_prompt(str(f'Current Frame {self.current_column}'))
 
     def slot_sliderMoved(self, pos):
         Log.debug(pos)
@@ -444,20 +445,24 @@ class TimelineTableView(QTableView):
             self._del_label(label)
 
     @TableDecorators.block_signals
-    def slot_labeled_selected(self, action_label: ActionLabel, emitter):
+    def slot_label_play(self, action_label: ActionLabel, emitter):
         Log.debug(action_label, emitter)
-        self._unselect_all()
-        self._select_label(action_label)
-        self._emit_video_play(action_label.begin, action_label.end)
+        self._label_play(action_label)
 
     @TableDecorators.block_signals
     def slot_follow_to(self, emitter, index):
         if emitter == global_.Emitter.T_HSCROLL:
             return
+        self.current_column = index
         self._col_to_center(index)
 
     def set_column_count(self, c):
         self.model().setColumnCount(c)
+
+    def _label_play(self, action_label: ActionLabel):
+        self._unselect_all()
+        self._select_label(action_label)
+        self._emit_video_play(action_label.begin, action_label.end)
 
     def _emit_video_play(self, start_at, stop_at=-1):
         global_.mySignals.schedule.emit(start_at, -1, stop_at, global_.Emitter.T_LABEL)

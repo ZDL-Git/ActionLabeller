@@ -53,4 +53,5 @@ class Emitter(Enum):
 
 
 mySignals = MySignals()
-g_get_action = lambda: (_ for _ in ()).throw(NotImplementedError('Please override this!'))
+g_get_action = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_get_action!'))
+g_status_prompt = lambda *args: Log.warn('No status prompt implemented, please override g_status_prompt!')
