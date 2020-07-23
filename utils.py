@@ -6,11 +6,13 @@ import time
 
 
 def python_version_required(v: str, ge=True):
-    sys_version = sys.version_info
-    for i, n in enumerate(v.split('.')):
-        n = int(n)
-        if (not ge and n != sys_version[i]) or (ge and n > sys_version[i]):
-            raise Exception(f'python version not meets the requirement!')
+    v_tuple = tuple(map(int, v.split('.')))
+    v_len = len(v_tuple)
+    if v_len > 3:
+        Log.error('required version error!')
+        return
+    if (not ge and v_tuple != sys.version_info[:v_len]) or (ge and v_tuple > sys.version_info[:v_len]):
+        raise Exception(f'python version {sys.version_info[:3]} not meets the requirement!')
 
 
 def pprint(*args):
@@ -92,28 +94,6 @@ class Log:
         if not cls.level[3]: return
         func_name, line_no = cls._get_func_and_no()
         cls.print_in_color(f'Error::【{func_name}:{line_no}】', *content, back_tupple=(191, 21, 75))
-
-
-def run_cmd(cmd, block=True):
-    import subprocess
-    (status, output) = subprocess.getstatusoutput(cmd)
-    Log.info(f'[{cmd}] result:\n==status: {status}\n==output:\n{output}')
-    if status and block:
-        raise Exception(f'command [{cmd}] execution failed!')
-    return output
-
-
-def version(package):
-    cmd = f'pip show {package}|grep Version'
-    run_cmd(cmd)
-
-
-def export_env(key, value):
-    os.environ[key] = str(value)
-
-
-def warn_log(msg):
-    print(f'\x1b[91mwarning: {msg}')
 
 
 def timeit(method):
