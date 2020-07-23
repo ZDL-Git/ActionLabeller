@@ -105,7 +105,7 @@
          </widget>
         </item>
         <item>
-         <widget class="TimeLineTableWidget" name="table_timeline">
+         <widget class="TimelineTableView" name="table_timeline">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
             <horstretch>0</horstretch>
@@ -123,29 +123,11 @@
             <pointsize>6</pointsize>
            </font>
           </property>
-          <property name="mouseTracking">
-           <bool>true</bool>
-          </property>
-          <property name="focusPolicy">
-           <enum>Qt::StrongFocus</enum>
-          </property>
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="lineWidth">
-           <number>1</number>
-          </property>
-          <property name="sizeAdjustPolicy">
-           <enum>QAbstractScrollArea::AdjustIgnored</enum>
-          </property>
           <property name="editTriggers">
            <set>QAbstractItemView::NoEditTriggers</set>
           </property>
           <property name="tabKeyNavigation">
            <bool>false</bool>
-          </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
           <property name="verticalScrollMode">
            <enum>QAbstractItemView::ScrollPerItem</enum>
@@ -154,36 +136,18 @@
            <enum>QAbstractItemView::ScrollPerItem</enum>
           </property>
           <property name="showGrid">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
-          <property name="sortingEnabled">
-           <bool>false</bool>
-          </property>
-          <property name="rowCount">
-           <number>20</number>
-          </property>
-          <property name="columnCount">
-           <number>50</number>
+          <property name="gridStyle">
+           <enum>Qt::DotLine</enum>
           </property>
           <attribute name="horizontalHeaderDefaultSectionSize">
            <number>20</number>
           </attribute>
-          <attribute name="horizontalHeaderHighlightSections">
-           <bool>true</bool>
-          </attribute>
           <attribute name="horizontalHeaderMinimumSectionSize">
            <number>2</number>
           </attribute>
-          <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
-           <bool>false</bool>
-          </attribute>
-          <attribute name="horizontalHeaderStretchLastSection">
-           <bool>false</bool>
-          </attribute>
           <attribute name="verticalHeaderVisible">
-           <bool>false</bool>
-          </attribute>
-          <attribute name="verticalHeaderCascadingSectionResizes">
            <bool>false</bool>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
@@ -192,82 +156,6 @@
           <attribute name="verticalHeaderMinimumSectionSize">
            <number>2</number>
           </attribute>
-          <attribute name="verticalHeaderShowSortIndicator" stdset="0">
-           <bool>false</bool>
-          </attribute>
-          <attribute name="verticalHeaderStretchLastSection">
-           <bool>false</bool>
-          </attribute>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <row/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
          </widget>
         </item>
         <item>
@@ -1287,11 +1175,6 @@ border: 1 solid gray;</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>TimeLineTableWidget</class>
-   <extends>QTableWidget</extends>
-   <header>widgets.h</header>
-  </customwidget>
-  <customwidget>
    <class>MyVideoLabelWidget</class>
    <extends>QLabel</extends>
    <header>widgets.h</header>
@@ -1306,13 +1189,17 @@ border: 1 solid gray;</string>
    <extends>QTableWidget</extends>
    <header>widgets.h</header>
   </customwidget>
+  <customwidget>
+   <class>TimelineTableView</class>
+   <extends>QTableView</extends>
+   <header>widgets.h</header>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>btn_open_video</tabstop>
   <tabstop>input_jumpto</tabstop>
   <tabstop>combo_speed</tabstop>
   <tabstop>spin_interval</tabstop>
-  <tabstop>table_timeline</tabstop>
   <tabstop>btn_stop</tabstop>
   <tabstop>btn_to_head</tabstop>
   <tabstop>pushButton_9</tabstop>

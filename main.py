@@ -1,23 +1,19 @@
-import sys
-import cv2
-
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5 import uic
-import global_
+
 from video import Video
-from utils import *
-from action import ActionLabel
+from widgets import *
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType("qt_gui/mainwindow.ui")
 
 
 class MyApp(QMainWindow, Ui_MainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
+        QMainWindow.__init__(self, flags=Qt.Window)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
+
+        self.model = TimelineItemModel(20, 330000)
+        self.table_timeline.setModel(self.model)
 
         self.combo_speed.addItems(['0.5', '0.75', '1', '1.25', '1.5', '1.75'])
         self.combo_speed.setCurrentIndex(2)
@@ -64,9 +60,6 @@ class MyApp(QMainWindow, Ui_MainWindow):
         self.table_labeled.__init_later__()
         self.table_label_temp.__init_later__()
 
-        self.state_mouse_pressing = False
-        self.state_mouse_last_point = None
-
         global_.mySignals.follow_to.connect(self.slot_follow_to)
 
     def common_slot(self, *arg):
@@ -106,47 +99,15 @@ class MyApp(QMainWindow, Ui_MainWindow):
         if event.type() == 12:
             return False
         # Log.debug(f'etype {event.type()} source {source}')
-        if source is self.label_note:
-            if event.type() == QEvent.MouseButtonPress:
-                print("pressed...")
-                self.pause()
-                self.state_mouse_pressing = 1
-                self.state_mouse_last_point = event.pos()
-            elif event.type() == QEvent.MouseButtonRelease:
-                self.state_mouse_pressing = 0
-            elif event.type() == QEvent.MouseMove:
-                print(event.pos())
-                cur_pos = event.pos()
-                if self.state_mouse_pressing:
-                    dis = cur_pos.x() - self.state_mouse_last_point.x()
-                    dis = dis // 2
-                    if dis > 0:
-                        print('forward')
-                        self.flush_frame()
-                    elif dis < 0:
-                        print('backward')
-                        self.flush_frame(reverse=True)
-                self.state_mouse_last_point = cur_pos
-        elif source is self.table_timeline:
-            print(f'table_timeline event type {event.type()}')
-            if event.type() == QEvent.Wheel:
-                print(f'wheel{event.angleDelta()}')
-                zoom_in = event.angleDelta().y() > 0
-                col_width = self.table_timeline.columnWidth(0)
-                col_width += 3 if zoom_in else -3
-                width = self.table_timeline.width()
-                cols = self.table_timeline.horizontalHeader().count()
-                col_width = max(col_width, int(width / cols))
-                self.table_timeline.horizontalHeader().setDefaultSectionSize(col_width)
-            elif event.type() == QEvent.Wheel:
-                pass
+        # if source is self.label_note:
+        #     pass
 
         return super(QMainWindow, self).eventFilter(source, event)
 
     # def resizeEvent(self, e):
     #     pass
-    # Log.warn(self.table_timeline.width())
-    # super(MyApp, self).resizeEvent(e)
+    #     Log.warn(self.table_timeline.width())
+    #     super(MyApp, self).resizeEvent(e)
 
     def slot_eval(self):
         cont = self.ptext_eval_in.toPlainText()  # type:QPlainTextEdit

@@ -1,15 +1,13 @@
-import collections
-from random import random
-
-import cv2
 import typing
-from PyQt5.QtWidgets import *
+from typing import List
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
 import global_
 from action import ActionLabel
 from utils import *
-from typing import List
 
 
 class TableDecorators:
@@ -30,338 +28,6 @@ class TableDecorators:
             arg[0].blockSignals(False)
 
         return func_wrapper
-
-
-class TimeLineTableWidget(QTableWidget):
-
-    def __init__(self, parent):
-        QTableWidget.__init__(self)
-
-        # myQAbstractItemModel = MyQAbstractItemModel(self)
-        # proxyModel = QAbstractProxyModel(self)
-        # proxyModel.setSourceModel(myQAbstractItemModel)
-        # self.setModel(proxyModel)
-
-        self.key_control_pressing = False
-        self.mouse_pressing_hscrollbar = False
-        self.mouse_pressing_item = False
-        self.entry_cell_pos = None
-        self.label_clicked = None
-        self.hcenter_before_wheeling = None
-
-        self.cellPressed.connect(self.slot_cellPressed)
-        self.cellClicked.connect(self.slot_cellClicked)
-        self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
-        self.cellActivated.connect(self.slot_cellActivated)
-        # self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
-
-        # global_.mySignals.jump_to.connect(self.slot_jump_to)
-        global_.mySignals.follow_to.connect(self.slot_follow_to)
-        global_.mySignals.labeled_selected.connect(self.slot_labeled_selected)
-        # global_.mySignals.labeled_update.connect(self.slot_labeled_update)
-        global_.mySignals.labeled_delete.connect(self.slot_labeled_delete)
-
-    # FIXME
-    def __init_later__(self):
-        self.setHorizontalHeaderLabels([str(i) for i in range(self.columnCount())])
-
-        header = self.horizontalHeader()
-        header.sectionPressed.disconnect()
-        header.sectionClicked.connect(self.slot_horizontalHeaderClicked)
-
-        self.horizontalScrollBar().installEventFilter(self)
-        self.horizontalScrollBar().sliderMoved.connect(self.slot_sliderMoved)
-        # self.installEventFilter(self)
-
-    def eventFilter(self, source, event):
-        # Log.debug('here', source, event)
-        if source == self.horizontalScrollBar():
-            if event.type() == QEvent.MouseButtonPress:
-                self.mouse_pressing_hscrollbar = True
-                # global_.mySignals.video_pause.emit()
-            elif event.type() == QEvent.MouseButtonRelease:
-                self.mouse_pressing_hscrollbar = False
-            # elif event.type() == QScrollBar.sliderPressed:
-            #     Log.error('here')
-            else:
-                pass
-                # Log.error(event.type())
-        return False
-
-    def keyPressEvent(self, e: QKeyEvent) -> None:
-        Log.debug(f'mytable {e} {e.key()} {e.type()}')
-        if e.key() == Qt.Key_Control:
-            self.key_control_pressing = True
-            self.hcenter_before_wheeling = self._center_col()
-        # elif e.key() == Qt.Key_Control:
-        #     pass
-
-    def keyReleaseEvent(self, e: QKeyEvent) -> None:
-        Log.debug('here', e.key())
-        if e.key() == Qt.Key_Control:
-            self.key_control_pressing = False
-        elif e.key() in [Qt.Key_Backspace, Qt.Key_D]:
-            cells_deleted = self._del_selected_label_cells()
-            global_.mySignals.label_cells_delete.emit(cells_deleted, global_.Emitter.T_LABEL)
-        elif e.key() == Qt.Key_R:
-            if self.label_clicked is not None:
-                self._emit_video_play(self.label_clicked.begin, self.label_clicked.end)
-
-    def wheelEvent(self, e: QWheelEvent) -> None:
-        print(f'wheel{e.angleDelta()}')
-        idler_forward = e.angleDelta().y() > 0
-        if self.key_control_pressing:
-            col_width = self.columnWidth(0)
-            col_width += 3 if idler_forward else -3
-            t_width = self.width()  # no vertical header
-            cols = self.horizontalHeader().count()
-            col_width_to = max(col_width, int(t_width / cols))
-
-            Log.warn(self.hcenter_before_wheeling)
-            self.horizontalHeader().setDefaultSectionSize(col_width_to)
-            self._col_to_center(self.hcenter_before_wheeling)
-        else:
-            bias = 2 if idler_forward else -2
-            # self._col_scroll(bias) # conflicts with follow_to
-            global_.mySignals.schedule.emit(-1, bias, -1, global_.Emitter.T_WHEEL)
-
-    def mousePressEvent(self, e):
-        Log.debug('here')
-        super().mousePressEvent(e)
-
-    def mouseReleaseEvent(self, e):
-        Log.debug('here')
-        super().mouseReleaseEvent(e)
-        if not self.entry_cell_pos:
-            return
-        rect = self.selectedRanges() and self.selectedRanges()[-1]
-        if not rect:
-            return
-        l, r, t, b = rect.leftColumn(), rect.rightColumn(), rect.topRow(), rect.bottomRow()
-        Log.debug('l r t b', l, r, t, b)
-        if l == r and t == b or b - t == self.rowCount() - 1:
-            return
-        entry_item = self.item(*self.entry_cell_pos)
-        if entry_item.background() == Qt.white:
-            name, color = g_get_action()
-            if name is None:
-                return
-        else:
-            name, color = entry_item.toolTip(), entry_item.background()
-        changed = False
-        for c in range(l, r + 1):
-            item = self.item(self.entry_cell_pos[0], c)
-            if item:
-                if item.background() != color:
-                    changed = True
-                    item.setBackground(color)
-                    item.setToolTip(name)
-            else:
-                changed = True
-                item = QTableWidgetItem('')
-                item.setBackground(color)
-                item.setToolTip(name)
-                self.setItem(self.entry_cell_pos[0], c, item)
-        if changed:
-            found_label = self._detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
-            if found_label is not None:
-                global_.mySignals.label_created.emit(found_label, global_.Emitter.T_LABEL)
-
-    # def horizontalScrollbarValueChanged(self, p_int):
-    #     Log.debug('here', p_int)
-    #     if self.mouse_pressing_hscrollbar:
-    #         global_.mySignals.jump_to.emit(p_int, None, global_.Emitter.T_HSCROLL)
-
-    def slot_labeled_delete(self, action_labels: List[ActionLabel], emitter):
-        Log.debug(action_labels, emitter)
-        self._unselect_all()
-        for label in action_labels:
-            self._del_label(label)
-
-    @TableDecorators.block_signals
-    def slot_labeled_selected(self, action_label: ActionLabel, emitter):
-        Log.debug(action_label, emitter)
-        self._unselect_all()
-        self._select_label(action_label)
-        self._emit_video_play(action_label.begin, action_label.end)
-
-    # @TableDecorators.block_signals
-    # def slot_labeled_update(self, action_label: ActionLabel, emitter):
-    #     Log.debug(action_label, emitter)
-    #     self._update_label(action_label)
-
-    def slot_common_test(self, *arg):
-        Log.debug(*arg)
-
-    def slot_sliderMoved(self, pos):
-        Log.debug(pos)
-        # col_c = self.columnCount()
-        # hscrollbar = self.horizontalScrollBar()
-        index = (self.columnCount() - 1) * pos / self.horizontalScrollBar().maximum()
-
-        global_.mySignals.schedule.emit(index, -1, -1, global_.Emitter.T_HSCROLL)
-        # self.selectColumn(index)  # crash bug
-
-    def slot_cellDoubleClicked(self, r, c):
-        label = self._detect_label(r, c)  # type:ActionLabel
-        if label is not None:
-            self._emit_video_play(label.begin, label.end)
-
-    def _emit_video_play(self, start_at, stop_at=-1):
-        global_.mySignals.schedule.emit(start_at, -1, stop_at, global_.Emitter.T_LABEL)
-        global_.mySignals.video_start.emit()
-
-    def _selected_colors(self):
-        pass
-
-    def _neighbor_color(self, r, c):
-        if c - 1 >= 0 and self.item(r, c - 1) and self.item(r, c - 1).background() != Qt.white:
-            return self.item(r, c - 1).background()
-        elif c + 1 < self.columnCount() and self.item(r, c + 1) and self.item(r, c + 1).background() != Qt.white:
-            return self.item(r, c + 1).background()
-        else:
-            return None
-
-    def _refer_color(self, rect: QTableWidgetSelectionRange):
-        l, r, t, b = rect.leftColumn(), rect.rightColumn(), rect.topRow(), rect.bottomRow()
-        colors = set()
-        for r in range(t, b + 1):
-            for c in range(l, r + 1):
-                if self.item(r, c) and self.item(r, c).background():
-                    pass
-
-    def slot_cellClicked(self, r, c):
-        Log.debug(r, c)
-        label = self._detect_label(r, c)
-        if label is None:
-            self.label_clicked = None
-        else:
-            self.label_clicked = label
-            self._select_label(label)
-            global_.mySignals.label_selected.emit(label, global_.Emitter.T_LABEL)
-
-    def slot_cellPressed(self, r, c):
-        Log.info('here', r, c, self.item(r, c))
-        global_.mySignals.video_pause.emit()
-        if not self.item(r, c):
-            item = QTableWidgetItem('')
-            item.setBackground(Qt.white)
-            self.setItem(r, c, item)
-        self.mouse_pressing_item = True
-        self.entry_cell_pos = (r, c)
-        # Log.warn(self.item(r, c).background() == Qt.white)
-        # self.item(r, c).setText('10')
-        # if self.item(r, c).background() != Qt.white:
-        #     Log.debug('clear color')
-        #     self.item(r, c).setBackground(Qt.white)
-        # elif self.item(r, c - 1) and self.item(r, c - 1).background() != Qt.white:
-        #     Log.debug('follow left neighbour color')
-        #     self.item(r, c).setBackground(self.item(r, c - 1).background())
-        # else:
-        #     Log.debug('fill random color')
-        #     self.item(r, c).setBackground(QColor(QRandomGenerator().global_().generate()))
-
-    def slot_cellActivated(self, r, c):
-        pass
-
-    def slot_itemSelectionChanged(self):
-        Log.info('here')
-
-    def slot_horizontalHeaderClicked(self, i):
-        Log.info('index', i)
-        global_.mySignals.schedule.emit(i, -1, -1, global_.Emitter.T_HHEADER)
-
-    def slot_follow_to(self, emitter, index):
-        if emitter == global_.Emitter.T_HSCROLL:
-            return
-        self._col_to_center(index)
-
-    def _center_col(self):  # only supports static case
-        t_width = self.width()  # no vertical header
-        return self.columnAt(int(t_width / 2))
-
-    def _col_to_center(self, index):
-        hscrollbar = self.horizontalScrollBar()
-        # bias_to_center = self.width() / 2 / self.columnWidth(0)
-        bias_to_center = hscrollbar.pageStep() / 2
-        to = index - bias_to_center
-        hscrollbar.setSliderPosition(max(0, to))
-
-    def _col_scroll(self, bias):
-        hscrollbar = self.horizontalScrollBar()
-        pos = hscrollbar.sliderPosition() + bias
-        hscrollbar.setSliderPosition(pos)
-
-    def set_column_count(self, c):
-
-        self.setColumnCount(c)
-        # FIXME: Set all labels is too slow, but implements view is too expensive
-        self.setHorizontalHeaderLabels([str(i) for i in range(c)])
-        # self.horizontalHeader().moveSection(c - 1, 0)
-        # self.setHorizontalHeaderItem(c - 1, QTableWidgetItem('0'))
-
-    # def headerData(self, col, orientation, role):
-    #     Log.warn('here')
-    #     if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-    #         return col - 1
-    #     return QVariant()
-
-    def _detect_label(self, row, col):
-        item = self.item(row, col)
-        if not item or item.background() == Qt.white:
-            return None
-
-        color = item.background()
-        l = r = col
-        for ci in range(col - 1, -1, -1):
-            if self.item(row, ci) and self.item(row, ci).background() == color:
-                l = ci
-            else:
-                break
-        for ci in range(col + 1, self.columnCount()):
-            if self.item(row, ci) and self.item(row, ci).background() == color:
-                r = ci
-            else:
-                break
-        return ActionLabel(item.toolTip(), l, r, row)
-
-    def _select_label(self, label: ActionLabel):
-        self.setRangeSelected(
-            QTableWidgetSelectionRange(label.timeline_row, label.begin, label.timeline_row, label.end), True)
-
-    def _unselect_label(self, label: ActionLabel):
-        self.setRangeSelected(
-            QTableWidgetSelectionRange(label.timeline_row, label.begin, label.timeline_row, label.end), False)
-
-    def _unselect_all(self):
-        rowc = self.rowCount()
-        colc = self.columnCount()
-        if rowc > 0 and colc > 0:
-            self.setRangeSelected(QTableWidgetSelectionRange(0, 0, rowc - 1, colc - 1), False)
-
-    # def _update_label(self, label: ActionLabel):
-    #     old_color = self.item(label.timeline_row, label.begin)
-    #     if old_color == Qt.white:
-    #         old_color = self.item(label.timeline_row, label.end)
-
-    def _del_label(self, label: ActionLabel):
-        for c in range(label.begin, label.end + 1):
-            self.item(label.timeline_row, c).setBackground(Qt.white)
-
-    def _del_selected_label_cells(self):
-        Log.info('here')
-        label_cells = {}  # key:row,value:cols list
-        for item in self.selectedItems():
-            if item.background() != Qt.white:
-                item.setBackground(Qt.white)
-                item_row = item.row()
-                if item_row in label_cells:
-                    label_cells[item_row].append(item.column())
-                else:
-                    label_cells[item_row] = [item.column()]
-        for range_ in self.selectedRanges():
-            self.setRangeSelected(range_, False)
-        return label_cells
 
 
 class LabeledTableWidget(QTableWidget):
@@ -618,6 +284,260 @@ class LabelTempTableWidget(QTableWidget):
             QDialog.__init__(self)
 
 
+class TimelineTableView(QTableView):
+    def __init__(self, parent=None):
+        super(TimelineTableView, self).__init__(parent)
+
+        self.key_control_pressing = False
+        self.mouse_pressing_hscrollbar = False
+        self.mouse_pressing_item = False
+        self.entry_cell_pos = None
+        self.label_clicked = None
+        self.hcenter_before_wheeling = None
+
+        self.clicked.connect(self.slot_cellClicked)
+        self.pressed.connect(self.slot_cellPressed)
+        self.doubleClicked.connect(self.slot_cellDoubleClicked)
+        # self.mouseReleaseEvent()
+
+        # global_.mySignals.jump_to.connect(self.slot_jump_to)
+        global_.mySignals.follow_to.connect(self.slot_follow_to)
+        global_.mySignals.labeled_selected.connect(self.slot_labeled_selected)
+        # global_.mySignals.labeled_update.connect(self.slot_labeled_update)
+        global_.mySignals.labeled_delete.connect(self.slot_labeled_delete)
+
+    def __init_later__(self):
+        header = self.horizontalHeader()
+        header.sectionPressed.disconnect()
+        header.sectionClicked.connect(self.slot_horizontalHeaderClicked)
+
+        self.horizontalScrollBar().installEventFilter(self)
+        self.horizontalScrollBar().sliderMoved.connect(self.slot_sliderMoved)
+        # self.installEventFilter(self)
+
+    def keyPressEvent(self, e: QKeyEvent) -> None:
+        Log.debug(e, e.key(), e.type())
+        if e.key() == Qt.Key_Control:
+            self.key_control_pressing = True
+            self.hcenter_before_wheeling = self._center_col()
+        # elif e.key() == Qt.Key_Control:
+        #     pass
+
+    def keyReleaseEvent(self, e: QKeyEvent) -> None:
+        Log.debug('here', e.key())
+        if e.key() == Qt.Key_Control:
+            self.key_control_pressing = False
+        elif e.key() in [Qt.Key_Backspace, Qt.Key_D]:
+            cells_deleted = self._del_selected_label_cells()
+            global_.mySignals.label_cells_delete.emit(cells_deleted, global_.Emitter.T_LABEL)
+        elif e.key() == Qt.Key_R:
+            if self.label_clicked is not None:
+                self._emit_video_play(self.label_clicked.begin, self.label_clicked.end)
+
+    def mouseReleaseEvent(self, e):
+        Log.debug('here')
+        super().mouseReleaseEvent(e)
+        if not self.entry_cell_pos:
+            return
+        # rect = self.selectionModel() and self.selectionModel().selectedIndexes()[-1]
+        _selected = self.selectionModel()
+        if not _selected.hasSelection():
+            return
+        rows, cols = set(), set()
+        for qindex in _selected.selectedIndexes():
+            rows.add(qindex.row())
+            cols.add(qindex.column())
+        l, r, t, b = min(cols), max(cols), min(rows), max(rows)
+        Log.debug('l r t b', l, r, t, b)
+        if l == r and t == b or b - t == self.model().rowCount() - 1:
+            return
+        entry_item = self.model().item(*self.entry_cell_pos)
+        if entry_item.background() == Qt.white:
+            name, color = g_get_action()
+            if name is None:
+                return
+        else:
+            name, color = entry_item.toolTip(), entry_item.background()
+        changed = False
+        for c in range(l, r + 1):
+            item = self.model().item(self.entry_cell_pos[0], c)
+            if item:
+                if item.background() != color:
+                    changed = True
+                    item.setBackground(color)
+                    item.setToolTip(name)
+            else:
+                changed = True
+                item = QStandardItem('')
+                item.setBackground(color)
+                item.setToolTip(name)
+                self.model().setItem(self.entry_cell_pos[0], c, item)
+        if changed:
+            found_label = self._detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
+            if found_label is not None:
+                global_.mySignals.label_created.emit(found_label, global_.Emitter.T_LABEL)
+
+    def wheelEvent(self, e: QWheelEvent) -> None:
+        Log.debug(f'wheel {e.angleDelta()}')
+        idler_forward = e.angleDelta().y() > 0
+        if self.key_control_pressing:
+            col_width = self.columnWidth(0)
+            col_width += 3 if idler_forward else -3
+            t_width = self.width()  # no vertical header
+            cols = self.horizontalHeader().count()
+            col_width_to = max(col_width, int(t_width / cols))
+
+            Log.warn(self.hcenter_before_wheeling)
+            self.horizontalHeader().setDefaultSectionSize(col_width_to)
+            self._col_to_center(self.hcenter_before_wheeling)
+        else:
+            bias = 2 if idler_forward else -2
+            # self._col_scroll(bias) # conflicts with follow_to
+            global_.mySignals.schedule.emit(-1, bias, -1, global_.Emitter.T_WHEEL)
+
+    def slot_cellPressed(self, qindex):
+        r, c = qindex.row(), qindex.column()
+        Log.debug(r, c, self.model().item(r, c))
+        global_.mySignals.video_pause.emit()
+        if not self.model().item(r, c):
+            item = QStandardItem('')
+            item.setBackground(Qt.white)
+            self.model().setItem(r, c, item)
+        self.mouse_pressing_item = True
+        self.entry_cell_pos = (r, c)
+
+    def slot_cellClicked(self, qindex):
+        r, c = qindex.row(), qindex.column()
+        Log.debug(r, c)
+        label = self._detect_label(r, c)
+        if label is None:
+            self.label_clicked = None
+        else:
+            self.label_clicked = label
+            self._select_label(label)
+            global_.mySignals.label_selected.emit(label, global_.Emitter.T_LABEL)
+
+    def slot_cellDoubleClicked(self, qindex):
+        r, c = qindex.row(), qindex.column()
+        label = self._detect_label(r, c)  # type:ActionLabel
+        if label is not None:
+            self._emit_video_play(label.begin, label.end)
+
+    def slot_sliderMoved(self, pos):
+        Log.debug(pos)
+        # col_c = self.columnCount()
+        # hscrollbar = self.horizontalScrollBar()
+        index = (self.model().columnCount() - 1) * pos / self.horizontalScrollBar().maximum()
+
+        global_.mySignals.schedule.emit(index, -1, -1, global_.Emitter.T_HSCROLL)
+        # self.selectColumn(index)  # crash bug
+
+    def slot_horizontalHeaderClicked(self, i):
+        Log.info('index', i)
+        global_.mySignals.schedule.emit(i, -1, -1, global_.Emitter.T_HHEADER)
+
+    @TableDecorators.block_signals
+    def slot_labeled_delete(self, action_labels: List[ActionLabel], emitter):
+        Log.debug(action_labels, emitter)
+        self._unselect_all()
+        for label in action_labels:
+            self._del_label(label)
+
+    @TableDecorators.block_signals
+    def slot_labeled_selected(self, action_label: ActionLabel, emitter):
+        Log.debug(action_label, emitter)
+        self._unselect_all()
+        self._select_label(action_label)
+        self._emit_video_play(action_label.begin, action_label.end)
+
+    @TableDecorators.block_signals
+    def slot_follow_to(self, emitter, index):
+        if emitter == global_.Emitter.T_HSCROLL:
+            return
+        self._col_to_center(index)
+
+    def set_column_count(self, c):
+        self.model().setColumnCount(c)
+
+    def _emit_video_play(self, start_at, stop_at=-1):
+        global_.mySignals.schedule.emit(start_at, -1, stop_at, global_.Emitter.T_LABEL)
+        global_.mySignals.video_start.emit()
+
+    def _detect_label(self, row, col):
+        item = self.model().item(row, col)
+        if not item or item.background() == Qt.white:
+            return None
+
+        color = item.background()
+        l = r = col
+        for ci in range(col - 1, -1, -1):
+            if self.model().item(row, ci) and self.model().item(row, ci).background() == color:
+                l = ci
+            else:
+                break
+        for ci in range(col + 1, self.model().columnCount()):
+            if self.model().item(row, ci) and self.model().item(row, ci).background() == color:
+                r = ci
+            else:
+                break
+        return ActionLabel(item.toolTip(), l, r, row)
+
+    def _select_label(self, label: ActionLabel):
+        Log.debug(label)
+        Log.debug(QRect(label.begin, label.timeline_row, label.end - label.begin + 1, 1))
+        self.selectionModel().select(
+            QItemSelection(self.model().index(label.timeline_row, label.begin),
+                           self.model().index(label.timeline_row, label.end)),
+            QItemSelectionModel.ClearAndSelect)
+
+    def _unselect_all(self):
+        rowc = self.model().rowCount()
+        colc = self.model().columnCount()
+        if rowc > 0 and colc > 0:
+            self.selectionModel().select(
+                QItemSelection(self.model().index(0, 0),
+                               self.model().index(rowc - 1, colc - 1)),
+                QItemSelectionModel.Clear)
+
+    def _del_label(self, label: ActionLabel):
+        for c in range(label.begin, label.end + 1):
+            self.model().item(label.timeline_row, c).setBackground(Qt.white)
+
+    def _del_selected_label_cells(self):
+        Log.info('here')
+        label_cells = {}  # key:row,value:cols list
+        for qindex in self.selectedIndexes():
+            r, c = qindex.row(), qindex.column()
+            item = self.model().item(r, c)
+            if item is None or item.background() == Qt.white:
+                continue
+            item.setBackground(Qt.white)
+            if r in label_cells:
+                label_cells[r].append(c)
+            else:
+                label_cells[r] = [c]
+        self._unselect_all()
+        return label_cells
+
+    def _col_to_center(self, index):
+        hscrollbar = self.horizontalScrollBar()
+        # bias_to_center = self.width() / 2 / self.columnWidth(0)
+        bias_to_center = hscrollbar.pageStep() / 2
+        to = index - bias_to_center
+        hscrollbar.setSliderPosition(max(0, to))
+
+    def _center_col(self):  # only supports static case
+        t_width = self.width()  # no vertical header
+        return self.columnAt(int(t_width / 2))
+
+
+class TimelineItemModel(QStandardItemModel):
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...) -> typing.Any:
+        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+            return str(section)
+        return QVariant()
+
+
 class MyVideoLabelWidget(QLabel):
 
     def __init__(self, parent):
@@ -697,9 +617,3 @@ class MyVideoLabelWidget(QLabel):
         #     # self.statusBar.showMessage('播放结束！')
         # else:
         #     self.flush_frame()
-
-# class MyQAbstractItemModel(QAbstractItemModel):
-#     def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...) -> typing.Any:
-#         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-#             return str(section - 1)
-#         return QVariant()
