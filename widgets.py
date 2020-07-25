@@ -1,12 +1,14 @@
+import random
 import typing
 from typing import List
 
+from PyQt5 import uic
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import global_
-from action import ActionLabel
+from action import ActionLabel, Action
 from utils import *
 
 
@@ -42,9 +44,12 @@ class LabeledTableWidget(QTableWidget):
         global_.mySignals.label_selected.connect(self.slot_label_selected)
         global_.mySignals.label_delete.connect(self.slot_label_delete)
         global_.mySignals.label_cells_delete.connect(self.slot_label_cells_delete)
+        global_.mySignals.action_update.connect(self.slot_action_update)
 
     def __init_later__(self):
         self.setColumnHidden(3, True)
+        self.setColumnHidden(4, True)
+        self.setColumnHidden(5, True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     @TableDecorators.dissort
@@ -77,6 +82,21 @@ class LabeledTableWidget(QTableWidget):
         Log.debug(label_cells, emitter)
         self._label_cells_delete(label_cells)
 
+    @TableDecorators.dissort
+    def slot_action_update(self, emitter):
+        rows_delete_later = set()
+        actions = global_.g_all_actions()
+        _actions_dict = {a.id: a for a in actions}
+        Log.debug(_actions_dict)
+        for r in range(self.rowCount()):
+            id = int(self.item(r, 4).text())
+            if id in _actions_dict:
+                self.item(r, 0).setText(_actions_dict[id].name)
+            else:
+                Log.debug(_actions_dict)
+                rows_delete_later.add(r)
+        self._delete_rows(rows_delete_later)
+
     # def slot_cellChanged(self, r, c):
     #     Log.debug(r, c)
 
@@ -99,7 +119,9 @@ class LabeledTableWidget(QTableWidget):
         global_.mySignals.labeled_selected.emit(label, global_.Emitter.T_LABELED)
 
     def _label_at(self, r):
-        return ActionLabel(self.item(r, 0).text(), int(self.item(r, 1).text()), int(self.item(r, 2).text()),
+        return ActionLabel(self.item(r, 0).text(), int(self.item(r, 4).text()), self.item(r, 5).background(),
+                           int(self.item(r, 1).text()),
+                           int(self.item(r, 2).text()),
                            int(self.item(r, 3).text()))
 
     def _labels_selected(self) -> (set, List[ActionLabel]):
@@ -117,21 +139,24 @@ class LabeledTableWidget(QTableWidget):
         rows_delete_later = set()
         labels_add_later = []
         for t_r in range(self.rowCount()):
-            label_row = int(self.item(t_r, 3).text())
-            if label_row not in label_cells:
+            Log.debug(self.item(t_r, 3).text())
+            timeline_row = self.item(t_r, 3).text() and int(self.item(t_r, 3).text())
+            if timeline_row not in label_cells:
                 continue
             label_begin = int(self.item(t_r, 1).text())
             label_end = int(self.item(t_r, 2).text())
-            if label_cells[label_row][0] > label_end or label_cells[label_row][-1] < label_begin:
+            if label_cells[timeline_row][0] > label_end or label_cells[timeline_row][-1] < label_begin:
                 continue
-            elif label_cells[label_row][0] <= label_begin:
-                self.item(t_r, 1).setData(Qt.DisplayRole, label_cells[label_row][-1] + 1)
-            elif label_cells[label_row][-1] >= label_end:
-                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[label_row][0] - 1)
+            elif label_cells[timeline_row][0] <= label_begin:
+                self.item(t_r, 1).setData(Qt.DisplayRole, label_cells[timeline_row][-1] + 1)
+            elif label_cells[timeline_row][-1] >= label_end:
+                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[timeline_row][0] - 1)
             else:
-                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[label_row][0] - 1)
+                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[timeline_row][0] - 1)
                 labels_add_later.append(
-                    ActionLabel(self.item(t_r, 0).text(), label_cells[label_row][-1] + 1, label_end, label_row))
+                    ActionLabel(self.item(t_r, 0).text(), int(self.item(t_r, 4).text()), self.item(t_r, 5).background(),
+                                label_cells[timeline_row][-1] + 1,
+                                label_end, timeline_row))
 
             if int(self.item(t_r, 1).text()) > int(self.item(t_r, 2).text()):
                 rows_delete_later.add(t_r)
@@ -157,14 +182,19 @@ class LabeledTableWidget(QTableWidget):
         begin.setData(Qt.DisplayRole, action_label.begin)
         end = QTableWidgetItem()
         end.setData(Qt.DisplayRole, action_label.end)
-        timeline_row = QTableWidgetItem()
-        timeline_row.setData(Qt.DisplayRole, action_label.timeline_row)
+        timeline_row = QTableWidgetItem(str(action_label.timeline_row))
+        action_id = QTableWidgetItem(str(action_label.action_id))
+        action_color = QTableWidgetItem()
+        action_color.setBackground(action_label.color)
+        # timeline_row.setData(Qt.DisplayRole, action_label.timeline_row)
         new_row_i = self.rowCount()
         self.insertRow(new_row_i)
         self.setItem(new_row_i, 0, action)
         self.setItem(new_row_i, 1, begin)
         self.setItem(new_row_i, 2, end)
         self.setItem(new_row_i, 3, timeline_row)
+        self.setItem(new_row_i, 4, action_id)
+        self.setItem(new_row_i, 5, action_color)
         return new_row_i
 
     def _delete_rows(self, rows):
@@ -178,6 +208,8 @@ class LabeledTableWidget(QTableWidget):
 class LabelTempTableWidget(QTableWidget):
     def __init__(self, parent):
         QTableWidget.__init__(self)
+        # TODO
+        self.header_labels = {''}
 
         # self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
         # self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
@@ -188,21 +220,31 @@ class LabelTempTableWidget(QTableWidget):
         # global_.mySignals.action_add.connect(self.slot_action_add)
 
     def __init_later__(self):
-        # self.setColumnHidden(3, True)
+        self.setColumnHidden(3, True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        for i in range(2):
-            self._new_action(f"action{i + 1}", QColor('#fe8a71') if i == 0 else QColor('#0e9aa7'),
-                             Qt.Checked if i == 0 else Qt.Unchecked)
+        global_.g_default_action = self.get_default_action
+        global_.g_all_actions = self.get_all_actions
 
-        global_.g_get_action = self.get_default_action
+        for i in range(2):
+            action = Action(self._generate_id(), f"action{i + 1}",
+                            QColor('#fe8a71') if i == 0 else QColor('#0e9aa7'),
+                            Qt.Checked if i == 0 else Qt.Unchecked)
+            self._insert_action(action)
+            # global_.g_all_actions.append(action)
 
     def slot_cellChanged(self, r, c):
         Log.debug(r, c)
-        if self.item(r, c).checkState() == Qt.Checked:
-            self._unselect_others(except_=r)
-        elif self.item(r, c).checkState() == 0:
+        if c == 2:
+            if self.item(r, c).checkState() == Qt.Checked:
+                self._unselect_others(except_=r)
+            elif self.item(r, c).checkState() == Qt.Unchecked:
+                pass
+        elif c == 0:
             pass
+
+        global_.mySignals.action_update.emit(global_.Emitter.T_TEMP)
+        # global_.g_all_actions = self.get_all_actions
 
     def slot_cellDoubleClicked(self, r, c):
         Log.debug(r, c)
@@ -210,17 +252,26 @@ class LabelTempTableWidget(QTableWidget):
             item = self.item(r, c)
             color = QColorDialog.getColor(initial=item.background().color())  # type:QColor
             if color.isValid():
+                if color == Qt.white:
+                    global_.g_status_prompt('Cannot set white color to action!')
+                    Log.warn('Cannot set white color to action!')
+                    return
                 item.setBackground(color)
 
+    # @TableDecorators.block_signals
     def slot_action_add(self):
         Log.debug('here')
-        self._new_action('', QColor(QRandomGenerator().global_().generate()), False)
+        action = Action(self._generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
+        # global_.g_all_actions.append(action)
+        self._insert_action(action)
         self.editItem(self.item(self.rowCount() - 1, 0))
 
-    def slot_del_selected_action(self):
+    @TableDecorators.dissort
+    def slot_del_selected_actions(self, emitter):
         Log.debug('here')
         if QMessageBox.Cancel == QMessageBox.warning(self, 'ActionLabel Warning',
-                                                     "All you sure to delete action template?",
+                                                     "All you sure to delete action template?"
+                                                     " All the related action label will be deleted!",
                                                      QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
             return
         rows = set()
@@ -228,6 +279,18 @@ class LabelTempTableWidget(QTableWidget):
             rows.add(index.row())
         for r in sorted(rows, reverse=True):
             self.removeRow(r)
+        global_.mySignals.action_update.emit(global_.Emitter.T_TEMP)
+
+    def get_all_actions(self):
+        Log.debug('')
+        actions = []
+        try:
+            for r in range(self.rowCount()):
+                actions.append(Action(int(self.item(r, 3).text()), self.item(r, 0).text(), self.item(r, 1).background(),
+                                      self.item(r, 2).checkState() == Qt.Checked))
+        except Exception as e:
+            return actions
+        return actions
 
     def get_default_action(self):
         rows = self.rowCount()
@@ -235,44 +298,61 @@ class LabelTempTableWidget(QTableWidget):
             QMessageBox.information(self, 'ActionLabel',
                                     "Please add action first!",
                                     QMessageBox.Ok, QMessageBox.Ok)
-            return None, None
+            return None
 
-        actions = {}
-        for r in range(rows):
-            actions[self.item(r, 0).text()] = self.item(r, 1).background()
-            if self.item(r, 2).checkState() == Qt.Checked:
-                if not self.item(r, 0).text():
+        actions = self.get_all_actions()
+        for action in actions:
+            if action.default:
+                if not action.name:
                     QMessageBox.information(self, 'ActionLabel',
                                             "Please complete action name first!",
                                             QMessageBox.Ok, QMessageBox.Ok)
-                return self.item(r, 0).text(), self.item(r, 1).background()
-        action, ok_pressed = QInputDialog.getItem(self, "ActionLabel", "Actions:", list(actions.keys()), 0, False)
-        if ok_pressed and action:
-            return action, actions[action]
+                    return None
+                # 1.return default
+                return action
+        # 2.select from dialog
+        action_name, ok_pressed = QInputDialog.getItem(self, "ActionLabel", "Actions:", [a.name for a in actions], 0,
+                                                       False)
+        if ok_pressed and action_name:
+            return list(filter(lambda a: a.name == action_name, actions))[0]
 
-        return None, None
+        return None
 
-    def _new_action(self, name, qcolor, checked):
-        action = QTableWidgetItem(name)
+    def _generate_id(self):
+        actions = global_.g_all_actions()
+        if actions:
+            return max([action.id for action in actions]) + 1
+        return 0
+
+    def _insert_action(self, action: Action):
+        id = QTableWidgetItem(str(action.id))
+        name = QTableWidgetItem(action.name)
         color = QTableWidgetItem()
         color.setFlags(Qt.ItemIsEnabled)
-        color.setBackground(qcolor)
+        color.setBackground(action.color)
         default = QTableWidgetItem()
-        default.setCheckState(checked)
+        default.setCheckState(action.default)
         r = self.rowCount()
         self.insertRow(r)
-        self.setItem(r, 0, action)
+        self.setItem(r, 0, name)
         self.setItem(r, 1, color)
         self.setItem(r, 2, default)
+        self.setItem(r, 3, id)
 
-    def _del_action(self, r):
-        self.removeRow(r)
+    def _del_action(self, id):
+        for r in range(self.rowCount()):
+            if self.item(r, 3).text() == str(id):
+                self.removeRow(r)
 
     def _unselect_others(self, except_):
         for r in range(self.rowCount()):
             if r == except_:
                 continue
             self.item(r, 2).setCheckState(Qt.Unchecked)
+
+    def _row_to_action(self, r):
+        return Action(int(self.model().item(r, 3).text()), self.model().item(r, 0).text(),
+                      self.model().item(r, 1).background(), self.model().item(r, 2).checkState() == Qt.Checked)
 
     def slot_test(self, *arg):
         Log.debug(*arg)
@@ -291,12 +371,14 @@ class TimelineTableView(QTableView):
         self.entry_cell_pos = None
         self.label_clicked = None
         self.hcenter_before_wheeling = None
-        self.current_column = None
+        self.current_column = 0
 
         self.clicked.connect(self.slot_cellClicked)
         self.pressed.connect(self.slot_cellPressed)
         self.doubleClicked.connect(self.slot_cellDoubleClicked)
         # self.mouseReleaseEvent()
+
+        self.label_create_dialog = self.TimelineDialog(self)
 
         # global_.mySignals.jump_to.connect(self.slot_jump_to)
         global_.mySignals.follow_to.connect(self.slot_follow_to)
@@ -352,25 +434,24 @@ class TimelineTableView(QTableView):
             return
         entry_item = self.model().item(*self.entry_cell_pos)
         if entry_item.background() == Qt.white:
-            name, color = global_.g_get_action()
-            if name is None:
+            default_action = global_.g_default_action()
+            if not default_action:
                 return
+            name, color, id = default_action.name, default_action.color, default_action.id
         else:
-            name, color = entry_item.toolTip(), entry_item.background()
+            name, color, id = entry_item.toolTip(), entry_item.background(), entry_item.whatsThis()
         changed = False
         for c in range(l, r + 1):
             item = self.model().item(self.entry_cell_pos[0], c)
-            if item:
-                if item.background() != color:
-                    changed = True
-                    item.setBackground(color)
-                    item.setToolTip(name)
-            else:
+            if item is None:
+                item = QStandardItem()
+                self.model().setItem(self.entry_cell_pos[0], c, item)
+            if item.background() != color:
                 changed = True
-                item = QStandardItem('')
                 item.setBackground(color)
                 item.setToolTip(name)
-                self.model().setItem(self.entry_cell_pos[0], c, item)
+                item.setWhatsThis(str(id))
+
         if changed:
             found_label = self._detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
             if found_label is not None:
@@ -423,6 +504,21 @@ class TimelineTableView(QTableView):
             # self._emit_video_play(label.begin, label.end)
         else:
             global_.g_status_prompt(str(f'Current Frame {self.current_column}'))
+            # self.label_create_dialog.set_actions(actions)
+            # self.label_create_dialog.set_cur_index(self.current_column)
+            self.label_create_dialog.load(self.current_column)
+            self.label_create_dialog.exec_()
+            # if self.label_create_dialog.exec_():
+            #     label = self.label_create_dialog.take_label()
+            #     Log.debug('', label)
+            #     if label.end is not None:
+            #         if label.begin > label.end:
+            #             warn_ = "Label's begin exceeds the end, ignored!"
+            #             global_.g_status_prompt(warn_)
+            #             Log.warn(warn_)
+            #             return
+            #         if self._settle_label(label):
+            #             global_.mySignals.label_created.emit(label, global_.Emitter.T_LABEL)
 
     def slot_sliderMoved(self, pos):
         Log.debug(pos)
@@ -468,6 +564,40 @@ class TimelineTableView(QTableView):
         global_.mySignals.schedule.emit(start_at, -1, stop_at, global_.Emitter.T_LABEL)
         global_.mySignals.video_start.emit()
 
+    def _settle_label(self, label: ActionLabel):
+        t_r = None
+        choices = list(range(self.model().rowCount()))
+        while choices:
+            r = random.choice(choices)
+            for c in range(label.begin, label.end + 1):
+                if self.model().item(r, c) and self.model().item(r, c).background() != Qt.white:
+                    choices.remove(r)
+                    break
+            else:
+                t_r = r
+                break
+        if t_r is not None:
+            label.timeline_row = t_r
+            self._plot_label(label)
+            return t_r
+        else:
+            warn_ = 'All related lines are not empty, please check the situation!'
+            Log.warn(warn_)
+            global_.g_status_prompt(warn_)
+            return None
+
+    def _plot_label(self, label: ActionLabel):
+        Log.debug(label)
+        for c in range(label.begin, label.end + 1):
+            item = self.model().item(label.timeline_row, c)
+            if item is None:
+                item = QStandardItem()
+                self.model().setItem(label.timeline_row, c, item)
+
+            item.setBackground(label.color)
+            item.setToolTip(label.action)
+            item.setWhatsThis(str(label.action_id))
+
     def _detect_label(self, row, col):
         item = self.model().item(row, col)
         if not item or item.background() == Qt.white:
@@ -485,7 +615,8 @@ class TimelineTableView(QTableView):
                 r = ci
             else:
                 break
-        return ActionLabel(item.toolTip(), l, r, row)
+        Log.debug(item.toolTip(), item.whatsThis(), item.background())
+        return ActionLabel(item.toolTip(), int(item.whatsThis()), item.background(), l, r, row)
 
     def _select_label(self, label: ActionLabel):
         Log.debug(label)
@@ -534,6 +665,137 @@ class TimelineTableView(QTableView):
     def _center_col(self):  # only supports static case
         t_width = self.width()  # no vertical header
         return self.columnAt(int(t_width / 2))
+
+    Ui_Dialog, _ = uic.loadUiType("qt_gui/timelinedialog.ui")
+
+    class TimelineDialog(QDialog, Ui_Dialog):
+        def __init__(self, parent=None):
+            QDialog.__init__(self, parent, flags=Qt.Dialog)
+            self.setupUi(self)
+            self.line_begin.setValidator(QIntValidator())
+            self.line_end.setValidator(QIntValidator())
+
+            self.cur_frame_index = None
+            self.labels_unfinished = []  # type:List
+            # self.stress_color = QColor('#b88481')
+
+            self.btn_new.clicked.connect(self.slot_btn_new_clicked)
+
+        # def set_cur_index(self, index):
+        #     self.cur_index = index
+
+        def load(self, cur_frame_index):
+            self.cur_frame_index = cur_frame_index
+            self._load_new_comb()
+            self._load_unfinished()
+
+        def _load_new_comb(self):
+            # created in qt creator IDE
+            self.combo_action_names.clear()
+            self.actions = actions = global_.g_all_actions()
+            if actions:
+                _action_names = [a.name for a in actions]
+                self.combo_action_names.addItems(_action_names)
+                default = list(filter(lambda action: action.default, actions))
+                if default:
+                    default = default[0].name
+                    self.combo_action_names.setCurrentIndex(_action_names.index(default))
+            self.line_begin.setText(str(self.cur_frame_index))
+            self.line_end.clear()
+
+        def _load_unfinished(self):
+            clearLayout(self.instore_layout)
+            for i, label in enumerate(self.labels_unfinished):
+                self._add_comb(label, self.cur_frame_index, i)
+
+        def _add_comb(self, action_label: ActionLabel, cur_frame_index: int, index_in_labels_unfinished: int):
+            layout = QHBoxLayout()
+            combox = QComboBox()
+            begin_editor = QLineEdit()
+            end_editor = QLineEdit()
+            btn_finish = QPushButton()
+            layout.addWidget(combox, 2)
+            layout.addWidget(begin_editor, 1)
+            layout.addWidget(end_editor, 1)
+            layout.addWidget(btn_finish, 1)
+            layout.setSpacing(5)
+            self.instore_layout.addLayout(layout, 1)
+
+            _action_names = [a.name for a in global_.g_all_actions()]
+            combox.addItems(_action_names)
+            combox.setCurrentIndex(
+                action_label.action in _action_names and _action_names.index(action_label.action)
+                or 0)
+            int_validator = QIntValidator()
+            begin_editor.setValidator(int_validator)
+            end_editor.setValidator(int_validator)
+            begin_editor.setText(str(action_label.begin))
+            end_editor.setText(str(cur_frame_index))
+            btn_finish.setText('Finish')
+            begin_editor.setPlaceholderText('required')
+            end_editor.setPlaceholderText('required')
+            end_editor.setStyleSheet("QLineEdit { color: darkred;}")
+
+            btn_finish.clicked.connect(
+                lambda: self.slot_btn_finish_clicked(combox, begin_editor, end_editor, index_in_labels_unfinished))
+
+        # FIXME
+        def slot_btn_finish_clicked(self, w_action, w_begin, w_end, index_in_labels_unfinished):
+            Log.debug('')
+            action_name = w_action.currentText()
+            action = list(filter(lambda a: a.name == action_name, self.actions))[0]
+            begin = w_begin.text() and int(w_begin.text())
+            end = w_end.text() and int(w_end.text())
+            label = ActionLabel(action.name, action.id, action.color, begin, end, None)
+            if not label.is_valid(['action', 'begin', 'end']):
+                return
+            self._commit_label(label)
+            del self.labels_unfinished[index_in_labels_unfinished]
+
+            if self.checkb_autoclose.isChecked():
+                self.buttonBox.accepted.emit()
+            else:
+                self._load_unfinished()
+
+        def slot_btn_new_clicked(self):
+            Log.debug('')
+            action_name = self.combo_action_names.currentText()
+            if not action_name:
+                Log.info('Please add action first!')
+                return
+            action = list(filter(lambda a: a.name == action_name, self.actions))[0]
+            begin = self.line_begin.text() and int(self.line_begin.text())
+            end = self.line_end.text() and int(self.line_end.text()) or None
+            label = ActionLabel(action.name, action.id, action.color, begin,
+                                end, None)
+            if not label.is_valid(['action', 'begin']):
+                return
+            if end:
+                self._commit_label(label)
+            else:
+                self.labels_unfinished.append(label)
+
+            if self.checkb_autoclose.isChecked():
+                self.buttonBox.accepted.emit()
+            else:
+                self._load_unfinished()
+
+        def _commit_label(self, label: ActionLabel):
+            Log.debug('', label)
+            if not label.is_valid(['action', 'action_id', 'color', 'begin', 'end']):
+                return
+            if self.parent()._settle_label(label):
+                global_.mySignals.label_created.emit(label, global_.Emitter.T_LABEL)
+
+        def exec_(self):
+            # self.setFixedWidth(self.width())
+            # self.setMaximumHeight(self.height())
+            return super().exec_()
+
+        # def take_label(self):
+        #     take = self.label_changed
+        #     self.label_changed = None
+        #     return take
 
 
 class TimelineItemModel(QStandardItemModel):
@@ -622,3 +884,12 @@ class MyVideoLabelWidget(QLabel):
         #     # self.statusBar.showMessage('播放结束！')
         # else:
         #     self.flush_frame()
+
+
+def clearLayout(layout):
+    while layout.count():
+        child = layout.takeAt(0)
+        if child.widget() is not None:
+            child.widget().setParent(None)
+        elif child.layout() is not None:
+            clearLayout(child.layout())

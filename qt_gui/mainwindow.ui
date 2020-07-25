@@ -477,16 +477,6 @@ border: 1 solid gray;</string>
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="pushButton_8">
-                      <property name="text">
-                       <string>&lt;</string>
-                      </property>
-                      <property name="checkable">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
                      <widget class="QPushButton" name="btn_play">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -502,16 +492,6 @@ border: 1 solid gray;</string>
                       </property>
                       <property name="text">
                        <string>Play</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="pushButton_10">
-                      <property name="text">
-                       <string>&gt;</string>
-                      </property>
-                      <property name="checkable">
-                       <bool>false</bool>
                       </property>
                      </widget>
                     </item>
@@ -538,17 +518,7 @@ border: 1 solid gray;</string>
                    </layout>
                   </item>
                   <item>
-                   <spacer name="verticalSpacer">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
+                   <widget class="QTextBrowser" name="textBrowser"/>
                   </item>
                  </layout>
                 </item>
@@ -825,7 +795,7 @@ border: 1 solid gray;</string>
                 <bool>true</bool>
                </property>
                <property name="columnCount">
-                <number>4</number>
+                <number>6</number>
                </property>
                <attribute name="horizontalHeaderCascadingSectionResizes">
                 <bool>false</bool>
@@ -851,7 +821,21 @@ border: 1 solid gray;</string>
                  <string>end</string>
                 </property>
                </column>
-               <column/>
+               <column>
+                <property name="text">
+                 <string>timeline_row</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>action_id</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string>action_color</string>
+                </property>
+               </column>
               </widget>
              </item>
             </layout>
@@ -905,8 +889,11 @@ border: 1 solid gray;</string>
             <item row="0" column="0">
              <widget class="LabelTempTableWidget" name="table_label_temp">
               <property name="columnCount">
-               <number>3</number>
+               <number>4</number>
               </property>
+              <attribute name="horizontalHeaderDefaultSectionSize">
+               <number>70</number>
+              </attribute>
               <column>
                <property name="text">
                 <string>Action Name</string>
@@ -920,6 +907,11 @@ border: 1 solid gray;</string>
               <column>
                <property name="text">
                 <string>Default</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Id</string>
                </property>
               </column>
              </widget>
@@ -1203,9 +1195,7 @@ border: 1 solid gray;</string>
   <tabstop>btn_stop</tabstop>
   <tabstop>btn_to_head</tabstop>
   <tabstop>pushButton_9</tabstop>
-  <tabstop>pushButton_8</tabstop>
   <tabstop>btn_play</tabstop>
-  <tabstop>pushButton_10</tabstop>
   <tabstop>pushButton_11</tabstop>
   <tabstop>btn_to_tail</tabstop>
   <tabstop>listView_2</tabstop>

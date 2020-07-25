@@ -22,7 +22,7 @@ class MySignals(QObject):
     labeled_selected = pyqtSignal(ActionLabel, Enum)
     # labeled_update = pyqtSignal(ActionLabel, Enum)
     labeled_delete = pyqtSignal(list, Enum)
-    action_add = pyqtSignal(Enum)
+    action_update = pyqtSignal(Enum)
 
     timer_video = QTimer()
 
@@ -53,5 +53,6 @@ class Emitter(Enum):
 
 
 mySignals = MySignals()
-g_get_action = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_get_action!'))
+g_default_action = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_default_action!'))
+g_all_actions = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_all_actions!'))
 g_status_prompt = lambda *args: Log.warn('No status prompt implemented, please override g_status_prompt!')
