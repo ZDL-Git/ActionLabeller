@@ -1,6 +1,7 @@
 from PyQt5 import uic
 
 import global_
+import xml_
 from utils import Log
 from video import Video
 from widgets import *
@@ -14,13 +15,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
-        self.model = TimelineItemModel(20, 50)
-        self.table_timeline.setModel(self.model)
-
         self.combo_speed.addItems(['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75'])
         self.combo_speed.setCurrentIndex(2)
         self.combo_sortby.addItems(['timestamp', 'filename'])
         self.combo_sortby.setCurrentIndex(1)
+        # self.line_xml_file_parttern.setText('action_{begin index}-{end index}.xml')
 
         self.spin_interval.textChanged.connect(self.slot_interval_changed)
         self.combo_speed.currentTextChanged.connect(self.slot_speed_changed)
@@ -35,8 +34,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.btn_to_head.clicked.connect(self.to_head)
             self.btn_to_tail.clicked.connect(self.to_tail)
             self.btn_eval.clicked.connect(self.slot_eval)
-            self.btn_new_label_temp.clicked.connect(self.table_label_temp.slot_action_add)
-            self.btn_del_label_temp.clicked.connect(self.table_label_temp.slot_del_selected_actions)
+            self.btn_new_action.clicked.connect(self.table_action.slot_action_add)
+            self.btn_del_action.clicked.connect(self.table_action.slot_del_selected_actions)
 
         def init_settings():
             global_.Settings.v_interval = int(self.spin_interval.text())
@@ -60,7 +59,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.table_timeline.__init_later__()
         self.table_labeled.__init_later__()
-        self.table_label_temp.__init_later__()
+        self.table_action.__init_later__()
+        self.table_xml_setting.__init_later__(self.table_action.model())
+
+        self._hold1_ = XmlSettingUnit(self)
 
         global_.g_status_prompt = self.label_note.setText
         global_.mySignals.follow_to.connect(self.slot_follow_to)
@@ -69,9 +71,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Log.debug(f'common slot print:', arg)
 
     def slot_open_file(self):
-        # got = QFileDialog.getOpenFileName(self, "Open Image", "/Users/zdl/Downloads/下载-视频",
-        #                                   "Media Files (*.mp4 *.jpg *.bmp)", options=QFileDialog.ReadOnly)
-        got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
+        # TODO: remove native directory
+        got = QFileDialog.getOpenFileName(self, "Open Image", "/Users/zdl/Downloads/下载-视频",
+                                          "Media Files (*.mp4 *.jpg *.bmp)", options=QFileDialog.ReadOnly)
+        # got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
         Log.info(got)
         fname = got[0]
         if fname:
@@ -101,11 +104,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def eventFilter(self, source, event):
         if event.type() == 12:
             return False
-        # Log.debug(f'etype {event.type()} source {source}')
-        # if source is self.label_note:
-        #     pass
 
         return super(QMainWindow, self).eventFilter(source, event)
+
+    def closeEvent(self, e: QCloseEvent):
+        Log.debug('Main window closed.')
+        if QMessageBox.Ok != QMessageBox.information(self, 'ActionLabel',
+                                                     "Are you sure to quit, the unsaved labels will be lost?",
+                                                     QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
+            e.ignore()
 
     # def resizeEvent(self, e):
     #     pass
@@ -113,16 +120,68 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #     super(MyApp, self).resizeEvent(e)
 
     def slot_eval(self):
-        cont = self.ptext_eval_in.toPlainText()  # type:QPlainTextEdit
-        Log.info(cont)
+        eval_content = self.ptext_eval_in.toPlainText()  # type:QPlainTextEdit
+        Log.info(eval_content)
         try:
-            resp = eval(cont)
+            resp = eval(eval_content)
         except Exception as e:
             resp = e.__str__()
         self.textb_eval_out.setText(str(resp))
 
-    # def slot_new_label_temp(self):
-    #     Log.debug('here')
-    #     global_.mySignals.action_add.emit(global_.Emitter.T_TEMP)
 
+class XmlSettingUnit:
+    def __init__(self, mwindow):
+        Log.debug('')
+        self.mw = mwindow
+        # Log.debug(self.parent())
+        self.mw.btn_export_xml.clicked.connect(self.slot_export_xml)
+        self.mw.btn_xml_template.clicked.connect(self.slot_xml_template)
 
+    def slot_export_xml(self):
+        Log.debug('')
+        labels = global_.g_all_labels()  # type:List[ActionLabel]
+        labels.sort(key=lambda l: l.begin)
+        actions = global_.g_all_actions()  # type:List[Action]
+        id_action_dict = {a.id: a for a in actions}  # type:dict[int,Action]
+        framespan = int(self.mw.line_framespan.text())
+        overlap = int(self.mw.line_overlap.text())
+        Log.debug(framespan, overlap, labels)
+
+        anno = xml_.AnnotationXml()
+        file_num = 0
+        abandoned = []
+        while labels:
+            trans = overlap * (0 if file_num == 0 else -1)
+            range_ = (file_num * framespan + trans + 1, (file_num + 1) * framespan + trans)
+            anno.new_file(f'runtime/xmldemo_{range_}.xml')
+            anno.set_tag('folder', 'runtime')
+            anno.set_tag('filename', f'runtime/xmldemo_{range_}.png')
+            anno.set_tag('width', framespan)
+            anno.set_tag('height', 200)
+            anno.set_tag('depth', 100)
+            cursor = 0
+            while labels:
+                if labels[cursor].begin >= range_[0] and labels[cursor].end <= range_[1]:
+                    label = labels.pop(cursor)
+                    action = id_action_dict[label.action_id]
+                    anno.append_action(label.action, label.begin, label.end, action.xml_ymin, action.xml_ymax)
+                elif labels[cursor].begin < range_[0]:
+                    abandoned.append(labels.pop(cursor))
+                elif labels[cursor].begin > range_[1]:
+                    break
+                else:
+                    cursor += 1
+            anno.dump()
+            file_num += 1
+        Log.info('labels abandoned:', abandoned)
+
+    def slot_xml_template(self):
+        Log.debug('')
+        layout = QGridLayout()
+        layout.addWidget(QTextBrowser())
+        layout.setContentsMargins(2, 2, 2, 2)
+        dialog = QDialog(self.mw, flags=Qt.Dialog)
+        dialog.setFixedSize(QSize(400, 300))
+        dialog.setLayout(layout)
+        dialog.setContentsMargins(2, 2, 2, 2)
+        dialog.exec_()

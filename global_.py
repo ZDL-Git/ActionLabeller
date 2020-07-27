@@ -20,7 +20,7 @@ class MySignals(QObject):
     label_delete = pyqtSignal(ActionLabel, Enum)
     label_cells_delete = pyqtSignal(dict, Enum)
     labeled_selected = pyqtSignal(ActionLabel, Enum)
-    # labeled_update = pyqtSignal(ActionLabel, Enum)
+    labeled_update = pyqtSignal(list, Enum)
     labeled_delete = pyqtSignal(list, Enum)
     action_update = pyqtSignal(Enum)
 
@@ -56,3 +56,4 @@ mySignals = MySignals()
 g_default_action = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_default_action!'))
 g_all_actions = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_all_actions!'))
 g_status_prompt = lambda *args: Log.warn('No status prompt implemented, please override g_status_prompt!')
+g_all_labels = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_all_labels!'))

@@ -795,7 +795,7 @@ border: 1 solid gray;</string>
                 <bool>true</bool>
                </property>
                <property name="columnCount">
-                <number>6</number>
+                <number>0</number>
                </property>
                <attribute name="horizontalHeaderCascadingSectionResizes">
                 <bool>false</bool>
@@ -806,36 +806,9 @@ border: 1 solid gray;</string>
                <attribute name="horizontalHeaderMinimumSectionSize">
                 <number>14</number>
                </attribute>
-               <column>
-                <property name="text">
-                 <string>action</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>begin</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>end</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>timeline_row</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>action_id</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string>action_color</string>
-                </property>
-               </column>
+               <attribute name="verticalHeaderDefaultSectionSize">
+                <number>28</number>
+               </attribute>
               </widget>
              </item>
             </layout>
@@ -866,9 +839,9 @@ border: 1 solid gray;</string>
           <property name="elideMode">
            <enum>Qt::ElideRight</enum>
           </property>
-          <widget class="QWidget" name="tab_label_setting">
+          <widget class="QWidget" name="tab_action_setting">
            <attribute name="title">
-            <string>Label Setting</string>
+            <string>Action Setting</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_6">
             <property name="leftMargin">
@@ -881,39 +854,22 @@ border: 1 solid gray;</string>
              <number>6</number>
             </property>
             <property name="bottomMargin">
-             <number>6</number>
-            </property>
-            <property name="verticalSpacing">
              <number>0</number>
             </property>
+            <property name="verticalSpacing">
+             <number>2</number>
+            </property>
             <item row="0" column="0">
-             <widget class="LabelTempTableWidget" name="table_label_temp">
+             <widget class="ActionTableWidget" name="table_action">
               <property name="columnCount">
-               <number>4</number>
+               <number>0</number>
               </property>
               <attribute name="horizontalHeaderDefaultSectionSize">
                <number>70</number>
               </attribute>
-              <column>
-               <property name="text">
-                <string>Action Name</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Label Color</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Default</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Id</string>
-               </property>
-              </column>
+              <attribute name="verticalHeaderDefaultSectionSize">
+               <number>28</number>
+              </attribute>
              </widget>
             </item>
             <item row="2" column="0">
@@ -925,14 +881,14 @@ border: 1 solid gray;</string>
                <number>0</number>
               </property>
               <item>
-               <widget class="QPushButton" name="btn_new_label_temp">
+               <widget class="QPushButton" name="btn_new_action">
                 <property name="text">
                  <string>New Temp</string>
                 </property>
                </widget>
               </item>
               <item>
-               <widget class="QPushButton" name="btn_del_label_temp">
+               <widget class="QPushButton" name="btn_del_action">
                 <property name="text">
                  <string>Del Temp</string>
                 </property>
@@ -947,6 +903,9 @@ border: 1 solid gray;</string>
             <string>Xml Setting</string>
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="spacing">
+             <number>0</number>
+            </property>
             <property name="leftMargin">
              <number>6</number>
             </property>
@@ -957,54 +916,44 @@ border: 1 solid gray;</string>
              <number>6</number>
             </property>
             <property name="bottomMargin">
-             <number>6</number>
+             <number>0</number>
             </property>
             <item>
-             <layout class="QFormLayout" name="formLayout_3">
-              <property name="fieldGrowthPolicy">
-               <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-              </property>
-              <property name="labelAlignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-              </property>
-              <property name="formAlignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+             <widget class="XmlSettingTableView" name="table_xml_setting">
+              <attribute name="verticalHeaderDefaultSectionSize">
+               <number>28</number>
+              </attribute>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <property name="leftMargin">
+               <number>4</number>
               </property>
               <property name="topMargin">
-               <number>0</number>
+               <number>4</number>
               </property>
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_6">
-                <property name="text">
-                 <string>Overlap:</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QLineEdit" name="lineEdit_2">
-                <property name="maximumSize">
-                 <size>
-                  <width>200</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-                <property name="text">
-                 <string>50</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0">
+              <property name="rightMargin">
+               <number>4</number>
+              </property>
+              <property name="bottomMargin">
+               <number>4</number>
+              </property>
+              <item>
                <widget class="QLabel" name="label_7">
                 <property name="text">
                  <string>Framespan:</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="lineEdit_3">
+              <item>
+               <widget class="QLineEdit" name="line_framespan">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>200</width>
@@ -1019,15 +968,21 @@ border: 1 solid gray;</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_8">
+              <item>
+               <widget class="QLabel" name="label_6">
                 <property name="text">
-                 <string>Filename parttern:</string>
+                 <string>Overlap:</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
-               <widget class="QLineEdit" name="lineEdit_4">
+              <item>
+               <widget class="QLineEdit" name="line_overlap">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="maximumSize">
                  <size>
                   <width>200</width>
@@ -1035,31 +990,41 @@ border: 1 solid gray;</string>
                  </size>
                 </property>
                 <property name="text">
-                 <string>temporal_actions_{index}.xml</string>
+                 <string>50</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
              </layout>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_2">
-              <property name="text">
-               <string>Export xml</string>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <property name="topMargin">
+               <number>0</number>
               </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="pushButton_3">
-              <property name="text">
-               <string>PushButton</string>
-              </property>
-             </widget>
+              <item>
+               <widget class="QPushButton" name="btn_xml_template">
+                <property name="text">
+                 <string>Xml template</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="btn_export_xml">
+                <property name="text">
+                 <string>Export xml</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tab">
+          <widget class="QWidget" name="tab_eval_tool">
            <attribute name="title">
-            <string>Eval</string>
+            <string>Eval Tool</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_9" rowstretch="3,2,0">
             <property name="leftMargin">
@@ -1177,12 +1142,17 @@ border: 1 solid gray;</string>
    <header>widgets.h</header>
   </customwidget>
   <customwidget>
-   <class>LabelTempTableWidget</class>
+   <class>ActionTableWidget</class>
    <extends>QTableWidget</extends>
    <header>widgets.h</header>
   </customwidget>
   <customwidget>
    <class>TimelineTableView</class>
+   <extends>QTableView</extends>
+   <header>widgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>XmlSettingTableView</class>
    <extends>QTableView</extends>
    <header>widgets.h</header>
   </customwidget>
@@ -1205,11 +1175,6 @@ border: 1 solid gray;</string>
   <tabstop>pushButton_4</tabstop>
   <tabstop>table_labeled</tabstop>
   <tabstop>tabWidget</tabstop>
-  <tabstop>lineEdit_2</tabstop>
-  <tabstop>lineEdit_3</tabstop>
-  <tabstop>lineEdit_4</tabstop>
-  <tabstop>pushButton_2</tabstop>
-  <tabstop>pushButton_3</tabstop>
  </tabstops>
  <resources/>
  <connections/>

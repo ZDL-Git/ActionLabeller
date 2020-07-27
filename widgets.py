@@ -32,9 +32,34 @@ class TableDecorators:
         return func_wrapper
 
 
-class LabeledTableWidget(QTableWidget):
+class TableViewCommon(QTableView):
+    def _delete_rows(self: QTableView, rows):
+        for r_d in sorted(rows, reverse=True):
+            self.model().removeRow(r_d)
+
+    def _select_row(self: QTableView, row):
+        self.selectRow(row)
+
+    def _unselect_all(self: QTableView):
+        rowc = self.model().rowCount()
+        colc = self.model().columnCount()
+        if rowc > 0 and colc > 0:
+            self.selectionModel().select(
+                QItemSelection(self.model().index(0, 0),
+                               self.model().index(rowc - 1, colc - 1)),
+                QItemSelectionModel.Clear)
+
+    class IntDelegate(QItemDelegate):
+        def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex):
+            line_edit = QLineEdit(parent)
+            validator = QIntValidator(line_edit)
+            line_edit.setValidator(validator)
+            return line_edit
+
+
+class LabeledTableWidget(QTableWidget, TableViewCommon):
     def __init__(self, parent):
-        QTableWidget.__init__(self)
+        super().__init__()
 
         self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
         self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
@@ -47,10 +72,14 @@ class LabeledTableWidget(QTableWidget):
         global_.mySignals.action_update.connect(self.slot_action_update)
 
     def __init_later__(self):
+        self.setColumnCount(6)
+        self.setHorizontalHeaderLabels(['Action', 'Begin', 'End', 'Timeline Row', 'Action Id', 'Action Color'])
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.setColumnHidden(3, True)
         self.setColumnHidden(4, True)
         self.setColumnHidden(5, True)
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+
+        global_.g_all_labels = self.get_all_labels
 
     @TableDecorators.dissort
     @TableDecorators.block_signals
@@ -85,17 +114,20 @@ class LabeledTableWidget(QTableWidget):
     @TableDecorators.dissort
     def slot_action_update(self, emitter):
         rows_delete_later = set()
+        labels_updated = []
         actions = global_.g_all_actions()
         _actions_dict = {a.id: a for a in actions}
-        Log.debug(_actions_dict)
         for r in range(self.rowCount()):
             id = int(self.item(r, 4).text())
             if id in _actions_dict:
                 self.item(r, 0).setText(_actions_dict[id].name)
+                self.item(r, 5).setBackground(_actions_dict[id].color)
+                labels_updated.append(self._label_at(r))
             else:
                 Log.debug(_actions_dict)
                 rows_delete_later.add(r)
         self._delete_rows(rows_delete_later)
+        global_.mySignals.labeled_update.emit(labels_updated, global_.Emitter.T_LABELED)
 
     # def slot_cellChanged(self, r, c):
     #     Log.debug(r, c)
@@ -118,6 +150,12 @@ class LabeledTableWidget(QTableWidget):
         label = self._label_at(r)
         global_.mySignals.labeled_selected.emit(label, global_.Emitter.T_LABELED)
 
+    def get_all_labels(self) -> list:
+        labels = []
+        for r in range(self.rowCount()):
+            labels.append(self._label_at(r))
+        return labels
+
     def _label_at(self, r):
         return ActionLabel(self.item(r, 0).text(), int(self.item(r, 4).text()), self.item(r, 5).background(),
                            int(self.item(r, 1).text()),
@@ -139,7 +177,6 @@ class LabeledTableWidget(QTableWidget):
         rows_delete_later = set()
         labels_add_later = []
         for t_r in range(self.rowCount()):
-            Log.debug(self.item(t_r, 3).text())
             timeline_row = self.item(t_r, 3).text() and int(self.item(t_r, 3).text())
             if timeline_row not in label_cells:
                 continue
@@ -197,41 +234,34 @@ class LabeledTableWidget(QTableWidget):
         self.setItem(new_row_i, 5, action_color)
         return new_row_i
 
-    def _delete_rows(self, rows):
-        for r_d in sorted(rows, reverse=True):
-            self.removeRow(r_d)
 
-    def _select_row(self, row):
-        self.selectRow(row)
-
-
-class LabelTempTableWidget(QTableWidget):
+class ActionTableWidget(QTableWidget, TableViewCommon):
     def __init__(self, parent):
-        QTableWidget.__init__(self)
+        super().__init__()
         # TODO
         self.header_labels = {''}
 
-        # self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
-        # self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
         self.cellChanged.connect(self.slot_cellChanged)
         self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
 
-        # global_.mySignals.label_created.connect(self.slot_label_created)
-        # global_.mySignals.action_add.connect(self.slot_action_add)
-
     def __init_later__(self):
-        self.setColumnHidden(3, True)
+        self.setColumnCount(6)
+        self.setHorizontalHeaderLabels(['Action Name', 'Label Color', 'Default', 'Action Id', 'Y-min', 'Y-max'])
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.setColumnHidden(3, True)
+        self.setColumnHidden(4, True)
+        self.setColumnHidden(5, True)
 
         global_.g_default_action = self.get_default_action
         global_.g_all_actions = self.get_all_actions
 
+        self.blockSignals(True)
         for i in range(2):
             action = Action(self._generate_id(), f"action{i + 1}",
                             QColor('#fe8a71') if i == 0 else QColor('#0e9aa7'),
-                            Qt.Checked if i == 0 else Qt.Unchecked)
+                            i == 0)
             self._insert_action(action)
-            # global_.g_all_actions.append(action)
+        self.blockSignals(False)
 
     def slot_cellChanged(self, r, c):
         Log.debug(r, c)
@@ -258,16 +288,16 @@ class LabelTempTableWidget(QTableWidget):
                     return
                 item.setBackground(color)
 
-    # @TableDecorators.block_signals
-    def slot_action_add(self):
-        Log.debug('here')
+    @TableDecorators.block_signals
+    def slot_action_add(self, checked):  # if use decorator, must receive checked param of button clicked event
+        Log.debug('')
         action = Action(self._generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
-        # global_.g_all_actions.append(action)
         self._insert_action(action)
         self.editItem(self.item(self.rowCount() - 1, 0))
 
     @TableDecorators.dissort
-    def slot_del_selected_actions(self, emitter):
+    def slot_del_selected_actions(self,
+                                  checked):  # if use decorator, must receive checked param of button clicked event
         Log.debug('here')
         if QMessageBox.Cancel == QMessageBox.warning(self, 'ActionLabel Warning',
                                                      "All you sure to delete action template?"
@@ -286,11 +316,11 @@ class LabelTempTableWidget(QTableWidget):
         actions = []
         try:
             for r in range(self.rowCount()):
-                actions.append(Action(int(self.item(r, 3).text()), self.item(r, 0).text(), self.item(r, 1).background(),
-                                      self.item(r, 2).checkState() == Qt.Checked))
+                actions.append(self._row_to_action(r))
         except Exception as e:
+            Log.error(e.__str__())
+        finally:
             return actions
-        return actions
 
     def get_default_action(self):
         rows = self.rowCount()
@@ -331,7 +361,7 @@ class LabelTempTableWidget(QTableWidget):
         color.setFlags(Qt.ItemIsEnabled)
         color.setBackground(action.color)
         default = QTableWidgetItem()
-        default.setCheckState(action.default)
+        default.setCheckState(Qt.Checked if action.default else Qt.Unchecked)
         r = self.rowCount()
         self.insertRow(r)
         self.setItem(r, 0, name)
@@ -351,21 +381,38 @@ class LabelTempTableWidget(QTableWidget):
             self.item(r, 2).setCheckState(Qt.Unchecked)
 
     def _row_to_action(self, r):
-        return Action(int(self.model().item(r, 3).text()), self.model().item(r, 0).text(),
-                      self.model().item(r, 1).background(), self.model().item(r, 2).checkState() == Qt.Checked)
+        id = self.item(r, 3) and int(self.item(r, 3).text())
+        name = self.item(r, 0) and self.item(r, 0).text()
+        xml_ymin = self.item(r, 4) and self.item(r, 4).text() and int(self.item(r, 4).text()) or None
+        xml_ymax = self.item(r, 5) and self.item(r, 5).text() and int(self.item(r, 5).text()) or None
+        return Action(id, name,
+                      self.item(r, 1).background(), self.item(r, 2).checkState() == Qt.Checked,
+                      xml_ymin, xml_ymax)
 
     def slot_test(self, *arg):
         Log.debug(*arg)
 
-    # TODO
-    class ActionSelectDialog(QDialog):
-        def __init__(self, parent=None):
-            QDialog.__init__(self)
+
+class XmlSettingTableView(QTableView):
+    def __init__(self, parent):
+        super().__init__()
+
+    def __init_later__(self, model):
+        self.setModel(model)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.setColumnHidden(1, True)
+        self.setColumnHidden(2, True)
+        self.setColumnHidden(3, True)
+        self.setColumnHidden(4, False)
+        self.setColumnHidden(5, False)
+        delegate = TableViewCommon.IntDelegate()
+        self.setItemDelegateForColumn(4, delegate)
+        self.setItemDelegateForColumn(5, delegate)
 
 
-class TimelineTableView(QTableView):
-    def __init__(self, parent=None):
-        super(TimelineTableView, self).__init__(parent)
+class TimelineTableView(TableViewCommon):
+    def __init__(self, parent):
+        super().__init__()
 
         self.key_control_pressing = False
         self.entry_cell_pos = None
@@ -376,17 +423,18 @@ class TimelineTableView(QTableView):
         self.clicked.connect(self.slot_cellClicked)
         self.pressed.connect(self.slot_cellPressed)
         self.doubleClicked.connect(self.slot_cellDoubleClicked)
-        # self.mouseReleaseEvent()
 
         self.label_create_dialog = self.TimelineDialog(self)
 
         # global_.mySignals.jump_to.connect(self.slot_jump_to)
         global_.mySignals.follow_to.connect(self.slot_follow_to)
         global_.mySignals.labeled_selected.connect(self.slot_label_play)
-        # global_.mySignals.labeled_update.connect(self.slot_labeled_update)
-        global_.mySignals.labeled_delete.connect(self.slot_labeled_delete)
+        global_.mySignals.labeled_update.connect(self.slot_label_update)
+        global_.mySignals.labeled_delete.connect(self.slot_label_delete)
 
     def __init_later__(self):
+        self.setModel(TimelineTableModel(20, 50))
+
         header = self.horizontalHeader()
         header.sectionPressed.disconnect()
         header.sectionClicked.connect(self.slot_horizontalHeaderClicked)
@@ -534,11 +582,18 @@ class TimelineTableView(QTableView):
         global_.mySignals.schedule.emit(i, -1, -1, global_.Emitter.T_HHEADER)
 
     @TableDecorators.block_signals
-    def slot_labeled_delete(self, action_labels: List[ActionLabel], emitter):
+    def slot_label_delete(self, action_labels: List[ActionLabel], emitter):
         Log.debug(action_labels, emitter)
         self._unselect_all()
         for label in action_labels:
             self._del_label(label)
+
+    @TableDecorators.block_signals
+    def slot_label_update(self, action_labels: List[ActionLabel], emitter):
+        Log.debug(action_labels, emitter)
+        self._unselect_all()
+        for label in action_labels:
+            self._update_label(label)
 
     @TableDecorators.block_signals
     def slot_label_play(self, action_label: ActionLabel, emitter):
@@ -547,9 +602,9 @@ class TimelineTableView(QTableView):
 
     @TableDecorators.block_signals
     def slot_follow_to(self, emitter, index):
+        self.current_column = index
         if emitter == global_.Emitter.T_HSCROLL:
             return
-        self.current_column = index
         self._col_to_center(index)
 
     def set_column_count(self, c):
@@ -569,26 +624,32 @@ class TimelineTableView(QTableView):
         choices = list(range(self.model().rowCount()))
         while choices:
             r = random.choice(choices)
-            for c in range(label.begin, label.end + 1):
+            for c in range(max(0, label.begin), min(self.model().columnCount(), label.end + 1)):
                 if self.model().item(r, c) and self.model().item(r, c).background() != Qt.white:
                     choices.remove(r)
                     break
             else:
                 t_r = r
                 break
-        if t_r is not None:
-            label.timeline_row = t_r
-            self._plot_label(label)
-            return t_r
-        else:
-            warn_ = 'All related lines are not empty, please check the situation!'
+        if t_r is None:
+            warn_ = 'All related lines are not empty, please check!'
             Log.warn(warn_)
             global_.g_status_prompt(warn_)
             return None
+        label.timeline_row = t_r
+        if not self._plot_label(label):
+            return None
+        return t_r
 
     def _plot_label(self, label: ActionLabel):
         Log.debug(label)
-        for c in range(label.begin, label.end + 1):
+        if label.end >= self.model().columnCount() and \
+                QMessageBox.Cancel == QMessageBox.information(self, 'ActionLabel',
+                                                              "The end exceeds video frames count, "
+                                                              "are you sure to create this action label?",
+                                                              QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
+            return False
+        for c in range(max(0, label.begin), label.end + 1):
             item = self.model().item(label.timeline_row, c)
             if item is None:
                 item = QStandardItem()
@@ -597,6 +658,7 @@ class TimelineTableView(QTableView):
             item.setBackground(label.color)
             item.setToolTip(label.action)
             item.setWhatsThis(str(label.action_id))
+        return True
 
     def _detect_label(self, row, col):
         item = self.model().item(row, col)
@@ -626,18 +688,24 @@ class TimelineTableView(QTableView):
                            self.model().index(label.timeline_row, label.end)),
             QItemSelectionModel.ClearAndSelect)
 
-    def _unselect_all(self):
-        rowc = self.model().rowCount()
-        colc = self.model().columnCount()
-        if rowc > 0 and colc > 0:
-            self.selectionModel().select(
-                QItemSelection(self.model().index(0, 0),
-                               self.model().index(rowc - 1, colc - 1)),
-                QItemSelectionModel.Clear)
+    def _update_label(self, label: ActionLabel):
+        for c in range(label.begin, label.end + 1):
+            item = self.model().item(label.timeline_row, c)
+            if item is None:
+                item = QStandardItem()
+                self.model().setItem(label.timeline_row, c, item)
+            item.setBackground(label.color)
+            item.setWhatsThis(str(label.action_id))
+            item.setToolTip(label.action)
 
     def _del_label(self, label: ActionLabel):
         for c in range(label.begin, label.end + 1):
-            self.model().item(label.timeline_row, c).setBackground(Qt.white)
+            item = self.model().item(label.timeline_row, c)
+            if item is None:
+                continue
+            item.setBackground(Qt.white)
+            item.setWhatsThis(None)
+            item.setToolTip(None)
 
     def _del_selected_label_cells(self):
         Log.info('here')
@@ -648,6 +716,8 @@ class TimelineTableView(QTableView):
             if item is None or item.background() == Qt.white:
                 continue
             item.setBackground(Qt.white)
+            item.setWhatsThis(None)
+            item.setToolTip(None)
             if r in label_cells:
                 label_cells[r].append(c)
             else:
@@ -681,9 +751,6 @@ class TimelineTableView(QTableView):
 
             self.btn_new.clicked.connect(self.slot_btn_new_clicked)
 
-        # def set_cur_index(self, index):
-        #     self.cur_index = index
-
         def load(self, cur_frame_index):
             self.cur_frame_index = cur_frame_index
             self._load_new_comb()
@@ -704,11 +771,11 @@ class TimelineTableView(QTableView):
             self.line_end.clear()
 
         def _load_unfinished(self):
-            clearLayout(self.instore_layout)
+            clear_layout(self.instore_layout)
             for i, label in enumerate(self.labels_unfinished):
-                self._add_comb(label, self.cur_frame_index, i)
+                self._add_comb(label, i)
 
-        def _add_comb(self, action_label: ActionLabel, cur_frame_index: int, index_in_labels_unfinished: int):
+        def _add_comb(self, action_label: ActionLabel, index_in_labels_unfinished: int):
             layout = QHBoxLayout()
             combox = QComboBox()
             begin_editor = QLineEdit()
@@ -730,7 +797,7 @@ class TimelineTableView(QTableView):
             begin_editor.setValidator(int_validator)
             end_editor.setValidator(int_validator)
             begin_editor.setText(str(action_label.begin))
-            end_editor.setText(str(cur_frame_index))
+            end_editor.setText(str(self.cur_frame_index))
             btn_finish.setText('Finish')
             begin_editor.setPlaceholderText('required')
             end_editor.setPlaceholderText('required')
@@ -749,7 +816,8 @@ class TimelineTableView(QTableView):
             label = ActionLabel(action.name, action.id, action.color, begin, end, None)
             if not label.is_valid(['action', 'begin', 'end']):
                 return
-            self._commit_label(label)
+            if not self._commit_label(label):
+                return
             del self.labels_unfinished[index_in_labels_unfinished]
 
             if self.checkb_autoclose.isChecked():
@@ -783,9 +851,11 @@ class TimelineTableView(QTableView):
         def _commit_label(self, label: ActionLabel):
             Log.debug('', label)
             if not label.is_valid(['action', 'action_id', 'color', 'begin', 'end']):
-                return
-            if self.parent()._settle_label(label):
-                global_.mySignals.label_created.emit(label, global_.Emitter.T_LABEL)
+                return False
+            if self.parent()._settle_label(label) is None:
+                return False
+            global_.mySignals.label_created.emit(label, global_.Emitter.T_LABEL)
+            return True
 
         def exec_(self):
             # self.setFixedWidth(self.width())
@@ -798,17 +868,17 @@ class TimelineTableView(QTableView):
         #     return take
 
 
-class TimelineItemModel(QStandardItemModel):
+class TimelineTableModel(QStandardItemModel):
     def headerData(self, section: int, orientation: Qt.Orientation, role: int = ...) -> typing.Any:
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
             return str(section)
         return QVariant()
 
 
-class MyVideoLabelWidget(QLabel):
+class MyVideoLabelWidget(QLabel, TableViewCommon):
 
     def __init__(self, parent):
-        QLabel.__init__(self)
+        super().__init__()
         self.entry_row_index = None
         self.video_obj = None
         self.video_playing = False
@@ -832,7 +902,7 @@ class MyVideoLabelWidget(QLabel):
         #        hence replace None with -1
         if jump_to != -1:
             bias = None
-        Log.info('here', jump_to, bias)
+        Log.info(jump_to, bias)
 
         if self.video_obj:
             self.video_obj.schedule(jump_to, bias, stop_at, emitter)
@@ -886,10 +956,10 @@ class MyVideoLabelWidget(QLabel):
         #     self.flush_frame()
 
 
-def clearLayout(layout):
+def clear_layout(layout):
     while layout.count():
         child = layout.takeAt(0)
         if child.widget() is not None:
             child.widget().setParent(None)
         elif child.layout() is not None:
-            clearLayout(child.layout())
+            clear_layout(child.layout())
