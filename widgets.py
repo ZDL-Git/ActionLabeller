@@ -298,7 +298,13 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
     @TableDecorators.dissort
     def slot_del_selected_actions(self,
                                   checked):  # if use decorator, must receive checked param of button clicked event
-        Log.debug('here')
+        Log.debug('')
+        if not self.selectedIndexes():
+            QMessageBox.information(self, 'ActionLabel Warning',
+                                "Select action first!",
+                                QMessageBox.Ok, QMessageBox.Ok)
+            return
+
         if QMessageBox.Cancel == QMessageBox.warning(self, 'ActionLabel Warning',
                                                      "All you sure to delete action template?"
                                                      " All the related action label will be deleted!",

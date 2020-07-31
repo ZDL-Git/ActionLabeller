@@ -62,7 +62,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.table_action.__init_later__()
         self.table_xml_setting.__init_later__(self.table_action.model())
 
-        self._hold1_ = XmlSettingUnit(self)
+        self._holder1 = XmlSettingUnit(self)
 
         global_.g_status_prompt = self.label_note.setText
         global_.mySignals.follow_to.connect(self.slot_follow_to)
@@ -120,7 +120,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     #     super(MyApp, self).resizeEvent(e)
 
     def slot_eval(self):
-        eval_content = self.ptext_eval_in.toPlainText()  # type:QPlainTextEdit
+        eval_content = self.ptext_eval_in.toPlainText()
         Log.info(eval_content)
         try:
             resp = eval(eval_content)
