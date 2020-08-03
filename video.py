@@ -1,5 +1,6 @@
 import cv2
 import collections
+import queue
 
 import global_
 from utils import Log
@@ -13,7 +14,10 @@ class Video:
         self._info = None
         self.cur_index = -1
         self.scheduled = self.Schedule(None, None, None)
-        self.frames_buffer = collections.deque(maxlen=100)
+        self.frames_buffer = queue.Queue(maxsize=100)
+
+    def __del__(self):
+        self._cap.release()
 
     def get_info(self):
         def _count_frames(cap=None):
