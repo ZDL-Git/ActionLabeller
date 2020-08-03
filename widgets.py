@@ -425,6 +425,7 @@ class TimelineTableView(TableViewCommon):
         self.label_clicked = None
         self.hcenter_before_wheeling = None
         self.current_column = 0
+        self.b_scroll_follow = False
 
         self.clicked.connect(self.slot_cellClicked)
         self.pressed.connect(self.slot_cellPressed)
@@ -448,6 +449,19 @@ class TimelineTableView(TableViewCommon):
         self.horizontalScrollBar().installEventFilter(self)
         self.horizontalScrollBar().sliderMoved.connect(self.slot_sliderMoved)
         # self.installEventFilter(self)
+
+        self.ckb_follow = QCheckBox('Follow', self)
+        self.ckb_follow.setToolTip('Table column scrolls follow video. Consumes a lot of resources')
+        self.ckb_follow.setCheckState(Qt.Checked if self.b_scroll_follow else Qt.Unchecked)
+        self.ckb_follow.setStyleSheet(
+            f'''QCheckBox {{margin-top: {self.horizontalHeader().height() + 5};
+                            margin-left: 5px;
+                            font-size: 10px;}}
+                QCheckBox::indicator {{ height: 10px;
+                                        width: 10px;}}
+                QCheckBox::indicator:checked {{ background-color: red;}}
+                QCheckBox::indicator:unchecked {{ background-color: gray;}}''')
+        self.ckb_follow.stateChanged.connect(self.slot_ckb_follow)
 
     def keyPressEvent(self, e: QKeyEvent) -> None:
         Log.debug(e, e.key(), e.type())
@@ -529,6 +543,14 @@ class TimelineTableView(TableViewCommon):
             # self._col_scroll(bias) # conflicts with follow_to
             global_.mySignals.schedule.emit(-1, bias, -1, global_.Emitter.T_WHEEL)
 
+    def slot_ckb_follow(self, state):
+        Log.debug('')
+        # if state == Qt.Checked:
+        #     global_.mySignals.follow_to.connect(self.slot_follow_to)
+        # else:
+        #     global_.mySignals.follow_to.disconnect(self.slot_follow_to)
+        self.b_scroll_follow = state == Qt.Checked
+
     def slot_cellPressed(self, qindex):
         r, c = qindex.row(), qindex.column()
         Log.debug(r, c, self.model().item(r, c))
@@ -551,12 +573,14 @@ class TimelineTableView(TableViewCommon):
             global_.mySignals.label_selected.emit(label, global_.Emitter.T_LABEL)
 
     def slot_cellDoubleClicked(self, qindex):
+        Log.debug('')
         r, c = qindex.row(), qindex.column()
         label = self._detect_label(r, c)  # type:ActionLabel
         if label is not None:
             self._label_play(label)
             # self._emit_video_play(label.begin, label.end)
         else:
+            self._col_to_center(self.current_column)
             global_.g_status_prompt(str(f'Current Frame {self.current_column}'))
             # self.label_create_dialog.set_actions(actions)
             # self.label_create_dialog.set_cur_index(self.current_column)
@@ -611,7 +635,8 @@ class TimelineTableView(TableViewCommon):
         self.current_column = index
         if emitter == global_.Emitter.T_HSCROLL:
             return
-        self._col_to_center(index)
+        if self.b_scroll_follow:
+            self._col_to_center(index)
 
     def set_column_count(self, c):
         self.model().setColumnCount(c)
@@ -732,14 +757,11 @@ class TimelineTableView(TableViewCommon):
         return label_cells
 
     def _col_to_center(self, index):
-        hscrollbar = self.horizontalScrollBar()
-        # bias_to_center = self.width() / 2 / self.columnWidth(0)
-        page_half = hscrollbar.pageStep() / 2
-        left_index = index - page_half
-        hscrollbar.setSliderPosition(max(0, left_index))
+        self.scrollTo(self.model().index(0, index - 1), QAbstractItemView.PositionAtCenter)
 
-    def _center_col(self):  # only supports static case
-        t_width = self.width()  # no vertical header
+    def _center_col(self):
+        """only supports static case & no vertical header"""
+        t_width = self.width()
         return self.columnAt(int(t_width / 2))
 
     Ui_Dialog, _ = uic.loadUiType("qt_gui/timelinedialog.ui")
