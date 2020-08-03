@@ -16,7 +16,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.combo_speed.addItems(['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75'])
-        self.combo_speed.setCurrentIndex(2)
+        self.combo_speed.setCurrentIndex(3)
         self.combo_sortby.addItems(['timestamp', 'filename'])
         self.combo_sortby.setCurrentIndex(1)
         # self.line_xml_file_parttern.setText('action_{begin index}-{end index}.xml')

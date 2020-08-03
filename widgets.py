@@ -301,8 +301,8 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         Log.debug('')
         if not self.selectedIndexes():
             QMessageBox.information(self, 'ActionLabel Warning',
-                                "Select action first!",
-                                QMessageBox.Ok, QMessageBox.Ok)
+                                    "Select action first!",
+                                    QMessageBox.Ok, QMessageBox.Ok)
             return
 
         if QMessageBox.Cancel == QMessageBox.warning(self, 'ActionLabel Warning',
@@ -734,9 +734,9 @@ class TimelineTableView(TableViewCommon):
     def _col_to_center(self, index):
         hscrollbar = self.horizontalScrollBar()
         # bias_to_center = self.width() / 2 / self.columnWidth(0)
-        bias_to_center = hscrollbar.pageStep() / 2
-        to = index - bias_to_center
-        hscrollbar.setSliderPosition(max(0, to))
+        page_half = hscrollbar.pageStep() / 2
+        left_index = index - page_half
+        hscrollbar.setSliderPosition(max(0, left_index))
 
     def _center_col(self):  # only supports static case
         t_width = self.width()  # no vertical header
@@ -881,7 +881,7 @@ class TimelineTableModel(QStandardItemModel):
         return QVariant()
 
 
-class MyVideoLabelWidget(QLabel, TableViewCommon):
+class MyVideoLabelWidget(QLabel):
 
     def __init__(self, parent):
         super().__init__()
@@ -923,7 +923,7 @@ class MyVideoLabelWidget(QLabel, TableViewCommon):
             self.slot_start()
 
     def slot_pause(self):
-        Log.info('here')
+        Log.info('')
         self.video_playing = False
 
     def slot_start(self):
