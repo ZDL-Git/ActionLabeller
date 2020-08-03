@@ -331,7 +331,7 @@ border: 1 solid gray;</string>
                         <string/>
                        </property>
                        <property name="alignment">
-                        <set>Qt::AlignCenter</set>
+                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                        </property>
                        <property name="placeholderText">
                         <string>frame index &amp; enter</string>

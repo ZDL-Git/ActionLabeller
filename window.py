@@ -23,8 +23,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.spin_interval.textChanged.connect(self.slot_interval_changed)
         self.combo_speed.currentTextChanged.connect(self.slot_speed_changed)
-        self.input_jumpto.textChanged.connect(
-            lambda text: text and global_.mySignals.schedule.emit(int(text), -1, -1, global_.Emitter.INPUT_JUMPTO))
+        self.input_jumpto.textChanged.connect(self.slot_input_jumpto_changed)
         self.label_show.installEventFilter(self)
 
         def init_buttons():
@@ -94,9 +93,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         global_.Settings.v_interval = int(self.spin_interval.text() or 1)
 
     def slot_speed_changed(self):
-        Log.debug('here')
+        Log.debug('')
         new_speed = 1000 / self.label_show.video_obj.get_info()['fps'] / float(self.combo_speed.currentText())
         global_.mySignals.timer_video.setInterval(new_speed)
+
+    def slot_input_jumpto_changed(self, text):
+        try:
+            jumpto = int(text)
+            global_.mySignals.schedule.emit(jumpto, -1, -1, global_.Emitter.INPUT_JUMPTO)
+        except Exception:
+            Log.warn('Only int number supported!')
 
     def slot_follow_to(self, emitter, to):
         global_.g_status_prompt(f'Frame {to}')
