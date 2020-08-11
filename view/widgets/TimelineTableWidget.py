@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QCheckBox, QMessageBox, QAbstractItemView, QDialog, 
     QPushButton
 
 import global_
-from action import ActionLabel
+from model.action_label import ActionLabel
 from utils.utils import Log
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators, clear_layout

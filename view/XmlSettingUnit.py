@@ -4,7 +4,9 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QGridLayout, QTextBrowser, QDialog
 
 import global_
-from action import Action, ActionLabel
+from model import xml_
+from model.action import Action
+from model.action_label import ActionLabel
 from utils.utils import Log
 
 

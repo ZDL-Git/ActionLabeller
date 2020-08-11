@@ -5,7 +5,7 @@ from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
 
 import global_
-from action import ActionLabel
+from model.action_label import ActionLabel
 from utils.utils import Log
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators

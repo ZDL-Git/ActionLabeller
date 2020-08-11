@@ -2,7 +2,7 @@ from enum import Enum
 
 from PyQt5.QtCore import *
 
-from action import ActionLabel
+from model.action_label import ActionLabel
 from utils.utils import Log
 
 

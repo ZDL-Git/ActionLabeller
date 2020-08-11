@@ -1,5 +1,6 @@
-import cv2
 import queue
+
+import cv2
 
 import global_
 from utils.utils import Log

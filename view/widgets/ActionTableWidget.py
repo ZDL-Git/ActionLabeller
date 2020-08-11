@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 import global_
-from action import Action
+from model.action import Action
 from utils.utils import Log
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators

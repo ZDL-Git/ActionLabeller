@@ -1,16 +1,12 @@
-from typing import List, Dict
-
 from PyQt5 import uic
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCloseEvent, QColor
-from PyQt5.QtWidgets import QMainWindow, QGridLayout, QTextBrowser, QDialog, QMessageBox, QGraphicsDropShadowEffect, \
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QGraphicsDropShadowEffect, \
     QHeaderView, QFileDialog
 
 import global_
-import xml_
-from action import Action, ActionLabel
+from model.video import Video
 from utils.utils import Log
-from video import Video
 from view.XmlSettingUnit import XmlSettingUnit
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType("qt_gui/mainwindow.ui")
