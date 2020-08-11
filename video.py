@@ -1,5 +1,4 @@
 import cv2
-import collections
 import queue
 
 import global_

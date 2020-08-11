@@ -5,8 +5,8 @@ from PyQt5.QtWidgets import *
 import global_
 from action import Action
 from utils.utils import Log
-from widgets.TableViewCommon import TableViewCommon
-from widgets.common import TableDecorators
+from view.widgets.TableViewCommon import TableViewCommon
+from view.widgets.common import TableDecorators
 
 
 class ActionTableWidget(QTableWidget, TableViewCommon):

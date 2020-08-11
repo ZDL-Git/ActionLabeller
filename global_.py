@@ -3,7 +3,7 @@ from enum import Enum
 from PyQt5.QtCore import *
 
 from action import ActionLabel
-from utils import *
+from utils.utils import Log
 
 
 class MySignals(QObject):

@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import QCheckBox, QMessageBox, QAbstractItemView, QDialog, 
 import global_
 from action import ActionLabel
 from utils.utils import Log
-from widgets.TableViewCommon import TableViewCommon
-from widgets.common import TableDecorators, clear_layout
+from view.widgets.TableViewCommon import TableViewCommon
+from view.widgets.common import TableDecorators, clear_layout
 
 
 class TimelineTableView(TableViewCommon):

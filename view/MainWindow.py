@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QSize
@@ -154,7 +154,7 @@ class XmlSettingUnit:
         labels = global_.g_all_labels()  # type:List[ActionLabel]
         labels.sort(key=lambda l: l.begin)
         actions = global_.g_all_actions()  # type:List[Action]
-        id_action_dict = {a.id: a for a in actions}  # type:dict[int,Action]
+        id_action_dict = {a.id: a for a in actions}  # type:Dict[int,Action]
         framespan = int(self.mw.line_framespan.text())
         overlap = int(self.mw.line_overlap.text())
         Log.debug(framespan, overlap, labels)

@@ -1134,27 +1134,27 @@ border: 1 solid gray;</string>
   <customwidget>
    <class>VideoLabelWidget</class>
    <extends>QLabel</extends>
-   <header>widgets/VideoLabelWidget.h</header>
+   <header>view/widgets/VideoLabelWidget.h</header>
   </customwidget>
   <customwidget>
    <class>LabeledTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>widgets/LabeledTableWidget.h</header>
+   <header>view/widgets/LabeledTableWidget.h</header>
   </customwidget>
   <customwidget>
    <class>ActionTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>widgets/ActionTableWidget.h</header>
+   <header>view/widgets/ActionTableWidget.h</header>
   </customwidget>
   <customwidget>
    <class>TimelineTableView</class>
    <extends>QTableView</extends>
-   <header>widgets/TimelineTableWidget.h</header>
+   <header>view/widgets/TimelineTableWidget.h</header>
   </customwidget>
   <customwidget>
    <class>XmlSettingTableView</class>
    <extends>QTableView</extends>
-   <header>widgets/XmlSettingTableView.h</header>
+   <header>view/widgets/XmlSettingTableView.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
