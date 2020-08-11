@@ -362,7 +362,7 @@ class TimelineTableView(TableViewCommon):
         t_width = self.width()
         return self.columnAt(int(t_width / 2))
 
-    Ui_Dialog, _ = uic.loadUiType("qt_gui/timelinedialog.ui")
+    Ui_Dialog, _ = uic.loadUiType("view/qt_gui/timelinedialog.ui")
 
     class TimelineDialog(QDialog, Ui_Dialog):
         def __init__(self, parent=None):

@@ -9,7 +9,7 @@ from model.video import Video
 from utils.utils import Log
 from view.XmlSettingUnit import XmlSettingUnit
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType("qt_gui/mainwindow.ui")
+Ui_MainWindow, QtBaseClass = uic.loadUiType("view/qt_gui/mainwindow.ui")
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
