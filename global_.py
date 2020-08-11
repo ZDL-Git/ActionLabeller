@@ -28,9 +28,6 @@ class MySignals(QObject):
     def timer_start(cls, Tms=50):
         cls.timer_video.start(Tms)
 
-    def slot_toTest(self):
-        Log.info('here')
-
 
 class Settings:
     pass
@@ -50,7 +47,7 @@ class Emitter(Enum):
     INPUT_JUMPTO = 10
 
 
-mySignals = MySignals()
+mySignals = MySignals()  # attribute pyqtSignal needs class to be instantiated, and inherit QObject
 g_default_action = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_default_action!'))
 g_all_actions = lambda: (_ for _ in ()).throw(NotImplementedError('Please override g_all_actions!'))
 g_status_prompt = lambda *args: Log.warn('No status prompt implemented, please override g_status_prompt!')

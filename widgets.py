@@ -954,6 +954,7 @@ class MyVideoLabelWidget(QLabel):
             return
         self.video_playing = True
 
+    @pyqtSlot()
     def timer_flush_frame(self):
         if self.video_obj is None:
             return
