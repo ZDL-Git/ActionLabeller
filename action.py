@@ -1,7 +1,7 @@
 from PyQt5.QtGui import *
 
 import global_
-from utils import Log
+from utils.utils import Log
 
 
 class Action:

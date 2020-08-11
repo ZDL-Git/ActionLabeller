@@ -1,7 +1,7 @@
-from PyQt5 import uic
+import sys
 
-from video import Video
-from widgets import *
+from PyQt5.QtWidgets import QApplication
+
 from window import MainWindow
 
 if __name__ == '__main__':

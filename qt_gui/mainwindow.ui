@@ -77,7 +77,7 @@
          <number>5</number>
         </property>
         <item>
-         <widget class="MyVideoLabelWidget" name="label_show">
+         <widget class="VideoLabelWidget" name="label_show">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -1132,29 +1132,29 @@ border: 1 solid gray;</string>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>MyVideoLabelWidget</class>
+   <class>VideoLabelWidget</class>
    <extends>QLabel</extends>
-   <header>widgets.h</header>
+   <header>widgets/VideoLabelWidget.h</header>
   </customwidget>
   <customwidget>
    <class>LabeledTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>widgets.h</header>
+   <header>widgets/LabeledTableWidget.h</header>
   </customwidget>
   <customwidget>
    <class>ActionTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>widgets.h</header>
+   <header>widgets/ActionTableWidget.h</header>
   </customwidget>
   <customwidget>
    <class>TimelineTableView</class>
    <extends>QTableView</extends>
-   <header>widgets.h</header>
+   <header>widgets/TimelineTableWidget.h</header>
   </customwidget>
   <customwidget>
    <class>XmlSettingTableView</class>
    <extends>QTableView</extends>
-   <header>widgets.h</header>
+   <header>widgets/XmlSettingTableView.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

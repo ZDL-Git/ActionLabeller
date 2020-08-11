@@ -3,7 +3,7 @@ import collections
 import queue
 
 import global_
-from utils import Log
+from utils.utils import Log
 
 
 class Video:
