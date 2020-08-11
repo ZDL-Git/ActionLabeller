@@ -6,10 +6,10 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox, QGraphicsDropShadowEffect,
 
 import global_
 from model.video import Video
+from presenter.XmlSettingUnit import XmlSettingUnit
 from utils.utils import Log
-from view.XmlSettingUnit import XmlSettingUnit
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType("view/qt_gui/mainwindow.ui")
+Ui_MainWindow, QtBaseClass = uic.loadUiType("view/ui_from_creator/mainwindow.ui")
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -136,5 +136,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception as e:
             resp = e.__str__()
         self.textb_eval_out.setText(str(resp))
-
-
