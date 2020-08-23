@@ -175,7 +175,7 @@ border-radius: 10px;
 border: 1 solid gray;</string>
           </property>
           <property name="text">
-           <string>......</string>
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;...&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -358,6 +358,9 @@ border: 1 solid gray;</string>
                          <width>130</width>
                          <height>0</height>
                         </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true"/>
                        </property>
                       </widget>
                      </item>

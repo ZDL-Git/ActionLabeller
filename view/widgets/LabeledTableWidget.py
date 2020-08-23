@@ -4,9 +4,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
 
-import global_
+from common.utils import Log
 from model.action_label import ActionLabel
-from utils.utils import Log
+from presenter import global_
+from presenter.MySignals import mySignals
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators
 
@@ -19,12 +20,6 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
         # self.cellChanged.connect(self.slot_cellChanged)
 
-        global_.mySignals.label_created.connect(self.slot_label_created)
-        global_.mySignals.label_selected.connect(self.slot_label_selected)
-        global_.mySignals.label_delete.connect(self.slot_label_delete)
-        global_.mySignals.label_cells_delete.connect(self.slot_label_cells_delete)
-        global_.mySignals.action_update.connect(self.slot_action_update)
-
     def __init_later__(self):
         self.setColumnCount(6)
         self.setHorizontalHeaderLabels(['Action', 'Begin', 'End', 'Timeline Row', 'Action Id', 'Action Color'])
@@ -34,6 +29,27 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         self.setColumnHidden(5, True)
 
         global_.g_all_labels = self.get_all_labels
+
+    # def slot_cellChanged(self, r, c):
+    #     Log.debug(r, c)
+
+    def keyReleaseEvent(self, e: QKeyEvent) -> None:
+        Log.debug('here', e.key())
+        if e.key() in [Qt.Key_Backspace, Qt.Key_D]:
+            rows, labels = self._labels_selected()
+            mySignals.labeled_delete.emit(labels, global_.Emitter.T_LABELED)
+            self._delete_rows(rows)
+        elif e.key() == Qt.Key_R:
+            if self.label_clicked is not None:
+                self._slot_video_play(self.label_clicked.begin, self.label_clicked.end)
+
+    def slot_itemSelectionChanged(self):
+        Log.debug('here')
+
+    def slot_cellDoubleClicked(self, r, c):
+        Log.debug(r, c)
+        label = self._label_at(r)
+        mySignals.labeled_selected.emit(label, global_.Emitter.T_LABELED)
 
     @TableDecorators.dissort
     @TableDecorators.block_signals
@@ -81,28 +97,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
                 Log.debug(_actions_dict)
                 rows_delete_later.add(r)
         self._delete_rows(rows_delete_later)
-        global_.mySignals.labeled_update.emit(labels_updated, global_.Emitter.T_LABELED)
-
-    # def slot_cellChanged(self, r, c):
-    #     Log.debug(r, c)
-
-    def keyReleaseEvent(self, e: QKeyEvent) -> None:
-        Log.debug('here', e.key())
-        if e.key() in [Qt.Key_Backspace, Qt.Key_D]:
-            rows, labels = self._labels_selected()
-            global_.mySignals.labeled_delete.emit(labels, global_.Emitter.T_LABELED)
-            self._delete_rows(rows)
-        elif e.key() == Qt.Key_R:
-            if self.label_clicked is not None:
-                self._slot_video_play(self.label_clicked.begin, self.label_clicked.end)
-
-    def slot_itemSelectionChanged(self):
-        Log.debug('here')
-
-    def slot_cellDoubleClicked(self, r, c):
-        Log.debug(r, c)
-        label = self._label_at(r)
-        global_.mySignals.labeled_selected.emit(label, global_.Emitter.T_LABELED)
+        mySignals.labeled_update.emit(labels_updated, global_.Emitter.T_LABELED)
 
     def get_all_labels(self) -> list:
         labels = []
@@ -124,38 +119,6 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         for r in rows:
             labels.append(self._label_at(r))
         return rows, labels
-
-    def _label_cells_delete(self, label_cells):
-        for k in label_cells:
-            label_cells[k].sort()
-        rows_delete_later = set()
-        labels_add_later = []
-        for t_r in range(self.rowCount()):
-            timeline_row = self.item(t_r, 3).text() and int(self.item(t_r, 3).text())
-            if timeline_row not in label_cells:
-                continue
-            label_begin = int(self.item(t_r, 1).text())
-            label_end = int(self.item(t_r, 2).text())
-            if label_cells[timeline_row][0] > label_end or label_cells[timeline_row][-1] < label_begin:
-                continue
-            elif label_cells[timeline_row][0] <= label_begin:
-                self.item(t_r, 1).setData(Qt.DisplayRole, label_cells[timeline_row][-1] + 1)
-            elif label_cells[timeline_row][-1] >= label_end:
-                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[timeline_row][0] - 1)
-            else:
-                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[timeline_row][0] - 1)
-                labels_add_later.append(
-                    ActionLabel(self.item(t_r, 0).text(), int(self.item(t_r, 4).text()), self.item(t_r, 5).background(),
-                                label_cells[timeline_row][-1] + 1,
-                                label_end, timeline_row))
-
-            if int(self.item(t_r, 1).text()) > int(self.item(t_r, 2).text()):
-                rows_delete_later.add(t_r)
-
-        self._delete_rows(rows_delete_later)
-
-        for l_add in labels_add_later:
-            self._add_label(l_add)
 
     def _get_label_row(self, action_label: ActionLabel):
         rows = self.rowCount()
@@ -187,3 +150,37 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         self.setItem(new_row_i, 4, action_id)
         self.setItem(new_row_i, 5, action_color)
         return new_row_i
+
+    def _label_cells_delete(self, label_cells):
+        for k in label_cells:
+            label_cells[k].sort()
+        rows_delete_later = set()
+        labels_add_later = []
+        for t_r in range(self.rowCount()):
+            timeline_row = self.item(t_r, 3).text() and int(self.item(t_r, 3).text())
+            if timeline_row not in label_cells:
+                continue
+            label_begin = int(self.item(t_r, 1).text())
+            label_end = int(self.item(t_r, 2).text())
+            if label_cells[timeline_row][0] > label_end or label_cells[timeline_row][-1] < label_begin:
+                continue
+            elif label_cells[timeline_row][0] <= label_begin:
+                self.item(t_r, 1).setData(Qt.DisplayRole, label_cells[timeline_row][-1] + 1)
+            elif label_cells[timeline_row][-1] >= label_end:
+                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[timeline_row][0] - 1)
+            else:
+                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[timeline_row][0] - 1)
+                labels_add_later.append(
+                    ActionLabel(self.item(t_r, 0).text(),
+                                int(self.item(t_r, 4).text()),
+                                self.item(t_r, 5).background(),
+                                label_cells[timeline_row][-1] + 1,
+                                label_end, timeline_row))
+
+            if int(self.item(t_r, 1).text()) > int(self.item(t_r, 2).text()):
+                rows_delete_later.add(t_r)
+
+        self._delete_rows(rows_delete_later)
+
+        for l_add in labels_add_later:
+            self._add_label(l_add)

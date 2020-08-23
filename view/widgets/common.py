@@ -1,19 +1,23 @@
 class TableDecorators:
     @classmethod
     def dissort(cls, func):
-        def func_wrapper(*arg):
-            arg[0].setSortingEnabled(False)
-            func(*arg)
-            arg[0].setSortingEnabled(True)
+        def func_wrapper(*args, **kwargs):
+            table = args[0]
+            table.setSortingEnabled(False)
+            result = func(*args, **kwargs)
+            table.setSortingEnabled(True)
+            return result
 
         return func_wrapper
 
     @classmethod
     def block_signals(cls, func):
-        def func_wrapper(*arg):
-            arg[0].blockSignals(True)
-            func(*arg)
-            arg[0].blockSignals(False)
+        def func_wrapper(*args, **kwargs):
+            table = args[0]
+            table.blockSignals(True)
+            result = func(*args, **kwargs)
+            table.blockSignals(False)
+            return result
 
         return func_wrapper
 

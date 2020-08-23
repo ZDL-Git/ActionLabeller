@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QBrush
 
-import global_
-from utils.utils import Log
+from common.utils import Log
+from presenter import global_
 
 
 class ActionLabel:

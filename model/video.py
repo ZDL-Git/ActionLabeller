@@ -2,8 +2,8 @@ import queue
 
 import cv2
 
-import global_
-from utils.utils import Log
+from common.utils import Log
+from presenter import global_
 
 
 class Video:
