@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
 
 from common.utils import Log
 from model.action_label import ActionLabel
-from presenter import global_
+from presenter import global_, MySignals
 from presenter.MySignals import mySignals
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators
@@ -37,7 +37,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         Log.debug('here', e.key())
         if e.key() in [Qt.Key_Backspace, Qt.Key_D]:
             rows, labels = self._labels_selected()
-            mySignals.labeled_delete.emit(labels, global_.Emitter.T_LABELED)
+            mySignals.labeled_delete.emit(labels, MySignals.Emitter.T_LABELED)
             self._delete_rows(rows)
         elif e.key() == Qt.Key_R:
             if self.label_clicked is not None:
@@ -49,7 +49,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     def slot_cellDoubleClicked(self, r, c):
         Log.debug(r, c)
         label = self._label_at(r)
-        mySignals.labeled_selected.emit(label, global_.Emitter.T_LABELED)
+        mySignals.labeled_selected.emit(label, MySignals.Emitter.T_LABELED)
 
     @TableDecorators.dissort
     @TableDecorators.block_signals
@@ -97,7 +97,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
                 Log.debug(_actions_dict)
                 rows_delete_later.add(r)
         self._delete_rows(rows_delete_later)
-        mySignals.labeled_update.emit(labels_updated, global_.Emitter.T_LABELED)
+        mySignals.labeled_update.emit(labels_updated, MySignals.Emitter.T_LABELED)
 
     def get_all_labels(self) -> list:
         labels = []

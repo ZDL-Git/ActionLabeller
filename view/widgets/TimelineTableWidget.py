@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QCheckBox, QMessageBox, QAbstractItemView, QDialog, 
 
 from common.utils import Log
 from model.action_label import ActionLabel
-from presenter import global_
+from presenter import global_, MySignals
 from presenter.MySignals import mySignals
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators, clear_layout
@@ -72,7 +72,7 @@ class TimelineTableView(TableViewCommon):
             self.key_control_pressing = False
         elif e.key() in [Qt.Key_Backspace, Qt.Key_D]:
             cells_deleted = self._del_selected_label_cells()
-            mySignals.label_cells_delete.emit(cells_deleted, global_.Emitter.T_LABEL)
+            mySignals.label_cells_delete.emit(cells_deleted, MySignals.Emitter.T_LABEL)
         elif e.key() == Qt.Key_R:
             if self.label_clicked is not None:
                 self._label_play(self.label_clicked)
@@ -118,7 +118,7 @@ class TimelineTableView(TableViewCommon):
         if changed:
             found_label = self._detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
             if found_label is not None:
-                mySignals.label_created.emit(found_label, global_.Emitter.T_LABEL)
+                mySignals.label_created.emit(found_label, MySignals.Emitter.T_LABEL)
 
     def wheelEvent(self, e: QWheelEvent) -> None:
         Log.debug(f'wheel {e.angleDelta()}')
@@ -136,7 +136,7 @@ class TimelineTableView(TableViewCommon):
         else:
             bias = -2 if idler_forward else 2
             # self._col_scroll(bias) # conflicts with follow_to
-            mySignals.schedule.emit(-1, bias, -1, global_.Emitter.T_WHEEL)
+            mySignals.schedule.emit(-1, bias, -1, MySignals.Emitter.T_WHEEL)
 
     def slot_ckb_follow(self, state):
         Log.debug('')
@@ -165,7 +165,7 @@ class TimelineTableView(TableViewCommon):
         else:
             self.label_clicked = label
             self._select_label(label)
-            mySignals.label_selected.emit(label, global_.Emitter.T_LABEL)
+            mySignals.label_selected.emit(label, MySignals.Emitter.T_LABEL)
 
     def slot_cellDoubleClicked(self, qindex):
         Log.debug('')
@@ -191,7 +191,7 @@ class TimelineTableView(TableViewCommon):
             #             Log.warn(warn_)
             #             return
             #         if self._settle_label(label):
-            #             global_.mySignals.label_created.emit(label, global_.Emitter.T_LABEL)
+            #             global_.mySignals.label_created.emit(label, MySignals.Emitter.T_LABEL)
 
     def slot_sliderMoved(self, pos):
         Log.debug(pos)
@@ -199,12 +199,12 @@ class TimelineTableView(TableViewCommon):
         # hscrollbar = self.horizontalScrollBar()
         index = (self.model().columnCount() - 1) * pos / self.horizontalScrollBar().maximum()
 
-        mySignals.schedule.emit(index, -1, -1, global_.Emitter.T_HSCROLL)
+        mySignals.schedule.emit(index, -1, -1, MySignals.Emitter.T_HSCROLL)
         # self.selectColumn(index)  # crash bug
 
     def slot_horizontalHeaderClicked(self, i):
         Log.info('index', i)
-        mySignals.schedule.emit(i, -1, -1, global_.Emitter.T_HHEADER)
+        mySignals.schedule.emit(i, -1, -1, MySignals.Emitter.T_HHEADER)
 
     def set_column_count(self, c):
         self.model().setColumnCount(c)
@@ -212,7 +212,7 @@ class TimelineTableView(TableViewCommon):
     @TableDecorators.block_signals
     def slot_follow_to(self, emitter, index):
         self.current_column = index
-        if emitter == global_.Emitter.T_HSCROLL:
+        if emitter == MySignals.Emitter.T_HSCROLL:
             return
         if self.b_scroll_follow:
             self._col_to_center(index)
@@ -242,7 +242,7 @@ class TimelineTableView(TableViewCommon):
         self._emit_video_play(action_label.begin, action_label.end)
 
     def _emit_video_play(self, start_at, stop_at=-1):
-        mySignals.schedule.emit(start_at, -1, stop_at, global_.Emitter.T_LABEL)
+        mySignals.schedule.emit(start_at, -1, stop_at, MySignals.Emitter.T_LABEL)
         mySignals.video_start.emit()
 
     def _settle_label(self, label: ActionLabel):
@@ -477,7 +477,7 @@ class TimelineTableView(TableViewCommon):
                 return False
             if self.parent()._settle_label(label) is None:
                 return False
-            mySignals.label_created.emit(label, global_.Emitter.T_LABEL)
+            mySignals.label_created.emit(label, MySignals.Emitter.T_LABEL)
             return True
 
         def exec_(self):

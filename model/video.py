@@ -3,7 +3,7 @@ import queue
 import cv2
 
 from common.utils import Log
-from presenter import global_
+from presenter import global_, MySignals
 
 
 class Video:
@@ -51,7 +51,7 @@ class Video:
         self.scheduled.set(emitter, jump_to, stop_at)
 
     def read(self):
-        # if self.scheduled.emitter and self.scheduled.emitter != global_.Emitter.T_HSCROLL:
+        # if self.scheduled.emitter and self.scheduled.emitter != MySignals.Emitter.T_HSCROLL:
         if self.scheduled.stop_at:
             _interval = 1
         else:
@@ -63,7 +63,7 @@ class Video:
             self.scheduled.jump_to = None
         else:
             dest_index = self.cur_index + _interval
-            emitter = global_.Emitter.TIMER
+            emitter = MySignals.Emitter.TIMER
 
         if self.scheduled.stop_at and dest_index > self.scheduled.stop_at:
             self.scheduled.clear()
@@ -77,13 +77,13 @@ class Video:
             _gap -= 1
             ret, frame = self._cap.read()
             if not ret:
-                self.schedule(0, -1, -1, global_.Emitter.V_PLAYER)
+                self.schedule(0, -1, -1, MySignals.Emitter.V_PLAYER)
                 return None, None, None
         self.cur_index = dest_index
 
         # if self.scheduled is None:
         #     self.cur_index += global_.Settings.v_interval
-        #     emitter = global_.Emitter.TIMER
+        #     emitter = MySignals.Emitter.TIMER
         #     if global_.Settings.v_interval > 80:
         #         self._cap.set(cv2.CAP_PROP_POS_FRAMES, self.cur_index)
         #         gap = 1
@@ -93,7 +93,7 @@ class Video:
         #         gap -= 1
         #         ret, frame = self._cap.read()
         #         if not ret:
-        #             self.schedule(0, None, global_.Emitter.V_PLAYER)
+        #             self.schedule(0, None, MySignals.Emitter.V_PLAYER)
         #             return None, None, None
         # else:
         #     emitter, schedule_index = self.scheduled

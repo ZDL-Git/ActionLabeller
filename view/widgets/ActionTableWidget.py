@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import *
 
 from common.utils import Log
 from model.action import Action
-from presenter import global_
+from presenter import global_, MySignals
 from presenter.MySignals import mySignals
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators
@@ -48,7 +48,7 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         elif c == 0:
             pass
 
-        mySignals.action_update.emit(global_.Emitter.T_TEMP)
+        mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
         # global_.g_all_actions = self.get_all_actions
 
     def slot_cellDoubleClicked(self, r, c):
@@ -90,7 +90,7 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
             rows.add(index.row())
         for r in sorted(rows, reverse=True):
             self.removeRow(r)
-        mySignals.action_update.emit(global_.Emitter.T_TEMP)
+        mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
 
     def get_all_actions(self):
         Log.debug('')

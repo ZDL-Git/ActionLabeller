@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox, QGraphicsDropShadowEffect,
     QHeaderView
 
 from common.utils import Log
-from presenter import global_
+from presenter import global_, MySignals
 from presenter.ActionLabellingUnit import ActionLabellingUnit
 from presenter.MySignals import mySignals
 from presenter.VideoPlayingUnit import VideoPlayingUnit
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def slot_input_jumpto_changed(self, text):
         try:
             jumpto = int(text)
-            mySignals.schedule.emit(jumpto, -1, -1, global_.Emitter.INPUT_JUMPTO)
+            mySignals.schedule.emit(jumpto, -1, -1, MySignals.Emitter.INPUT_JUMPTO)
         except Exception:
             Log.warn('Only int number supported!')
 

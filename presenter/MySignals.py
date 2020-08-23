@@ -28,4 +28,16 @@ class MySignals(QObject):
         cls.timer_video.start(Tms)
 
 
+class Emitter(Enum):
+    TIMER = 1
+    T_HHEADER = 2
+    T_HSCROLL = 3
+    T_WHEEL = 4
+    T_LABEL = 5
+    T_LABELED = 6
+    T_TEMP = 7
+    V_PLAYER = 8
+    INPUT_JUMPTO = 10
+
+
 mySignals = MySignals()  # attribute pyqtSignal needs class to be instantiated, and inherit QObject
