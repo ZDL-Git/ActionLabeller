@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QBrush
 
 from common.utils import Log
-from presenter import global_
+from presenter import Settings
 
 
 class ActionLabel:
@@ -30,12 +30,12 @@ class ActionLabel:
             value = eval(f'self.{attr}')
             if value in [None, '', []]:
                 warn_ = f"Label's attr [{attr}]  is [{value}], invalid!"
-                global_.g_status_prompt(warn_)
+                Settings.g_status_prompt(warn_)
                 Log.warn(warn_)
                 return False
         if self.begin is not None and self.end is not None and self.begin > self.end:
             warn_ = f"Label's begin[{self.begin}] exceeds end[{self.end}], invalid!"
-            global_.g_status_prompt(warn_)
+            Settings.g_status_prompt(warn_)
             Log.warn(warn_)
             return False
         return True

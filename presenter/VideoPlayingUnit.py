@@ -1,5 +1,6 @@
 from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QObject
 from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtWidgets import QFileDialog
 
 from common.utils import Log
 from model.video import Video
@@ -54,9 +55,9 @@ class VideoPlayingUnit(QObject):
 
     def slot_open_file(self):
         # TODO: remove native directory
-        # got = QFileDialog().getOpenFileName(self.mw, "Open Image", "/Users/zdl/Downloads/下载-视频",
-        #                                     "Media Files (*.mp4 *.jpg *.bmp)", options=QFileDialog.ReadOnly)
-        got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
+        got = QFileDialog().getOpenFileName(self.mw, "Open Image", "/Users/zdl/Downloads/下载-视频",
+                                            "Media Files (*.mp4 *.jpg *.bmp)", options=QFileDialog.ReadOnly)
+        # got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
         Log.info(got)
         fname = got[0]
         if fname:

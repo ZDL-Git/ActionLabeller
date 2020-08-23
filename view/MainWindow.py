@@ -5,9 +5,10 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox, QGraphicsDropShadowEffect,
     QHeaderView
 
 from common.utils import Log
-from presenter import global_, MySignals
+from presenter import MySignals
 from presenter.ActionLabellingUnit import ActionLabellingUnit
 from presenter.MySignals import mySignals
+from presenter.Settings import Settings
 from presenter.VideoPlayingUnit import VideoPlayingUnit
 from presenter.XmlSettingUnit import XmlSettingUnit
 
@@ -36,7 +37,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.btn_del_action.clicked.connect(self.table_action.slot_del_selected_actions)
 
         def init_settings():
-            global_.Settings.v_interval = int(self.spin_interval.text())
+            Settings.v_interval = int(self.spin_interval.text())
             # global_.Settings.v_speed = float(self.combo_speed.currentText())
 
         def prettify():
@@ -64,13 +65,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._holder2 = VideoPlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
 
-        global_.g_status_prompt = self.label_note.setText
+        Settings.g_status_prompt = self.label_note.setText
 
     def common_slot(self, *arg):
         Log.debug(f'common slot print:', arg)
 
     def slot_interval_changed(self):
-        global_.Settings.v_interval = int(self.spin_interval.text() or 1)
+        Settings.v_interval = int(self.spin_interval.text() or 1)
 
     def slot_speed_changed(self):
         Log.debug('')
@@ -85,7 +86,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Log.warn('Only int number supported!')
 
     def slot_follow_to(self, emitter, to):
-        global_.g_status_prompt(f'Frame {to}')
+        Settings.g_status_prompt(f'Frame {to}')
 
     def eventFilter(self, source, event):
         # if event.type() == 12:  # paint

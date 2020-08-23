@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
 
 from common.utils import Log
 from model.action_label import ActionLabel
-from presenter import global_, MySignals
+from presenter import Settings, MySignals
 from presenter.MySignals import mySignals
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators
@@ -28,7 +28,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         self.setColumnHidden(4, True)
         self.setColumnHidden(5, True)
 
-        global_.g_all_labels = self.get_all_labels
+        Settings.g_all_labels = self.get_all_labels
 
     # def slot_cellChanged(self, r, c):
     #     Log.debug(r, c)
@@ -85,7 +85,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     def slot_action_update(self, emitter):
         rows_delete_later = set()
         labels_updated = []
-        actions = global_.g_all_actions()
+        actions = Settings.g_all_actions()
         _actions_dict = {a.id: a for a in actions}
         for r in range(self.rowCount()):
             id = int(self.item(r, 4).text())

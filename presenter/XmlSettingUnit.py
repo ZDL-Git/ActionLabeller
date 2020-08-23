@@ -7,7 +7,7 @@ from common.utils import Log
 from model import xml_
 from model.action import Action
 from model.action_label import ActionLabel
-from presenter import global_
+from presenter import Settings
 
 
 class XmlSettingUnit:
@@ -20,9 +20,9 @@ class XmlSettingUnit:
 
     def slot_export_xml(self):
         Log.debug('')
-        labels = global_.g_all_labels()  # type:List[ActionLabel]
+        labels = Settings.g_all_labels()  # type:List[ActionLabel]
         labels.sort(key=lambda l: l.begin)
-        actions = global_.g_all_actions()  # type:List[Action]
+        actions = Settings.g_all_actions()  # type:List[Action]
         id_action_dict = {a.id: a for a in actions}  # type:Dict[int,Action]
         framespan = int(self.mw.line_framespan.text())
         overlap = int(self.mw.line_overlap.text())

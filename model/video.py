@@ -3,7 +3,8 @@ import queue
 import cv2
 
 from common.utils import Log
-from presenter import global_, MySignals
+from presenter import MySignals
+from presenter.Settings import Settings
 
 
 class Video:
@@ -55,7 +56,7 @@ class Video:
         if self.scheduled.stop_at:
             _interval = 1
         else:
-            _interval = global_.Settings.v_interval
+            _interval = Settings.v_interval
 
         if self.scheduled.jump_to:
             dest_index = self.scheduled.jump_to

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import *
 
 from common.utils import Log
 from model.action import Action
-from presenter import global_, MySignals
+from presenter import Settings, MySignals
 from presenter.MySignals import mySignals
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators
@@ -27,8 +27,8 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         self.setColumnHidden(4, True)
         self.setColumnHidden(5, True)
 
-        global_.g_default_action = self.get_default_action
-        global_.g_all_actions = self.get_all_actions
+        Settings.g_default_action = self.get_default_action
+        Settings.g_all_actions = self.get_all_actions
 
         self.blockSignals(True)
         for i in range(2):
@@ -58,7 +58,7 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
             color = QColorDialog().getColor(initial=item.background().color())  # type:QColor
             if color.isValid():
                 if color == Qt.white:
-                    global_.g_status_prompt('Cannot set white color to action!')
+                    Settings.g_status_prompt('Cannot set white color to action!')
                     Log.warn('Cannot set white color to action!')
                     return
                 item.setBackground(color)
@@ -130,7 +130,7 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         return None
 
     def _generate_id(self):
-        actions = global_.g_all_actions()
+        actions = Settings.g_all_actions()
         if actions:
             return max([action.id for action in actions]) + 1
         return 0
