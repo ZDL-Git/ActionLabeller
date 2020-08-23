@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMainWindow, QMessageBox, QGraphicsDropShadowEffect,
 from common.utils import Log
 from presenter import MySignals
 from presenter.ActionLabellingUnit import ActionLabellingUnit
+from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
 from presenter.Settings import Settings
 from presenter.VideoPlayingUnit import VideoPlayingUnit
@@ -61,11 +62,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.table_action.__init_later__()
         self.table_xml_setting.__init_later__(self.table_action.model())
 
+        self._holder0 = CommonUnit(self)
         self._holder1 = XmlSettingUnit(self)
         self._holder2 = VideoPlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
-
-        Settings.g_status_prompt = self.label_note.setText
 
     def common_slot(self, *arg):
         Log.debug(f'common slot print:', arg)
@@ -86,7 +86,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             Log.warn('Only int number supported!')
 
     def slot_follow_to(self, emitter, to):
-        Settings.g_status_prompt(f'Frame {to}')
+        CommonUnit.status_prompt(f'Frame {to}')
 
     def eventFilter(self, source, event):
         # if event.type() == 12:  # paint

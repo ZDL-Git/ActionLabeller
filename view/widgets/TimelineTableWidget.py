@@ -9,7 +9,8 @@ from PyQt5.QtWidgets import QCheckBox, QMessageBox, QAbstractItemView, QDialog, 
 
 from common.utils import Log
 from model.action_label import ActionLabel
-from presenter import Settings, MySignals
+from presenter import MySignals
+from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
 from view.widgets.TableViewCommon import TableViewCommon
 from view.widgets.common import TableDecorators, clear_layout
@@ -97,7 +98,7 @@ class TimelineTableView(TableViewCommon):
             return
         entry_item = self.model().item(*self.entry_cell_pos)
         if entry_item.background() == Qt.white:
-            default_action = Settings.g_default_action()
+            default_action = CommonUnit.get_default_action()
             if not default_action:
                 return
             name, color, id = default_action.name, default_action.color, default_action.id
@@ -176,7 +177,7 @@ class TimelineTableView(TableViewCommon):
             # self._emit_video_play(label.begin, label.end)
         else:
             self._col_to_center(self.current_column)
-            Settings.g_status_prompt(str(f'Current Frame {self.current_column}'))
+            CommonUnit.status_prompt(str(f'Current Frame {self.current_column}'))
             # self.label_create_dialog.set_actions(actions)
             # self.label_create_dialog.set_cur_index(self.current_column)
             self.label_create_dialog.load(self.current_column)
@@ -260,7 +261,7 @@ class TimelineTableView(TableViewCommon):
         if t_r is None:
             warn_ = 'All related lines are not empty, please check!'
             Log.warn(warn_)
-            Settings.g_status_prompt(warn_)
+            CommonUnit.status_prompt(warn_)
             return None
         label.timeline_row = t_r
         if not self._plot_label(label):
@@ -382,7 +383,7 @@ class TimelineTableView(TableViewCommon):
         def _load_new_comb(self):
             # created in qt creator IDE
             self.combo_action_names.clear()
-            self.actions = actions = Settings.g_all_actions()
+            self.actions = actions = CommonUnit.get_all_actions()
             if actions:
                 _action_names = [a.name for a in actions]
                 self.combo_action_names.addItems(_action_names)
@@ -411,7 +412,7 @@ class TimelineTableView(TableViewCommon):
             layout.setSpacing(5)
             self.instore_layout.addLayout(layout, 1)
 
-            _action_names = [a.name for a in Settings.g_all_actions()]
+            _action_names = [a.name for a in CommonUnit.get_all_actions()]
             combox.addItems(_action_names)
             combox.setCurrentIndex(
                 action_label.action in _action_names and _action_names.index(action_label.action)
