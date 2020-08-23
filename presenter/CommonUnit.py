@@ -1,21 +1,20 @@
+from PyQt5.QtWidgets import QFileDialog
+
 from common.utils import Log
 
 
 class CommonUnit:
-    get_default_action = lambda: (_ for _ in ()).throw(
-        NotImplementedError('Please register CommonUnit.get_default_action!'))
-    get_all_actions = lambda: (_ for _ in ()).throw(
-        NotImplementedError('Please register CommonUnit.get_all_actions!'))
-    status_prompt = lambda *args: Log.warn(
-        'The status_prompt not implemented, please override CommonUnit.status_prompt!')
-    get_all_labels = lambda: (_ for _ in ()).throw(
-        NotImplementedError('Please register CommonUnit.get_all_labels!'))
-
-    def __init__(self, mwindow):
+    @classmethod
+    def set_mw(cls, mwindow):
         Log.debug('')
-        self.mw = mwindow
+        cls.mw = mwindow
 
-        self.__class__.get_default_action = self.mw.table_action.get_default_action
-        self.__class__.get_all_actions = self.mw.table_action.get_all_actions
-        self.__class__.status_prompt = self.mw.label_note.setText
-        self.__class__.get_all_labels = self.mw.table_labeled.get_all_labels
+        cls.get_default_action = cls.mw.table_action.get_default_action
+        cls.get_all_actions = cls.mw.table_action.get_all_actions
+        cls.status_prompt = cls.mw.label_note.setText
+        cls.get_all_labels = cls.mw.table_labeled.get_all_labels
+
+    @classmethod
+    def get_save_name(cls, default=None):
+        name = QFileDialog().getSaveFileName(cls.mw, 'Save File', default)
+        return name[0]

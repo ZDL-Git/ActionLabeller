@@ -62,7 +62,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.table_action.__init_later__()
         self.table_xml_setting.__init_later__(self.table_action.model())
 
-        self._holder0 = CommonUnit(self)
+        CommonUnit.set_mw(self)
         self._holder1 = XmlSettingUnit(self)
         self._holder2 = VideoPlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
