@@ -1,3 +1,4 @@
+import hashlib
 import inspect
 import json
 import sys
@@ -108,3 +109,23 @@ def timeit(method):
         return result
 
     return timed
+
+
+def hash_of_file(file, fn='md5') -> str:
+    # BUF_SIZE is totally arbitrary, change for your app!
+    # lets read stuff in 500MB chunks!
+    buf_size = 524288000
+    if fn == 'md5':
+        res = hashlib.md5()
+    elif fn == 'sha1':
+        res = hashlib.sha1()
+    else:
+        Log.error('fn should in [md5,sha1]')
+        return None
+    with open(file, 'rb') as f:
+        while True:
+            data = f.read(buf_size)
+            if not data:
+                break
+            res.update(data)
+    return res.hexdigest()

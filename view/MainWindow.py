@@ -1,7 +1,7 @@
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCloseEvent, QColor
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QGraphicsDropShadowEffect, \
+from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
     QHeaderView
 
 from common.utils import Log
@@ -63,6 +63,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.table_xml_setting.__init_later__(self.table_action.model())
 
         CommonUnit.set_mw(self)
+        # Hold to avoid being destroyed
         self._holder1 = XmlSettingUnit(self)
         self._holder2 = VideoPlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
@@ -94,11 +95,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return False
 
     def closeEvent(self, e: QCloseEvent):
+        Log.debug('')
+        # TODO: uncomment this block
+        # if QMessageBox.Ok != QMessageBox.information(self, 'ActionLabel',
+        #                                              "Are you sure to quit, the unsaved labels will be lost?",
+        #                                              QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
+        #     e.ignore()
         Log.debug('Main window closed.')
-        if QMessageBox.Ok != QMessageBox.information(self, 'ActionLabel',
-                                                     "Are you sure to quit, the unsaved labels will be lost?",
-                                                     QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
-            e.ignore()
 
     # def resizeEvent(self, e):
     #     pass

@@ -727,7 +727,7 @@ border: 1 solid gray;</string>
               <number>0</number>
              </property>
              <item>
-              <widget class="QPushButton" name="pushButton_5">
+              <widget class="QPushButton" name="btn_import_labeled">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -735,12 +735,12 @@ border: 1 solid gray;</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Import txt</string>
+                <string>Import json</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_4">
+              <widget class="QPushButton" name="btn_export_labeled">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
@@ -748,7 +748,7 @@ border: 1 solid gray;</string>
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Export txt</string>
+                <string>Export json</string>
                </property>
               </widget>
              </item>
@@ -1174,8 +1174,8 @@ border: 1 solid gray;</string>
   <tabstop>listView_2</tabstop>
   <tabstop>combo_sortby</tabstop>
   <tabstop>pushButton</tabstop>
-  <tabstop>pushButton_5</tabstop>
-  <tabstop>pushButton_4</tabstop>
+  <tabstop>btn_import_labeled</tabstop>
+  <tabstop>btn_export_labeled</tabstop>
   <tabstop>table_labeled</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>

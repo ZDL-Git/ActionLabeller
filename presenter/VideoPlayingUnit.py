@@ -8,13 +8,18 @@ from presenter.MySignals import mySignals
 
 
 class VideoPlayingUnit(QObject):
+    # Simple implementation, not real singleton.
+    # Cannot use class object, cause there is an event installer, must inherit QObject and do instantiation
+    only_ins = None
+
     def __init__(self, mwindow):
         Log.debug('')
+        self.__class__.only_ins = self
         self.mw = mwindow
         super().__init__()
 
-        self.entry_row_index = None
-        self.video_model = None
+        # self.entry_row_index = None
+        self.video_model = None  # type:Video
         self.video_playing = False
 
         (
