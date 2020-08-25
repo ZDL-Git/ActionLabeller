@@ -55,7 +55,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     def slot_label_created(self, action_label: ActionLabel, emitter):
         Log.debug(action_label, emitter)
         self._label_cells_delete({action_label.timeline_row: list(range(action_label.begin, action_label.end + 1))})
-        row_i = self._add_label(action_label)
+        row_i = self.add_label(action_label)
         self._select_row(row_i)
 
     @TableDecorators.dissort
@@ -102,6 +102,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         labels = []
         for r in range(self.rowCount()):
             labels.append(self._label_at(r))
+        labels.sort(key=lambda l: l.begin)
         return labels
 
     def _label_at(self, r):
@@ -128,7 +129,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
                         return r
         return None
 
-    def _add_label(self, action_label: ActionLabel):
+    def add_label(self, action_label: ActionLabel):
         action = QTableWidgetItem(action_label.action)
         # action.setFlags(action.flags() & ~Qt.ItemIsEditable)
         begin = QTableWidgetItem()
@@ -182,4 +183,4 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         self._delete_rows(rows_delete_later)
 
         for l_add in labels_add_later:
-            self._add_label(l_add)
+            self.add_label(l_add)

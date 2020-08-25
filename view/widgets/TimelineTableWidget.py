@@ -131,11 +131,11 @@ class TimelineTableView(TableViewCommon):
             cols = self.horizontalHeader().count()
             col_width_to = max(col_width, int(t_width / cols))
 
-            Log.warn(self.hcenter_before_wheeling)
+            Log.debug(self.hcenter_before_wheeling)
             self.horizontalHeader().setDefaultSectionSize(col_width_to)
             self._col_to_center(self.hcenter_before_wheeling)
         else:
-            bias = -2 if idler_forward else 2
+            bias = 2 if idler_forward else -2
             # self._col_scroll(bias) # conflicts with follow_to
             mySignals.schedule.emit(-1, bias, -1, MySignals.Emitter.T_WHEEL)
 
@@ -246,7 +246,7 @@ class TimelineTableView(TableViewCommon):
         mySignals.schedule.emit(start_at, -1, stop_at, MySignals.Emitter.T_LABEL)
         mySignals.video_start.emit()
 
-    def _settle_label(self, label: ActionLabel):
+    def settle_label(self, label: ActionLabel):
         t_r = None
         choices = list(range(self.model().rowCount()))
         while choices:
@@ -353,7 +353,7 @@ class TimelineTableView(TableViewCommon):
         return label_cells
 
     def _col_to_center(self, index):
-        self.scrollTo(self.model().index(0, index - 1), QAbstractItemView.PositionAtCenter)
+        self.scrollTo(self.model().index(0, max(0, index - 1)), QAbstractItemView.PositionAtCenter)
 
     def _center_col(self):
         """only supports static case & no vertical header"""
@@ -476,7 +476,7 @@ class TimelineTableView(TableViewCommon):
             Log.debug('', label)
             if not label.is_valid(['action', 'action_id', 'color', 'begin', 'end']):
                 return False
-            if self.parent()._settle_label(label) is None:
+            if self.parent().settle_label(label) is None:
                 return False
             mySignals.label_created.emit(label, MySignals.Emitter.T_LABEL)
             return True

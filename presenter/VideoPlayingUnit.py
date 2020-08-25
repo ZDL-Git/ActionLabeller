@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QFileDialog
 
 from common.utils import Log
 from model.video import Video
+from presenter import MySignals
+from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
 
 
@@ -39,12 +41,14 @@ class VideoPlayingUnit(QObject):
         )
         (
             self.mw.spin_interval.textChanged.connect(self.mw.slot_interval_changed),
-            self.mw.combo_speed.currentTextChanged.connect(self.mw.slot_speed_changed),
+            self.mw.combo_speed.currentTextChanged.connect(self.slot_speed_changed),
             self.mw.input_jumpto.textChanged.connect(self.mw.slot_input_jumpto_changed),
         )
         (
             self.mw.btn_to_head.clicked.connect(self.to_head),
             self.mw.btn_to_tail.clicked.connect(self.to_tail),
+            self.mw.btn_backward.clicked.connect(self.slot_fast_backward),
+            self.mw.btn_rewind.clicked.connect(self.slot_rewind),
             self.mw.btn_stop.clicked.connect(self.slot_btn_stop),
             self.mw.btn_open_video.clicked.connect(self.slot_open_file),
         )
@@ -61,7 +65,7 @@ class VideoPlayingUnit(QObject):
     def slot_open_file(self):
         # TODO: remove native directory
         got = QFileDialog().getOpenFileName(self.mw, "Open Image", "/Users/zdl/Downloads/下载-视频",
-                                            "Media Files (*.mp4 *.jpg *.bmp)", options=QFileDialog.ReadOnly)
+                                            "Media Files (*.mp4 *.jpg *.bmp *.flv)", options=QFileDialog.ReadOnly)
         # got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
         Log.info(got)
         fname = got[0]
@@ -138,8 +142,30 @@ class VideoPlayingUnit(QObject):
     def set_video(self, video):
         self.video_model = video
 
+    def slot_fast_backward(self):
+        Log.debug('')
+        step = CommonUnit.get_value(self.mw.input_step, int)
+        self.video_model.schedule(-1, -1 * step, -1, MySignals.Emitter.BTN)
+
+    def slot_rewind(self):
+        Log.debug('')
+        step = CommonUnit.get_value(self.mw.input_step, int)
+        self.video_model.schedule(-1, step, -1, MySignals.Emitter.BTN)
+
     def to_head(self):
         pass
 
     def to_tail(self):
         pass
+
+    def slot_speed_changed(self):
+        Log.debug('')
+        try:
+            factor = float(self.mw.combo_speed.currentText())
+            if not factor:
+                return
+        except Exception:
+            return
+        if VideoPlayingUnit.only_ins.video_model:
+            new_speed = 1000 / self.video_model.get_info()['fps'] / factor
+            mySignals.timer_video.setInterval(new_speed)

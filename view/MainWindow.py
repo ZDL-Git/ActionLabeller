@@ -1,8 +1,8 @@
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QCloseEvent, QColor
+from PyQt5.QtGui import QCloseEvent, QColor, QDoubleValidator
 from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
-    QHeaderView
+    QHeaderView, QComboBox
 
 from common.utils import Log
 from presenter import MySignals
@@ -22,10 +22,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
-        self.combo_speed.addItems(['0.25', '0.5', '0.75', '1', '1.25', '1.5', '1.75'])
+        double_validator = QDoubleValidator()
+
+        self.combo_speed: QComboBox
+        self.combo_speed.setEditable(True)
+        self.combo_speed.lineEdit().setValidator(double_validator)
+        self.combo_speed.addItems(['0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75'])
         self.combo_speed.setCurrentIndex(3)
-        self.combo_sortby.addItems(['timestamp', 'filename'])
-        self.combo_sortby.setCurrentIndex(1)
+        self.combo_sortby.addItems(['sort by', 'filename', 'timestamp'])
+        self.combo_sortby.setCurrentIndex(0)
         # self.line_xml_file_parttern.setText('action_{begin index}-{end index}.xml')
 
         self.label_show.installEventFilter(self)
@@ -73,11 +78,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def slot_interval_changed(self):
         Settings.v_interval = int(self.spin_interval.text() or 1)
-
-    def slot_speed_changed(self):
-        Log.debug('')
-        new_speed = 1000 / self.label_show.video_model.get_info()['fps'] / float(self.combo_speed.currentText())
-        mySignals.timer_video.setInterval(new_speed)
 
     def slot_input_jumpto_changed(self, text):
         try:

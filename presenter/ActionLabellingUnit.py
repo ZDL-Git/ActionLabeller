@@ -2,7 +2,12 @@ import json
 import os
 import time
 
+from PyQt5.QtCore import QRandomGenerator
+from PyQt5.QtGui import QColor
+
 from common.utils import Log, hash_of_file
+from model.action import Action
+from model.action_label import ActionLabel
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
 from presenter.VideoPlayingUnit import VideoPlayingUnit
@@ -56,10 +61,30 @@ class ActionLabellingUnit:
             json_content['labels'][i] = {'action': label.action,
                                          'begin': label.begin,
                                          'end': label.end, }
-        save_as = CommonUnit.get_save_name(default='xxx.json')
+        save_as = CommonUnit.get_save_name(default=f'{video_name}.json')
         if save_as:
             with open(save_as, "w") as f:
                 json.dump(json_content, f, indent=2, ensure_ascii=False)
 
     def slot_import_labeled(self):
         Log.debug('')
+        file_name = CommonUnit.get_open_name(filter_="(*.json)")
+        Log.debug(file_name)
+        with open(file_name, 'r') as f:
+            json_content = json.load(f)
+
+        all_actions = {}
+        for i in json_content['labels']:
+            action_name = json_content['labels'][i]['action']
+            begin = json_content['labels'][i]['begin']
+            end = json_content['labels'][i]['end']
+            if action_name not in all_actions:
+                action = Action(self.mw.table_action.generate_id(), action_name,
+                                QColor(QRandomGenerator().global_().generate()), False)
+                self.mw.table_action.insert_action(action)
+                all_actions[action_name] = action
+            else:
+                action = all_actions[action_name]
+            action_label = ActionLabel(action.name, action.id, action.color, begin, end, None)
+            self.mw.table_timeline.settle_label(action_label)
+            self.mw.table_labeled.add_label(action_label)

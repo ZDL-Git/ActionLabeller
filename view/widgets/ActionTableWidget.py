@@ -30,10 +30,10 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
 
         self.blockSignals(True)
         for i in range(2):
-            action = Action(self._generate_id(), f"action{i + 1}",
+            action = Action(self.generate_id(), f"action{i + 1}",
                             QColor('#fe8a71') if i == 0 else QColor('#0e9aa7'),
                             i == 0)
-            self._insert_action(action)
+            self.insert_action(action)
         self.blockSignals(False)
 
     def slot_cellChanged(self, r, c):
@@ -64,8 +64,8 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
     @TableDecorators.block_signals
     def slot_action_add(self, checked):  # if use decorator, must receive checked param of button clicked event
         Log.debug('')
-        action = Action(self._generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
-        self._insert_action(action)
+        action = Action(self.generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
+        self.insert_action(action)
         self.editItem(self.item(self.rowCount() - 1, 0))
 
     @TableDecorators.dissort
@@ -73,12 +73,12 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
                                   checked):  # if use decorator, must receive checked param of button clicked event
         Log.debug('')
         if not self.selectedIndexes():
-            QMessageBox().information('ActionLabel Warning',
+            QMessageBox().information(self, 'ActionLabel Warning',
                                       "Select action first!",
                                       QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        if QMessageBox.Cancel == QMessageBox().warning('ActionLabel Warning',
+        if QMessageBox.Cancel == QMessageBox().warning(self, 'ActionLabel Warning',
                                                        "All you sure to delete action template?"
                                                        " All the related action label will be deleted!",
                                                        QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
@@ -128,13 +128,13 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
 
         return None
 
-    def _generate_id(self):
+    def generate_id(self):
         actions = self.get_all_actions()
         if actions:
             return max([action.id for action in actions]) + 1
         return 0
 
-    def _insert_action(self, action: Action):
+    def insert_action(self, action: Action):
         id = QTableWidgetItem(str(action.id))
         name = QTableWidgetItem(action.name)
         color = QTableWidgetItem()
@@ -149,7 +149,7 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         self.setItem(r, 2, default)
         self.setItem(r, 3, id)
 
-    def _del_action(self, id):
+    def del_action(self, id):
         for r in range(self.rowCount()):
             if self.item(r, 3).text() == str(id):
                 self.removeRow(r)

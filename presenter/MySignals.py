@@ -38,6 +38,7 @@ class Emitter(Enum):
     T_TEMP = 7
     V_PLAYER = 8
     INPUT_JUMPTO = 10
+    BTN = 11
 
 
 mySignals = MySignals()  # attribute pyqtSignal needs class to be instantiated, and inherit QObject

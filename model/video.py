@@ -52,13 +52,12 @@ class Video:
         self.scheduled.set(emitter, jump_to, stop_at)
 
     def read(self):
-        # if self.scheduled.emitter and self.scheduled.emitter != MySignals.Emitter.T_HSCROLL:
         if self.scheduled.stop_at:
             _interval = 1
         else:
             _interval = Settings.v_interval
 
-        if self.scheduled.jump_to:
+        if self.scheduled.jump_to is not None:
             dest_index = self.scheduled.jump_to
             emitter = self.scheduled.emitter
             self.scheduled.jump_to = None
@@ -82,34 +81,6 @@ class Video:
                 return None, None, None
         self.cur_index = dest_index
 
-        # if self.scheduled is None:
-        #     self.cur_index += global_.Settings.v_interval
-        #     emitter = MySignals.Emitter.TIMER
-        #     if global_.Settings.v_interval > 80:
-        #         self._cap.set(cv2.CAP_PROP_POS_FRAMES, self.cur_index)
-        #         gap = 1
-        #     else:
-        #         gap = global_.Settings.v_interval
-        #     while gap:
-        #         gap -= 1
-        #         ret, frame = self._cap.read()
-        #         if not ret:
-        #             self.schedule(0, None, MySignals.Emitter.V_PLAYER)
-        #             return None, None, None
-        # else:
-        #     emitter, schedule_index = self.scheduled
-        #     self.scheduled = None
-        #
-        #     gap = schedule_index - self.cur_index
-        #     if gap > 80 or gap < 1:
-        #         self._cap.set(cv2.CAP_PROP_POS_FRAMES, schedule_index)
-        #         gap = 1
-        #     while gap:
-        #         gap -= 1
-        #         ret, frame = self._cap.read()
-        #         if not ret:
-        #             return None, None, None
-        #     self.cur_index = schedule_index
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # self.frames_buffer.append((self.cur_index, frame))
         return emitter, self.cur_index, frame
@@ -124,11 +95,15 @@ class Video:
             self.emitter = emitter
             self.jump_to = jump_to
             self.stop_at = stop_at
+            Log.debug('scheduled--', self)
 
         def clear(self):
             self.emitter = None
             self.jump_to = None
             self.stop_at = None
+
+        def __str__(self):
+            return f'emitter:{self.emitter} jumpTo:{self.jump_to} stopAt:{self.stop_at}'
 
         def __bool__(self):
             return self.emitter is not None and self.jump_to is not None
