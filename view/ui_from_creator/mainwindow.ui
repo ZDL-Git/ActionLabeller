@@ -29,7 +29,7 @@
      <height>0</height>
     </size>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_5">
+   <layout class="QGridLayout" name="gridLayout_10">
     <property name="sizeConstraint">
      <enum>QLayout::SetDefaultConstraint</enum>
     </property>
@@ -45,7 +45,7 @@
     <property name="bottomMargin">
      <number>0</number>
     </property>
-    <item>
+    <item row="0" column="0">
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,1">
       <property name="spacing">
        <number>0</number>
@@ -77,31 +77,86 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="VideoLabelWidget" name="label_show">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <widget class="QStackedWidget" name="stacked_widget">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>200</height>
+           </size>
           </property>
-          <property name="mouseTracking">
-           <bool>true</bool>
-          </property>
-          <property name="acceptDrops">
-           <bool>false</bool>
-          </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">background-color: black;</string>
-          </property>
-          <property name="text">
-           <string>TextLabel</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
+          <widget class="QWidget" name="page_4">
+           <layout class="QGridLayout" name="gridLayout_8">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="VideoLabelWidget" name="label_show">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="mouseTracking">
+               <bool>true</bool>
+              </property>
+              <property name="acceptDrops">
+               <bool>false</bool>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background-color: black;</string>
+              </property>
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="page_5">
+           <layout class="QGridLayout" name="gridLayout_11">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="GraphicsLayoutWidget" name="graphicsView">
+              <property name="backgroundBrush">
+               <brush brushstyle="SolidPattern">
+                <color alpha="255">
+                 <red>255</red>
+                 <green>255</green>
+                 <blue>255</blue>
+                </color>
+               </brush>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
         <item>
@@ -191,7 +246,7 @@ border: 1 solid gray;</string>
            <number>0</number>
           </property>
           <item>
-           <widget class="QToolBox" name="toolBox">
+           <widget class="QToolBox" name="tool_box">
             <property name="enabled">
              <bool>true</bool>
             </property>
@@ -227,8 +282,8 @@ border: 1 solid gray;</string>
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>691</width>
-               <height>144</height>
+               <width>674</width>
+               <height>159</height>
               </rect>
              </property>
              <attribute name="label">
@@ -416,6 +471,9 @@ border: 1 solid gray;</string>
                   </property>
                   <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
                     <item>
                      <widget class="QPushButton" name="btn_open_video">
                       <property name="sizePolicy">
@@ -692,6 +750,76 @@ border: 1 solid gray;</string>
              <attribute name="label">
               <string>III. Pose Plotting</string>
              </attribute>
+             <layout class="QGridLayout" name="gridLayout">
+              <property name="leftMargin">
+               <number>4</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>4</number>
+              </property>
+              <property name="bottomMargin">
+               <number>4</number>
+              </property>
+              <property name="horizontalSpacing">
+               <number>-1</number>
+              </property>
+              <item row="0" column="0">
+               <layout class="QVBoxLayout" name="verticalLayout_3">
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_7">
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_2">
+                    <property name="text">
+                     <string>Open</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
             </widget>
            </widget>
           </item>
@@ -1177,6 +1305,11 @@ border: 1 solid gray;</string>
    <class>XmlSettingTableView</class>
    <extends>QTableView</extends>
    <header>view/widgets/XmlSettingTableView.h</header>
+  </customwidget>
+  <customwidget>
+   <class>GraphicsLayoutWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
   </customwidget>
  </customwidgets>
  <tabstops>

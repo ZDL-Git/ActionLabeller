@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
 from common.utils import Log
 from presenter import MySignals
 from presenter.ActionLabellingUnit import ActionLabellingUnit
+from presenter.ApplicationUnit import ApplicationUnit
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
 from presenter.Settings import Settings
@@ -69,6 +70,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         CommonUnit.set_mw(self)
         # Hold to avoid being destroyed
+        self._holder0 = ApplicationUnit(self)
         self._holder1 = XmlSettingUnit(self)
         self._holder2 = VideoPlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
