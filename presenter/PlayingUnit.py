@@ -1,24 +1,27 @@
+import os
+
 from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QObject
 from PyQt5.QtGui import QPixmap, QImage
 from PyQt5.QtWidgets import QFileDialog
 
 from common.utils import Log
-from model.video import Video
+from model.Video import Video
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
+from presenter.Settings import Settings
 
 
-class VideoPlayingUnit(QObject):
+class PlayingUnit(QObject):
     # Simple implementation, not real singleton.
     # Cannot use class object, cause there is an event installer, must inherit QObject and do instantiation
     only_ins = None
 
     def __init__(self, mwindow):
         Log.debug('')
+        super().__init__()
         self.__class__.only_ins = self
         self.mw = mwindow
-        super().__init__()
 
         # self.entry_row_index = None
         self.video_model = None  # type:Video
@@ -52,6 +55,9 @@ class VideoPlayingUnit(QObject):
             self.mw.btn_stop.clicked.connect(self.slot_btn_stop),
             self.mw.btn_open_video.clicked.connect(self.slot_open_file),
         )
+        (
+            self.mw.tab_media.currentChanged.connect(self.slot_tabmedia_current_changed),
+        )
 
     def eventFilter(self, source, event):
         # Log.debug(source, event)
@@ -64,17 +70,25 @@ class VideoPlayingUnit(QObject):
 
     def slot_open_file(self):
         # TODO: remove native directory
+        all_types_filter = f'* {" *".join(Settings.video_exts + Settings.image_exts + Settings.plotting_exts)}'
         got = QFileDialog().getOpenFileName(self.mw, "Open Image", "/Users/zdl/Downloads/下载-视频",
-                                            "Media Files (*.mp4 *.jpg *.bmp *.flv)", options=QFileDialog.ReadOnly)
+                                            f"Media Files ({all_types_filter})", options=QFileDialog.ReadOnly)
         # got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
         Log.info(got)
-        fname = got[0]
-        if fname:
-            video = Video(fname)
-            self.mw.table_timeline.set_column_count(video.get_info()['frame_c'])
+        if not got or not got[0]:
+            return
+        file_uri = got[0]
+        ext = os.path.splitext(file_uri)[1]
+        if ext in Settings.video_exts:
+            self.mw.tab_media.setCurrentIndex(0)
+
+            video = Video(file_uri)
+            self.mw.table_timeline.set_column_num(video.get_info()['frame_c'])
             self.set_video(video)
-            mySignals.timer_start(1000 / video.get_info()['fps'] / float(self.mw.combo_speed.currentText()))
+            mySignals.timer_video.start(1000 / video.get_info()['fps'] / float(self.mw.combo_speed.currentText()))
             mySignals.video_start.emit()
+        elif ext in Settings.plotting_exts:
+            self.mw.tab_media.setCurrentIndex(2)
 
     def slot_btn_stop(self):
         Log.debug('')
@@ -144,11 +158,15 @@ class VideoPlayingUnit(QObject):
 
     def slot_fast_backward(self):
         Log.debug('')
+        if self.video_model is None:
+            return
         step = CommonUnit.get_value(self.mw.input_step, int)
         self.video_model.schedule(-1, -1 * step, -1, MySignals.Emitter.BTN)
 
     def slot_rewind(self):
         Log.debug('')
+        if self.video_model is None:
+            return
         step = CommonUnit.get_value(self.mw.input_step, int)
         self.video_model.schedule(-1, step, -1, MySignals.Emitter.BTN)
 
@@ -166,6 +184,13 @@ class VideoPlayingUnit(QObject):
                 return
         except Exception:
             return
-        if VideoPlayingUnit.only_ins.video_model:
+        if PlayingUnit.only_ins.video_model:
             new_speed = 1000 / self.video_model.get_info()['fps'] / factor
             mySignals.timer_video.setInterval(new_speed)
+
+    def slot_tabmedia_current_changed(self, index):
+        Log.debug(index)
+        if index in [0, 1]:
+            self.mw.stacked_widget.setCurrentIndex(0)
+        elif index == 2:
+            self.mw.stacked_widget.setCurrentIndex(1)

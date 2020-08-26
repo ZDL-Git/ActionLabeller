@@ -4,9 +4,9 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QGridLayout, QTextBrowser, QDialog
 
 from common.utils import Log
-from model import xml_
-from model.action import Action
-from model.action_label import ActionLabel
+from model.Action import Action
+from model.ActionLabel import ActionLabel
+from model.Xml_ import AnnotationXml
 from presenter.CommonUnit import CommonUnit
 
 
@@ -28,7 +28,7 @@ class XmlSettingUnit:
         overlap = int(self.mw.line_overlap.text())
         Log.debug(framespan, overlap, labels)
 
-        anno = xml_.AnnotationXml()
+        anno = AnnotationXml()
         file_num = 0
         abandoned = []
         while labels:

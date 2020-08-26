@@ -4,13 +4,15 @@ import time
 
 from PyQt5.QtCore import QRandomGenerator
 from PyQt5.QtGui import QColor
+from PyQt5.QtWidgets import QMessageBox
 
 from common.utils import Log, hash_of_file
-from model.action import Action
-from model.action_label import ActionLabel
+from model.Action import Action
+from model.ActionLabel import ActionLabel
+from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
-from presenter.VideoPlayingUnit import VideoPlayingUnit
+from presenter.PlayingUnit import PlayingUnit
 
 
 class ActionLabellingUnit:
@@ -32,6 +34,8 @@ class ActionLabellingUnit:
             mySignals.action_update.connect(self.mw.table_labeled.slot_action_update),
         )
         (
+            self.mw.btn_new_action.clicked.connect(self.slot_action_add),
+            self.mw.btn_del_action.clicked.connect(self.slot_del_selected_actions),
             self.mw.btn_export_labeled.clicked.connect(self.slot_export_labeled),
             self.mw.btn_import_labeled.clicked.connect(self.slot_import_labeled),
         )
@@ -39,7 +43,7 @@ class ActionLabellingUnit:
     def slot_export_labeled(self):
         Log.debug('')
         labels = self.mw.table_labeled.get_all_labels()
-        video_obj = VideoPlayingUnit.only_ins.video_model
+        video_obj = PlayingUnit.only_ins.video_model
         video_info = video_obj and video_obj.get_info()
         video_uri = video_info and video_info['fname']
         video_name = video_uri and os.path.basename(video_uri)
@@ -88,3 +92,30 @@ class ActionLabellingUnit:
             action_label = ActionLabel(action.name, action.id, action.color, begin, end, None)
             self.mw.table_timeline.settle_label(action_label)
             self.mw.table_labeled.add_label(action_label)
+
+    def slot_action_add(self, checked):  # if use decorator, must receive checked param of button clicked event
+        Log.debug('')
+        action = Action(self.mw.table_action.generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
+        self.mw.table_action.insert_action(action)
+        self.mw.table_action.editItem(self.mw.table_action.item(self.mw.table_action.rowCount() - 1, 0))
+
+    def slot_del_selected_actions(self,
+                                  checked):  # if use decorator, must receive checked param of button clicked event
+        Log.debug('')
+        if not self.mw.table_action.selectedIndexes():
+            QMessageBox().information(self.mw, 'ActionLabel Warning',
+                                      "Select action first!",
+                                      QMessageBox.Ok, QMessageBox.Ok)
+            return
+        if self.mw.table_labeled.rowCount():
+            if QMessageBox.Cancel == QMessageBox().warning(self.mw, 'ActionLabel Warning',
+                                                           "All you sure to delete action template?"
+                                                           " All the related action labels will be deleted!",
+                                                           QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
+                return
+        rows = set()
+        for index in self.mw.table_action.selectedIndexes():
+            rows.add(index.row())
+        for r in sorted(rows, reverse=True):
+            self.mw.table_action.removeRow(r)
+        mySignals.action_update.emit(MySignals.Emitter.T_TEMP)

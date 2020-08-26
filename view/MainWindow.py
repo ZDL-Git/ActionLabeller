@@ -10,8 +10,9 @@ from presenter.ActionLabellingUnit import ActionLabellingUnit
 from presenter.ApplicationUnit import ApplicationUnit
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
+from presenter.PlayingUnit import PlayingUnit
+from presenter.PosePlottingUnit import PosePlottingUnit
 from presenter.Settings import Settings
-from presenter.VideoPlayingUnit import VideoPlayingUnit
 from presenter.XmlSettingUnit import XmlSettingUnit
 
 Ui_MainWindow, QtBaseClass = uic.loadUiType("view/ui_from_creator/mainwindow.ui")
@@ -30,7 +31,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.combo_speed.lineEdit().setValidator(double_validator)
         self.combo_speed.addItems(['0.25', '0.5', '0.75', '1.0', '1.25', '1.5', '1.75'])
         self.combo_speed.setCurrentIndex(3)
-        self.combo_sortby.addItems(['sort by', 'filename', 'timestamp'])
+        self.combo_sortby.addItems(['filename', 'timestamp'])
         self.combo_sortby.setCurrentIndex(0)
         # self.line_xml_file_parttern.setText('action_{begin index}-{end index}.xml')
 
@@ -40,8 +41,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.btn_open_video.setFocus()
             self.btn_play.clicked.connect(mySignals.video_pause_or_resume.emit)
             self.btn_eval.clicked.connect(self.slot_eval)
-            self.btn_new_action.clicked.connect(self.table_action.slot_action_add)
-            self.btn_del_action.clicked.connect(self.table_action.slot_del_selected_actions)
 
         def init_settings():
             Settings.v_interval = int(self.spin_interval.text())
@@ -72,8 +71,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # Hold to avoid being destroyed
         self._holder0 = ApplicationUnit(self)
         self._holder1 = XmlSettingUnit(self)
-        self._holder2 = VideoPlayingUnit(self)
+        self._holder2 = PlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
+        self._holder4 = PosePlottingUnit(self)
 
     def common_slot(self, *arg):
         Log.debug(f'common slot print:', arg)

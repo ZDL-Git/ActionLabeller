@@ -2,7 +2,7 @@ from enum import Enum
 
 from PyQt5.QtCore import pyqtSignal, QObject, QTimer
 
-from model.action_label import ActionLabel
+from model.ActionLabel import ActionLabel
 
 
 class MySignals(QObject):
@@ -22,10 +22,10 @@ class MySignals(QObject):
     action_update = pyqtSignal(Enum)
 
     timer_video = QTimer()
+    timer_plotting = QTimer()
 
-    @classmethod
-    def timer_start(cls, Tms=50):
-        cls.timer_video.start(Tms)
+    timer_video.setInterval(50)
+    timer_plotting.setInterval(50)
 
 
 class Emitter(Enum):

@@ -5,12 +5,12 @@ from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
 
 from common.utils import Log
-from model.action_label import ActionLabel
+from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
+from view.widgets.Common import TableDecorators
 from view.widgets.TableViewCommon import TableViewCommon
-from view.widgets.common import TableDecorators
 
 
 class LabeledTableWidget(QTableWidget, TableViewCommon):
@@ -62,7 +62,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     @TableDecorators.block_signals
     def slot_label_selected(self, action_label, emitter):
         Log.debug(action_label, emitter)
-        label_row = self._get_label_row(action_label)
+        label_row = self._get_label_row_num(action_label)
         if label_row is not None:
             self.selectRow(label_row)
 
@@ -70,7 +70,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     @TableDecorators.block_signals
     def slot_label_delete(self, action_label, emitter):
         Log.debug(action_label, emitter)
-        row_i = self._get_label_row(action_label)
+        row_i = self._get_label_row_num(action_label)
         if row_i is not None:
             self._delete_rows(row_i)
 
@@ -120,7 +120,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
             labels.append(self._label_at(r))
         return rows, labels
 
-    def _get_label_row(self, action_label: ActionLabel):
+    def _get_label_row_num(self, action_label: ActionLabel):
         rows = self.rowCount()
         for r in range(rows):
             if self.item(r, 1) and self.item(r, 1).text() == str(action_label.begin):

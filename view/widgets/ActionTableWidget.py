@@ -3,12 +3,11 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from common.utils import Log
-from model.action import Action
+from model.Action import Action
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
 from view.widgets.TableViewCommon import TableViewCommon
-from view.widgets.common import TableDecorators
 
 
 class ActionTableWidget(QTableWidget, TableViewCommon):
@@ -61,35 +60,6 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
                     return
                 item.setBackground(color)
 
-    @TableDecorators.block_signals
-    def slot_action_add(self, checked):  # if use decorator, must receive checked param of button clicked event
-        Log.debug('')
-        action = Action(self.generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
-        self.insert_action(action)
-        self.editItem(self.item(self.rowCount() - 1, 0))
-
-    @TableDecorators.dissort
-    def slot_del_selected_actions(self,
-                                  checked):  # if use decorator, must receive checked param of button clicked event
-        Log.debug('')
-        if not self.selectedIndexes():
-            QMessageBox().information(self, 'ActionLabel Warning',
-                                      "Select action first!",
-                                      QMessageBox.Ok, QMessageBox.Ok)
-            return
-
-        if QMessageBox.Cancel == QMessageBox().warning(self, 'ActionLabel Warning',
-                                                       "All you sure to delete action template?"
-                                                       " All the related action label will be deleted!",
-                                                       QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
-            return
-        rows = set()
-        for index in self.selectedIndexes():
-            rows.add(index.row())
-        for r in sorted(rows, reverse=True):
-            self.removeRow(r)
-        mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
-
     def get_all_actions(self):
         Log.debug('')
         actions = []
@@ -105,7 +75,7 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         Log.debug('')
         rows = self.rowCount()
         if rows == 0:
-            QMessageBox().information('ActionLabel',
+            QMessageBox().information(self, 'ActionLabel',
                                       "Please add action first!",
                                       QMessageBox.Ok, QMessageBox.Ok)
             return None
@@ -114,14 +84,16 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         for action in actions:
             if action.default:
                 if not action.name:
-                    QMessageBox().information('ActionLabel',
+                    QMessageBox().information(self, 'ActionLabel',
                                               "Please complete action name first!",
                                               QMessageBox.Ok, QMessageBox.Ok)
                     return None
                 # 1.return default
                 return action
         # 2.select from dialog
-        action_name, ok_pressed = QInputDialog().getItem("ActionLabel", "Actions:", [a.name for a in actions], 0,
+        action_name, ok_pressed = QInputDialog().getItem(self, "ActionLabel",
+                                                         "Select or check as default in Action Setting:",
+                                                         [a.name for a in actions], 0,
                                                          False)
         if ok_pressed and action_name:
             return list(filter(lambda a: a.name == action_name, actions))[0]

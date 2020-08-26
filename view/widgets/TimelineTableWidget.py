@@ -4,16 +4,16 @@ import typing
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QVariant, QRect, QItemSelection, QItemSelectionModel
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEvent, QIntValidator
-from PyQt5.QtWidgets import QCheckBox, QMessageBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
+from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
     QPushButton
 
 from common.utils import Log
-from model.action_label import ActionLabel
+from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
+from view.widgets.Common import TableDecorators, clear_layout
 from view.widgets.TableViewCommon import TableViewCommon
-from view.widgets.common import TableDecorators, clear_layout
 
 
 class TimelineTableView(TableViewCommon):
@@ -207,7 +207,7 @@ class TimelineTableView(TableViewCommon):
         Log.info('index', i)
         mySignals.schedule.emit(i, -1, -1, MySignals.Emitter.T_HHEADER)
 
-    def set_column_count(self, c):
+    def set_column_num(self, c):
         self.model().setColumnCount(c)
 
     @TableDecorators.block_signals
@@ -270,12 +270,12 @@ class TimelineTableView(TableViewCommon):
 
     def _plot_label(self, label: ActionLabel):
         Log.debug(label)
-        if label.end >= self.model().columnCount() and \
-                QMessageBox.Cancel == QMessageBox.information(self, 'ActionLabel',
-                                                              "The end exceeds video frames count, "
-                                                              "are you sure to create this action label?",
-                                                              QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
-            return False
+        # if label.end >= self.model().columnCount() and \
+        #         QMessageBox.Cancel == QMessageBox.information(self, 'ActionLabel',
+        #                                                       "The end exceeds video frames count, "
+        #                                                       "are you sure to create this action label?",
+        #                                                       QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
+        #     return False
         for c in range(max(0, label.begin), label.end + 1):
             item = self.model().item(label.timeline_row, c)
             if item is None:
