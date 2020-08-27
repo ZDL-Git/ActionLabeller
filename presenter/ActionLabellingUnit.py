@@ -22,6 +22,7 @@ class ActionLabellingUnit:
         self.mw = mwindow
         (
             self.mw.table_action.cellChanged.connect(self.mw.table_labeled.slot_action_update),
+            self.mw.table_timeline.doubleClicked.connect(self.table_timeline_cell_double_clicked),
         )
 
         (
@@ -125,3 +126,13 @@ class ActionLabellingUnit:
         for r in sorted(rows, reverse=True):
             self.mw.table_action.removeRow(r)
         mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
+
+    def table_timeline_cell_double_clicked(self, qindex):
+        Log.debug('')
+        r, c = qindex.row(), qindex.column()
+        label = self.mw.table_timeline._detect_label(r, c)  # type:ActionLabel
+        if not label:
+            self.mw.table_timeline.col_to_center(self.mw.table_timeline.current_column)
+            CommonUnit.status_prompt(str(f'Current Frame {self.mw.table_timeline.current_column}'))
+            self.mw.table_timeline.label_create_dialog.load(self.mw.table_timeline.current_column)
+            self.mw.table_timeline.label_create_dialog.exec_()

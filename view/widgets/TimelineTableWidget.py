@@ -29,7 +29,7 @@ class TimelineTableView(TableViewCommon):
 
         self.clicked.connect(self.slot_cellClicked)
         self.pressed.connect(self.slot_cellPressed)
-        self.doubleClicked.connect(self.slot_cellDoubleClicked)
+        # self.doubleClicked.connect(self.slot_cellDoubleClicked)
 
         self.label_create_dialog = self.TimelineDialog(self)
 
@@ -133,7 +133,7 @@ class TimelineTableView(TableViewCommon):
 
             Log.debug(self.hcenter_before_wheeling)
             self.horizontalHeader().setDefaultSectionSize(col_width_to)
-            self._col_to_center(self.hcenter_before_wheeling)
+            self.col_to_center(self.hcenter_before_wheeling)
         else:
             bias = 2 if idler_forward else -2
             # self._col_scroll(bias) # conflicts with follow_to
@@ -167,32 +167,6 @@ class TimelineTableView(TableViewCommon):
             self.select_label(label)
             mySignals.label_selected.emit(label, MySignals.Emitter.T_LABEL)
 
-    def slot_cellDoubleClicked(self, qindex):
-        Log.debug('')
-        r, c = qindex.row(), qindex.column()
-        label = self._detect_label(r, c)  # type:ActionLabel
-        if label is not None:
-            self._label_play(label)
-            # self._emit_video_play(label.begin, label.end)
-        else:
-            self._col_to_center(self.current_column)
-            CommonUnit.status_prompt(str(f'Current Frame {self.current_column}'))
-            # self.label_create_dialog.set_actions(actions)
-            # self.label_create_dialog.set_cur_index(self.current_column)
-            self.label_create_dialog.load(self.current_column)
-            self.label_create_dialog.exec_()
-            # if self.label_create_dialog.exec_():
-            #     label = self.label_create_dialog.take_label()
-            #     Log.debug('', label)
-            #     if label.end is not None:
-            #         if label.begin > label.end:
-            #             warn_ = "Label's begin exceeds the end, ignored!"
-            #             global_.g_status_prompt(warn_)
-            #             Log.warn(warn_)
-            #             return
-            #         if self._settle_label(label):
-            #             global_.mySignals.label_created.emit(label, MySignals.Emitter.T_LABEL)
-
     def slot_sliderMoved(self, pos):
         Log.debug(pos)
         # col_c = self.columnCount()
@@ -215,7 +189,7 @@ class TimelineTableView(TableViewCommon):
         # if emitter == MySignals.Emitter.T_HSCROLL:
         #     return
         if self.b_scroll_follow:
-            self._col_to_center(index)
+            self.col_to_center(index)
 
     # @TableDecorators.block_signals
     # def slot_label_play(self, action_label: ActionLabel, emitter):
@@ -260,12 +234,6 @@ class TimelineTableView(TableViewCommon):
 
     def _plot_label(self, label: ActionLabel):
         Log.debug(label)
-        # if label.end >= self.model().columnCount() and \
-        #         QMessageBox.Cancel == QMessageBox.information(self, 'ActionLabel',
-        #                                                       "The end exceeds video frames count, "
-        #                                                       "are you sure to create this action label?",
-        #                                                       QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
-        #     return False
         for c in range(max(0, label.begin), label.end + 1):
             item = self.model().item(label.timeline_row, c)
             if item is None:
@@ -342,7 +310,7 @@ class TimelineTableView(TableViewCommon):
         self.unselect_all()
         return label_cells
 
-    def _col_to_center(self, index):
+    def col_to_center(self, index):
         self.scrollTo(self.model().index(0, max(0, index - 1)), QAbstractItemView.PositionAtCenter)
 
     def _center_col(self):

@@ -40,6 +40,7 @@ class PlayingUnit(QObject):
             self.mw.table_timeline.horizontalHeader().sectionClicked.connect(
                 self.slot_tabletimeline_header_clicked),
             self.mw.table_timeline.pressed.connect(self.slot_stop),
+            self.mw.table_timeline.doubleClicked.connect(self.table_timeline_cell_double_clicked),
             self.mw.table_labeled.cellDoubleClicked.connect(self.table_labeled_cell_double_clicked),
         )
         (
@@ -244,9 +245,17 @@ class PlayingUnit(QObject):
         # bottom_axis.setTicks([[(i, str(i)) for i in range(0, w + 1, 20)], []])
 
     def table_labeled_cell_double_clicked(self, r, c):
+        Log.debug('')
         label = self.mw.table_labeled.label_at(r)
         if not self.label_play(label):
-            self.mw.table_timeline._col_to_center(label.begin)
+            self.mw.table_timeline.col_to_center(label.begin)
+
+    def table_timeline_cell_double_clicked(self, qindex):
+        Log.debug('')
+        r, c = qindex.row(), qindex.column()
+        label = self.mw.table_timeline._detect_label(r, c)  # type:ActionLabel
+        if label:
+            self.label_play(label)
 
     def label_play(self, action_label: ActionLabel):
         if self.media_model is None:
