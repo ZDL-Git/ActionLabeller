@@ -20,7 +20,7 @@ from lxml import etree
 #
 # tree = etree.ElementTree(root)
 # tree.write('xmldemo.xml', pretty_print=True)
-from common.utils import Log
+from common.Log import Log
 
 
 class AnnotationXml:

@@ -395,19 +395,6 @@ border: 1 solid gray;</string>
                 </property>
                </widget>
               </item>
-              <item>
-               <spacer name="horizontalSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </item>
             <item>
@@ -566,6 +553,26 @@ border: 1 solid gray;</string>
           </item>
           <item>
            <widget class="QTabWidget" name="tab_media">
+            <property name="styleSheet">
+             <string notr="true">QWidget {
+
+}
+QTabWidget {
+
+}
+QTabWidget::pane {
+}
+QTabBar::tab {
+	background: lightgray;
+	color: black;
+	padding: 2px 5px;
+	border: 1px solid black;
+}
+QTabBar::tab:selected {
+	background: rgb(242, 248, 233);
+	color: black;
+}</string>
+            </property>
             <property name="currentIndex">
              <number>0</number>
             </property>

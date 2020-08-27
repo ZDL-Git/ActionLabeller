@@ -3,7 +3,7 @@ from typing import List, Dict
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QGridLayout, QTextBrowser, QDialog
 
-from common.utils import Log
+from common.Log import Log
 from model.Action import Action
 from model.ActionLabel import ActionLabel
 from model.Xml_ import AnnotationXml

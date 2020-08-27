@@ -7,7 +7,7 @@ from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEven
 from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
     QPushButton
 
-from common.utils import Log
+from common.Log import Log
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
@@ -150,7 +150,6 @@ class TimelineTableView(TableViewCommon):
     def slot_cellPressed(self, qindex):
         r, c = qindex.row(), qindex.column()
         Log.debug(r, c, self.model().item(r, c))
-        mySignals.video_pause.emit()
         if not self.model().item(r, c):
             item = QStandardItem('')
             item.setBackground(Qt.white)
@@ -165,7 +164,7 @@ class TimelineTableView(TableViewCommon):
             self.label_clicked = None
         else:
             self.label_clicked = label
-            self._select_label(label)
+            self.select_label(label)
             mySignals.label_selected.emit(label, MySignals.Emitter.T_LABEL)
 
     def slot_cellDoubleClicked(self, qindex):
@@ -203,48 +202,39 @@ class TimelineTableView(TableViewCommon):
         mySignals.schedule.emit(index, -1, -1, MySignals.Emitter.T_HSCROLL)
         # self.selectColumn(index)  # crash bug
 
-    def slot_horizontalHeaderClicked(self, i):
-        Log.info('index', i)
-        mySignals.schedule.emit(i, -1, -1, MySignals.Emitter.T_HHEADER)
+    # def slot_horizontalHeaderClicked(self, i):
+    #     Log.info('index', i)
+    #     mySignals.schedule.emit(i, -1, -1, MySignals.Emitter.T_HHEADER)
 
     def set_column_num(self, c):
         self.model().setColumnCount(c)
 
     @TableDecorators.block_signals
-    def slot_follow_to(self, emitter, index):
+    def slot_follow_to(self, index):
         self.current_column = index
-        if emitter == MySignals.Emitter.T_HSCROLL:
-            return
+        # if emitter == MySignals.Emitter.T_HSCROLL:
+        #     return
         if self.b_scroll_follow:
             self._col_to_center(index)
 
-    @TableDecorators.block_signals
-    def slot_label_play(self, action_label: ActionLabel, emitter):
-        Log.debug(action_label, emitter)
-        self._label_play(action_label)
+    # @TableDecorators.block_signals
+    # def slot_label_play(self, action_label: ActionLabel, emitter):
+    #     Log.debug(action_label, emitter)
+    #     self._label_play(action_label)
 
     @TableDecorators.block_signals
     def slot_label_delete(self, action_labels: typing.List[ActionLabel], emitter):
         Log.debug(action_labels, emitter)
-        self._unselect_all()
+        self.unselect_all()
         for label in action_labels:
             self._del_label(label)
 
     @TableDecorators.block_signals
     def slot_label_update(self, action_labels: typing.List[ActionLabel], emitter):
         Log.debug(action_labels, emitter)
-        self._unselect_all()
+        self.unselect_all()
         for label in action_labels:
             self._update_label(label)
-
-    def _label_play(self, action_label: ActionLabel):
-        self._unselect_all()
-        self._select_label(action_label)
-        self._emit_video_play(action_label.begin, action_label.end)
-
-    def _emit_video_play(self, start_at, stop_at=-1):
-        mySignals.schedule.emit(start_at, -1, stop_at, MySignals.Emitter.T_LABEL)
-        mySignals.video_start.emit()
 
     def settle_label(self, label: ActionLabel):
         t_r = None
@@ -307,7 +297,7 @@ class TimelineTableView(TableViewCommon):
         Log.debug(item.toolTip(), item.whatsThis(), item.background())
         return ActionLabel(item.toolTip(), int(item.whatsThis()), item.background(), l, r, row)
 
-    def _select_label(self, label: ActionLabel):
+    def select_label(self, label: ActionLabel):
         Log.debug(label)
         Log.debug(QRect(label.begin, label.timeline_row, label.end - label.begin + 1, 1))
         self.selectionModel().select(
@@ -349,7 +339,7 @@ class TimelineTableView(TableViewCommon):
                 label_cells[r].append(c)
             else:
                 label_cells[r] = [c]
-        self._unselect_all()
+        self.unselect_all()
         return label_cells
 
     def _col_to_center(self, index):

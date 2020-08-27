@@ -1,4 +1,4 @@
-from common.utils import Log
+from common.Log import Log
 
 
 class ApplicationUnit:

@@ -1,10 +1,13 @@
 import os
 
-from PyQt5.QtCore import pyqtSlot, Qt, QEvent, QObject
-from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QFileDialog
+import pyqtgraph as pg
+from PyQt5.QtCore import QEvent, QObject
 
-from common.utils import Log
+from common.Log import Log
+from model.ActionLabel import ActionLabel
+from model.File import load_dict
+from model.Playable import Playable
+from model.PosePlotting import PosePlotting
 from model.Video import Video
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
@@ -24,19 +27,25 @@ class PlayingUnit(QObject):
         self.mw = mwindow
 
         # self.entry_row_index = None
-        self.video_model = None  # type:Video
+        self.media_model = None  # type:Playable
+        self.video_model = None
+        self.images_model = None
+        self.pose_model = None
         self.video_playing = False
 
+        self._init_pyqtgraph()
+
         (
+            self.mw.tab_media.currentChanged.connect(self.slot_tabmedia_current_changed),
             self.mw.table_timeline.horizontalHeader().sectionClicked.connect(
-                self.mw.table_timeline.slot_horizontalHeaderClicked),
+                self.slot_tabletimeline_header_clicked),
+            self.mw.table_timeline.pressed.connect(self.slot_stop),
+            self.mw.table_labeled.cellDoubleClicked.connect(self.table_labeled_cell_double_clicked),
         )
         (
-            mySignals.schedule.connect(self.slot_schedule),
-            mySignals.timer_video.timeout.connect(self.timer_flush_frame),
-            mySignals.video_pause_or_resume.connect(self.pause_or_resume),
-            mySignals.video_start.connect(self.slot_start),
-            mySignals.video_pause.connect(self.slot_pause),
+            # mySignals.video_pause_or_resume.connect(self.pause_or_resume),
+            # mySignals.video_start.connect(self.slot_start),
+            # mySignals.video_pause.connect(self.slot_pause),
             mySignals.follow_to.connect(self.mw.slot_follow_to),
         )
         (
@@ -45,18 +54,16 @@ class PlayingUnit(QObject):
         (
             self.mw.spin_interval.textChanged.connect(self.mw.slot_interval_changed),
             self.mw.combo_speed.currentTextChanged.connect(self.slot_speed_changed),
-            self.mw.input_jumpto.textChanged.connect(self.mw.slot_input_jumpto_changed),
+            self.mw.input_jumpto.textChanged.connect(self.slot_input_jumpto_changed),
         )
         (
             self.mw.btn_to_head.clicked.connect(self.to_head),
             self.mw.btn_to_tail.clicked.connect(self.to_tail),
             self.mw.btn_backward.clicked.connect(self.slot_fast_backward),
             self.mw.btn_rewind.clicked.connect(self.slot_rewind),
-            self.mw.btn_stop.clicked.connect(self.slot_btn_stop),
             self.mw.btn_open_video.clicked.connect(self.slot_open_file),
-        )
-        (
-            self.mw.tab_media.currentChanged.connect(self.slot_tabmedia_current_changed),
+            self.mw.btn_stop.clicked.connect(self.slot_btn_stop),
+            self.mw.btn_play.clicked.connect(self.slot_play_toggle),
         )
 
     def eventFilter(self, source, event):
@@ -64,111 +71,95 @@ class PlayingUnit(QObject):
         if source == self.mw.label_show:
             if event.type() == QEvent.MouseButtonPress:
                 Log.debug(source, event)
-                self.pause_or_resume()
+                self.slot_play_toggle()
 
         return False
 
     def slot_open_file(self):
         # TODO: remove native directory
-        all_types_filter = f'* {" *".join(Settings.video_exts + Settings.image_exts + Settings.plotting_exts)}'
-        got = QFileDialog().getOpenFileName(self.mw, "Open Image", "/Users/zdl/Downloads/下载-视频",
-                                            f"Media Files ({all_types_filter})", options=QFileDialog.ReadOnly)
-        # got = ['/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4']
-        Log.info(got)
-        if not got or not got[0]:
+        all_types_filter = f'*{" *".join(Settings.video_exts + Settings.image_exts + Settings.plotting_exts)}'
+        file_uri = CommonUnit.get_open_name(filter_=f"Media Files ({all_types_filter})")
+        # got = '/Users/zdl/Downloads/下载-视频/poses.json'
+        # got = '/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4'
+        Log.info(file_uri)
+        if not file_uri:
             return
-        file_uri = got[0]
         ext = os.path.splitext(file_uri)[1]
         if ext in Settings.video_exts:
             self.mw.tab_media.setCurrentIndex(0)
-
-            video = Video(file_uri)
-            self.mw.table_timeline.set_column_num(video.get_info()['frame_c'])
-            self.set_video(video)
-            mySignals.timer_video.start(1000 / video.get_info()['fps'] / float(self.mw.combo_speed.currentText()))
-            mySignals.video_start.emit()
+            video_model = Video(file_uri).set_view(self.mw.label_show)
+            video_model.set_fps(video_model.get_info()['fps'] * float(self.mw.combo_speed.currentText()))
+            self.mw.table_timeline.set_column_num(video_model.get_info()['frame_c'])
+            self.video_model = video_model
+            self.set_model(video_model)
         elif ext in Settings.plotting_exts:
             self.mw.tab_media.setCurrentIndex(2)
+            pose_data = load_dict(file_uri)
+            pose_model = PosePlotting() \
+                .set_data(pose_data) \
+                .set_view(self.main_plotter) \
+                .set_range()
+            self.mw.table_timeline.set_column_num(int(pose_model.indices[-1]) + 1)
+            self.pose_model = pose_model
+            self.set_model(pose_model)
+        else:
+            Log.warn(file_uri, ext)
+        self.media_model.signals.flushed.connect(self.mw.table_timeline.slot_follow_to)
+        self.media_model.signals.flushed.connect(self.mw.slot_follow_to)
+        self.media_model.start()
 
     def slot_btn_stop(self):
         Log.debug('')
         self.video_playing = False
         self.mw.label_show.clear()
 
-    def slot_schedule(self, jump_to, bias, stop_at, emitter):
-        # index: related signal defined to receive int parameters, None will be cast to large number 146624904,
-        #        hence replace None with -1
-        if jump_to != -1:
-            bias = None
-        Log.info(jump_to, bias)
-
-        if self.video_model:
-            self.video_model.schedule(jump_to, bias, stop_at, emitter)
-
-    @pyqtSlot()
-    def timer_flush_frame(self):
-        if self.video_model is None:
+    def slot_play_toggle(self):
+        Log.debug('')
+        if self.media_model is None:
             return
-        if not self.video_playing and not self.video_model.scheduled:
-            return
-
-        emitter, i, frame = self.video_model.read()
-        if frame is None:
-            self.video_playing = False
-            return
-        # mySignals.follow_to.emit(emitter, i)
-        self.mw.slot_follow_to(emitter, i)
-        self.mw.table_timeline.slot_follow_to(emitter, i)
-
-        height, width, bytesPerComponent = frame.shape
-        bytesPerLine = bytesPerComponent * width
-        q_image = QImage(frame.data, width, height, bytesPerLine,
-                         QImage.Format_RGB888).scaled(self.mw.label_show.width(), self.mw.label_show.height(),
-                                                      Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        q_pixmap = QPixmap.fromImage(q_image)
-        self.mw.label_show.setPixmap(q_pixmap)
-
-        # self.label_note.setText(f'frame:{self.cur_index}')
-
-        # elif not ret:
-        #     self.cap.release()
-        #     # self.timer_video.stop()
-        #     # self.statusBar.showMessage('播放结束！')
-        # else:
-        #     self.flush_frame()
-
-    def pause_or_resume(self):
-        if self.video_playing:
-            self.slot_pause()
+        if self.media_model.is_playing():
+            self.media_model.stop()
         else:
-            self.slot_start()
+            self.media_model.start()
 
-    def slot_pause(self):
-        Log.info('')
-        self.video_playing = False
+    def slot_stop(self):
+        Log.debug('')
+        if self.media_model is None:
+            return
+        self.media_model.stop()
 
     def slot_start(self):
-        # self.timer_video.start()
-        if not self.video_model:
+        Log.debug('')
+        if self.media_model is None:
             return
-        self.video_playing = True
+        self.media_model.start()
 
-    def set_video(self, video):
-        self.video_model = video
+    # def slot_schedule(self, jump_to, bias, stop_at, emitter):
+    #     # index: related signal defined to receive int parameters, None will be cast to large number 146624904,
+    #     #        hence replace None with -1
+    #     Log.info(jump_to, bias, stop_at, emitter)
+    #     if jump_to != -1:
+    #         bias = None
+    #     if self.media_model:
+    #         self.media_model.schedule(jump_to, bias, stop_at, emitter)
+
+    def set_model(self, model):
+        Log.debug(type(model))
+        self.media_model = model
 
     def slot_fast_backward(self):
         Log.debug('')
-        if self.video_model is None:
+        if self.media_model is None:
             return
         step = CommonUnit.get_value(self.mw.input_step, int)
-        self.video_model.schedule(-1, -1 * step, -1, MySignals.Emitter.BTN)
+        self.media_model.schedule(-1, -1 * step, -1, MySignals.Emitter.BTN)
 
     def slot_rewind(self):
         Log.debug('')
-        if self.video_model is None:
+        if self.media_model is None:
             return
         step = CommonUnit.get_value(self.mw.input_step, int)
-        self.video_model.schedule(-1, step, -1, MySignals.Emitter.BTN)
+        self.media_model.schedule(-1, step, -1, MySignals.Emitter.BTN)
 
     def to_head(self):
         pass
@@ -184,13 +175,84 @@ class PlayingUnit(QObject):
                 return
         except Exception:
             return
-        if PlayingUnit.only_ins.video_model:
-            new_speed = 1000 / self.video_model.get_info()['fps'] / factor
+        if self.media_model:
+            new_speed = 1000 / self.media_model.get_info()['fps'] / factor
             mySignals.timer_video.setInterval(new_speed)
+
+    def slot_input_jumpto_changed(self, text):
+        try:
+            if self.media_model is None:
+                return
+            jump_to = int(text)
+            self.media_model.schedule(jump_to, -1, -1, MySignals.Emitter.INPUT_JUMPTO)
+        except Exception:
+            Log.warn('Only int number supported!')
 
     def slot_tabmedia_current_changed(self, index):
         Log.debug(index)
-        if index in [0, 1]:
+        self.media_model and self.media_model.stop()
+        if index == 0:
             self.mw.stacked_widget.setCurrentIndex(0)
+            self.set_model(self.video_model)
+        elif index == 1:
+            self.mw.stacked_widget.setCurrentIndex(0)
+            self.set_model(self.images_model)
         elif index == 2:
             self.mw.stacked_widget.setCurrentIndex(1)
+            self.set_model(self.pose_model)
+
+    def slot_tabletimeline_header_clicked(self, i):
+        Log.info('index', i)
+        if self.media_model is None:
+            return
+        self.media_model.schedule(i, -1, -1, MySignals.Emitter.T_HHEADER)
+
+    def _init_pyqtgraph(self):
+        pg.setConfigOptions(antialias=True)
+
+        # p3 = self.graphics_view.addPlot(title="Drawing with points")  # type: pg.PlotItem
+
+        # self.mw.graphics_view.setBackground('w')
+        # self.graphics_view.setAspectLocked(True)
+
+        h, w = 200, 300
+        self.main_plotter = self.mw.graphics_view.addPlot()  # type: pg.PlotItem
+        self.main_plotter.hideButtons()
+
+        # self.main_plotter.plot(np.random.normal(size=100), pen=(200, 200, 200), symbolBrush=(255, 0, 0), symbolPen='w')
+
+        # self.main_plot.setFixedHeight(h)
+        # self.main_plot.setFixedWidth(w)
+
+        # view_box = pg.ViewBox(p3)
+        # view_box.setRange(xRange=[0, 200], yRange=[0, 100], padding=0)
+        # self.main_plot.setAxisItems({'left': pg.AxisItem(orientation='left', linkView=view_box)})
+        self.main_plotter.setRange(xRange=[0, 200], yRange=[0, 100], padding=False, disableAutoRange=True)
+        # self.main_plot.vb.setLimits(xMax=w, yMax=h)
+
+        view_box = self.main_plotter.getViewBox()  # type:pg.ViewBox
+        view_box.setMouseEnabled(False, False)
+        view_box.invertY(True)
+        view_box.setAspectLocked(True, ratio=1)  # keep the content's x y scale consistent, not window
+
+        left_axis = self.main_plotter.getAxis('left')  # type:pg.AxisItem
+        bottom_axis = self.main_plotter.getAxis('bottom')  # type:pg.AxisItem
+        left_axis.setWidth(22)
+        bottom_axis.setHeight(4)
+
+        # left_axis.setTicks([[(i, str(i)) for i in range(0, h + 1, 20)], []])
+        # bottom_axis.setTicks([[(i, str(i)) for i in range(0, w + 1, 20)], []])
+
+    def table_labeled_cell_double_clicked(self, r, c):
+        label = self.mw.table_labeled.label_at(r)
+        if not self.label_play(label):
+            self.mw.table_timeline._col_to_center(label.begin)
+
+    def label_play(self, action_label: ActionLabel):
+        if self.media_model is None:
+            return False
+        self.mw.table_timeline.unselect_all()
+        self.mw.table_timeline.select_label(action_label)
+        self.media_model.schedule(action_label.begin, -1, action_label.end, MySignals.Emitter.T_LABEL)
+        self.media_model.start()
+        return True

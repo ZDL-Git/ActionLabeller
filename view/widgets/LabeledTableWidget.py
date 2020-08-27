@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
 
-from common.utils import Log
+from common.Log import Log
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
@@ -47,7 +47,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
 
     def slot_cellDoubleClicked(self, r, c):
         Log.debug(r, c)
-        label = self._label_at(r)
+        label = self.label_at(r)
         mySignals.labeled_selected.emit(label, MySignals.Emitter.T_LABELED)
 
     @TableDecorators.dissort
@@ -81,7 +81,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         self._label_cells_delete(label_cells)
 
     @TableDecorators.dissort
-    def slot_action_update(self, emitter):
+    def slot_action_update(self, r, c):
         rows_delete_later = set()
         labels_updated = []
         actions = CommonUnit.get_all_actions()
@@ -91,7 +91,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
             if id in _actions_dict:
                 self.item(r, 0).setText(_actions_dict[id].name)
                 self.item(r, 5).setBackground(_actions_dict[id].color)
-                labels_updated.append(self._label_at(r))
+                labels_updated.append(self.label_at(r))
             else:
                 Log.debug(_actions_dict)
                 rows_delete_later.add(r)
@@ -101,11 +101,11 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     def get_all_labels(self) -> list:
         labels = []
         for r in range(self.rowCount()):
-            labels.append(self._label_at(r))
+            labels.append(self.label_at(r))
         labels.sort(key=lambda l: l.begin)
         return labels
 
-    def _label_at(self, r):
+    def label_at(self, r):
         return ActionLabel(self.item(r, 0).text(), int(self.item(r, 4).text()), self.item(r, 5).background(),
                            int(self.item(r, 1).text()),
                            int(self.item(r, 2).text()),
@@ -117,7 +117,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
             rows.add(index.row())
         labels = []
         for r in rows:
-            labels.append(self._label_at(r))
+            labels.append(self.label_at(r))
         return rows, labels
 
     def _get_label_row_num(self, action_label: ActionLabel):

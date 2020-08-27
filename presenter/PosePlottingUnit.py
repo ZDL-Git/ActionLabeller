@@ -1,7 +1,7 @@
 import pyqtgraph as pg
-from PyQt5.QtCore import Qt, pyqtSlot, QObject
+from PyQt5.QtCore import Qt, QObject
 
-from common.utils import Log
+from common.Log import Log
 from model import File
 from model.PosePlotting import PosePlotting
 from presenter.CommonUnit import CommonUnit
@@ -19,14 +19,14 @@ class PosePlottingUnit(QObject):
         self.flag_plotting = False
 
         self._init_pyqtgraph()
-        self.main_plotting_model = PosePlotting(self.main_plotter)
+        self.main_plotting_model = PosePlotting().set_view(self.main_plotter)
 
         (
             # self.mw.btn_play_plotting.clicked.connect(self.slot_play),
         )
 
         (
-            mySignals.timer_plotting.timeout.connect(self.slot_timer_flush),
+            # mySignals.timer_plotting.timeout.connect(self.slot_timer_flush),
         )
 
         # self.mw.slider_frame: QSlider
@@ -84,7 +84,7 @@ class PosePlottingUnit(QObject):
         if not self.fname:
             return
 
-        self.main_plotting_model.fdata = File.load_dict(self.fname)
+        self.main_plotting_model.set_data = File.load_dict(self.fname)
 
         # self.mw.slider_frame: QSlider
         # self.mw.slider_frame.setRange(0, len(self.main_plotting.fdata) - 1)
@@ -99,18 +99,8 @@ class PosePlottingUnit(QObject):
         mySignals.timer_plotting.start()
         self.flag_plotting = True
 
-    def slot_play(self, checked):
-        Log.debug('')
-
-        if self.flag_plotting:
-            mySignals.timer_plotting.stop()
-            self.flag_plotting = False
-        else:
-            mySignals.timer_plotting.start()
-            self.flag_plotting = True
-
     def slot_slider_changed(self, v):
-        if self.main_plotting_model.fdata is not None:
+        if self.main_plotting_model.set_data is not None:
             self.main_plotting_model.plot(v)
 
     def slot_btn_clear(self):
@@ -118,14 +108,3 @@ class PosePlottingUnit(QObject):
 
     def slot_ckb_clear(self, state):
         self.main_plotting_model.clear_per_frame = state == Qt.Checked
-
-    @pyqtSlot()
-    def slot_timer_flush(self):
-        if self.fname is None:
-            return
-        if not self.flag_plotting:
-            return
-
-        index = self.main_plotting_model.timer_flush()
-        if index is None:
-            mySignals.timer_plotting.stop()

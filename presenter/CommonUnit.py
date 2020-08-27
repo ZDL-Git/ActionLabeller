@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit
 
-from common.utils import Log
+from common.Log import Log
 
 
 class CommonUnit:

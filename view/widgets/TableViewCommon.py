@@ -11,7 +11,7 @@ class TableViewCommon(QTableView):
     def _select_row(self: QTableView, row):
         self.selectRow(row)
 
-    def _unselect_all(self: QTableView):
+    def unselect_all(self: QTableView):
         rowc = self.model().rowCount()
         colc = self.model().columnCount()
         if rowc > 0 and colc > 0:

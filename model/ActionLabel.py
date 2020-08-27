@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QBrush
 
-from common.utils import Log
+from common.Log import Log
 from presenter.CommonUnit import CommonUnit
 
 

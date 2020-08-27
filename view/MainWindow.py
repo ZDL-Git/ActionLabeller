@@ -4,14 +4,11 @@ from PyQt5.QtGui import QCloseEvent, QColor, QDoubleValidator
 from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
     QHeaderView, QComboBox
 
-from common.utils import Log
-from presenter import MySignals
+from common.Log import Log
 from presenter.ActionLabellingUnit import ActionLabellingUnit
 from presenter.ApplicationUnit import ApplicationUnit
 from presenter.CommonUnit import CommonUnit
-from presenter.MySignals import mySignals
 from presenter.PlayingUnit import PlayingUnit
-from presenter.PosePlottingUnit import PosePlottingUnit
 from presenter.Settings import Settings
 from presenter.XmlSettingUnit import XmlSettingUnit
 
@@ -39,7 +36,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         def init_buttons():
             self.btn_open_video.setFocus()
-            self.btn_play.clicked.connect(mySignals.video_pause_or_resume.emit)
             self.btn_eval.clicked.connect(self.slot_eval)
 
         def init_settings():
@@ -73,7 +69,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self._holder1 = XmlSettingUnit(self)
         self._holder2 = PlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
-        self._holder4 = PosePlottingUnit(self)
+        # self._holder4 = PosePlottingUnit(self)
 
     def common_slot(self, *arg):
         Log.debug(f'common slot print:', arg)
@@ -81,14 +77,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def slot_interval_changed(self):
         Settings.v_interval = int(self.spin_interval.text() or 1)
 
-    def slot_input_jumpto_changed(self, text):
-        try:
-            jumpto = int(text)
-            mySignals.schedule.emit(jumpto, -1, -1, MySignals.Emitter.INPUT_JUMPTO)
-        except Exception:
-            Log.warn('Only int number supported!')
-
-    def slot_follow_to(self, emitter, to):
+    def slot_follow_to(self, to):
         CommonUnit.status_prompt(f'Frame {to}')
 
     def eventFilter(self, source, event):

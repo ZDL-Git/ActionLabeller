@@ -1,24 +1,30 @@
 import queue
 
 import cv2
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QImage, QPixmap
 
-from common.utils import Log
+from common.Log import Log
+from model.Playable import Playable
 from presenter import MySignals
 from presenter.Settings import Settings
 
 
-class Video:
-
+class Video(Playable):
     def __init__(self, fname):
+        super().__init__()
         self.fname = fname
         self._cap = cv2.VideoCapture(self.fname)
         self._info = None
         self.cur_index = -1
-        self.scheduled = self.Schedule(None, None, None)
         self.frames_buffer = queue.Queue(maxsize=100)
 
     def __del__(self):
         self._cap.release()
+
+    def set_view(self, view):
+        self.label_show = view
+        return self
 
     def get_info(self):
         def _count_frames(cap=None):
@@ -51,7 +57,9 @@ class Video:
         stop_at = None if stop_at == -1 else max(0, min(stop_at, self.get_info()['frame_c'] - 1))
         self.scheduled.set(emitter, jump_to, stop_at)
 
-    def read(self):
+    def flush(self):
+        if not self._flag_playing and self.scheduled.jump_to is None:
+            return None
         if self.scheduled.stop_at:
             _interval = 1
         else:
@@ -59,15 +67,16 @@ class Video:
 
         if self.scheduled.jump_to is not None:
             dest_index = self.scheduled.jump_to
-            emitter = self.scheduled.emitter
+            # emitter = self.scheduled.emitter
             self.scheduled.jump_to = None
         else:
             dest_index = self.cur_index + _interval
-            emitter = MySignals.Emitter.TIMER
+            # emitter = MySignals.Emitter.TIMER
 
-        if self.scheduled.stop_at and dest_index > self.scheduled.stop_at:
+        if self.scheduled.stop_at is not None and dest_index > self.scheduled.stop_at:
             self.scheduled.clear()
-            return None, None, None
+            self.stop()
+            return None
 
         _gap = dest_index - self.cur_index
         if _gap > 80 or _gap < 1:
@@ -77,33 +86,19 @@ class Video:
             _gap -= 1
             ret, frame = self._cap.read()
             if not ret:
-                self.schedule(0, -1, -1, MySignals.Emitter.V_PLAYER)
-                return None, None, None
+                self.schedule(0, -1, 0, MySignals.Emitter.V_PLAYER)
+                return None
         self.cur_index = dest_index
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # self.frames_buffer.append((self.cur_index, frame))
-        return emitter, self.cur_index, frame
 
-    class Schedule:
-        def __init__(self, emitter, jump_to, stop_at):
-            self.emitter = emitter
-            self.jump_to = jump_to
-            self.stop_at = stop_at
-
-        def set(self, emitter, jump_to, stop_at):
-            self.emitter = emitter
-            self.jump_to = jump_to
-            self.stop_at = stop_at
-            Log.debug('scheduled--', self)
-
-        def clear(self):
-            self.emitter = None
-            self.jump_to = None
-            self.stop_at = None
-
-        def __str__(self):
-            return f'emitter:{self.emitter} jumpTo:{self.jump_to} stopAt:{self.stop_at}'
-
-        def __bool__(self):
-            return self.emitter is not None and self.jump_to is not None
+        height, width, bytesPerComponent = frame.shape
+        bytesPerLine = bytesPerComponent * width
+        q_image = QImage(frame.data, width, height, bytesPerLine,
+                         QImage.Format_RGB888).scaled(self.label_show.width(), self.label_show.height(),
+                                                      Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        q_pixmap = QPixmap.fromImage(q_image)
+        self.label_show.setPixmap(q_pixmap)
+        self.signals.flushed.emit(self.cur_index)
+        return self.cur_index

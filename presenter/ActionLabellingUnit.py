@@ -6,7 +6,8 @@ from PyQt5.QtCore import QRandomGenerator
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
 
-from common.utils import Log, hash_of_file
+from common.Log import Log
+from common.utils import hash_of_file
 from model.Action import Action
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
@@ -19,10 +20,13 @@ class ActionLabellingUnit:
     def __init__(self, mwindow):
         Log.debug('')
         self.mw = mwindow
+        (
+            self.mw.table_action.cellChanged.connect(self.mw.table_labeled.slot_action_update),
+        )
 
         (
             mySignals.follow_to.connect(self.mw.table_timeline.slot_follow_to),
-            mySignals.labeled_selected.connect(self.mw.table_timeline.slot_label_play),
+            # mySignals.labeled_selected.connect(self.mw.table_timeline.slot_label_play),
             mySignals.labeled_update.connect(self.mw.table_timeline.slot_label_update),
             mySignals.labeled_delete.connect(self.mw.table_timeline.slot_label_delete),
         )
@@ -31,7 +35,7 @@ class ActionLabellingUnit:
             mySignals.label_selected.connect(self.mw.table_labeled.slot_label_selected),
             mySignals.label_delete.connect(self.mw.table_labeled.slot_label_delete),
             mySignals.label_cells_delete.connect(self.mw.table_labeled.slot_label_cells_delete),
-            mySignals.action_update.connect(self.mw.table_labeled.slot_action_update),
+            # mySignals.action_update.connect(self.mw.table_labeled.slot_action_update),
         )
         (
             self.mw.btn_new_action.clicked.connect(self.slot_action_add),
@@ -43,7 +47,7 @@ class ActionLabellingUnit:
     def slot_export_labeled(self):
         Log.debug('')
         labels = self.mw.table_labeled.get_all_labels()
-        video_obj = PlayingUnit.only_ins.video_model
+        video_obj = PlayingUnit.only_ins.media_model
         video_info = video_obj and video_obj.get_info()
         video_uri = video_info and video_info['fname']
         video_name = video_uri and os.path.basename(video_uri)
@@ -74,6 +78,8 @@ class ActionLabellingUnit:
         Log.debug('')
         file_name = CommonUnit.get_open_name(filter_="(*.json)")
         Log.debug(file_name)
+        if file_name == '':
+            return
         with open(file_name, 'r') as f:
             json_content = json.load(f)
 
