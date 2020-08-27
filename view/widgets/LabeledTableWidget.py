@@ -81,7 +81,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         self._label_cells_delete(label_cells)
 
     @TableDecorators.dissort
-    def slot_action_update(self, r, c):
+    def action_update(self):
         rows_delete_later = set()
         labels_updated = []
         actions = CommonUnit.get_all_actions()
@@ -96,7 +96,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
                 Log.debug(_actions_dict)
                 rows_delete_later.add(r)
         self._delete_rows(rows_delete_later)
-        mySignals.labeled_update.emit(labels_updated, MySignals.Emitter.T_LABELED)
+        return labels_updated
 
     def get_all_labels(self) -> list:
         labels = []

@@ -21,7 +21,7 @@ class ActionLabellingUnit:
         Log.debug('')
         self.mw = mwindow
         (
-            self.mw.table_action.cellChanged.connect(self.mw.table_labeled.slot_action_update),
+            self.mw.table_action.cellChanged.connect(self.slot_action_update),
             self.mw.table_timeline.doubleClicked.connect(self.table_timeline_cell_double_clicked),
         )
 
@@ -81,7 +81,7 @@ class ActionLabellingUnit:
         Log.debug(file_name)
         if file_name == '':
             return
-        with open(file_name, 'r') as f:
+        with open(file_name, 'r', encoding='utf-8') as f:
             json_content = json.load(f)
 
         all_actions = {}
@@ -105,6 +105,12 @@ class ActionLabellingUnit:
         action = Action(self.mw.table_action.generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
         self.mw.table_action.insert_action(action)
         self.mw.table_action.editItem(self.mw.table_action.item(self.mw.table_action.rowCount() - 1, 0))
+
+    def slot_action_update(self, r, c):
+        Log.debug('')
+        labels_updated = self.mw.table_labeled.action_update()
+        if labels_updated:
+            self.mw.table_timeline.slot_label_update(labels_updated, MySignals.Emitter.T_LABELED)
 
     def slot_del_selected_actions(self,
                                   checked):  # if use decorator, must receive checked param of button clicked event

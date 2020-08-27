@@ -555,18 +555,17 @@ border: 1 solid gray;</string>
            <widget class="QTabWidget" name="tab_media">
             <property name="styleSheet">
              <string notr="true">QWidget {
-
 }
 QTabWidget {
-
+	border: 3px solid lightgray;
 }
 QTabWidget::pane {
 }
 QTabBar::tab {
 	background: lightgray;
 	color: black;
-	padding: 2px 5px;
-	border: 1px solid black;
+	padding: 2px 10px;
+	border: 1px solid gray;
 }
 QTabBar::tab:selected {
 	background: rgb(242, 248, 233);
@@ -681,7 +680,7 @@ QTabBar::tab:selected {
                 <item>
                  <widget class="QLabel" name="label_4">
                   <property name="text">
-                   <string>Sort by</string>
+                   <string>Sort by:</string>
                   </property>
                  </widget>
                 </item>
@@ -692,6 +691,11 @@ QTabBar::tab:selected {
                     <horstretch>0</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">QWidget {
+	border: 2px;
+}</string>
                   </property>
                  </widget>
                 </item>
