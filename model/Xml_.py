@@ -2,7 +2,6 @@ import textwrap
 from copy import deepcopy
 
 from lxml import etree
-
 # root = etree.Element("annotation")
 # etree.SubElement(root, "folder")
 # etree.SubElement(root, "filename")
@@ -20,7 +19,7 @@ from lxml import etree
 #
 # tree = etree.ElementTree(root)
 # tree.write('xmldemo.xml', pretty_print=True)
-from common.Log import Log
+from zdl.io.log import darkThemeColorLogger as logger
 
 
 class AnnotationXml:
@@ -94,7 +93,7 @@ class AnnotationXml:
     def _get_action_top_tag(self):
         for elem in self.temp_root.iterchildren():
             if elem.xpath('.//xmin'):
-                Log.debug('action top tag:', elem.tag, elem)
+                logger.debug(f'action top tag: {elem.tag} {elem}')
                 return elem
 
 

@@ -3,8 +3,8 @@ from typing import List
 
 import numpy as np
 import pyqtgraph as pg
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model.Playable import Playable
 from presenter.CommonUnit import CommonUnit
 
@@ -22,7 +22,7 @@ class Plotting(Playable):
         # self.clear_per_frame = True
 
     def set_data(self, v):
-        Log.debug('')
+        logger.debug('')
         self._fdata = v
         type_ = type(self._fdata)
         if type_ == np.array:
@@ -45,13 +45,13 @@ class Plotting(Playable):
         self._flag_clear_per_frame = v
 
     def set_range(self, x_range: list = [0, 1280], y_range: list = [0, 720]):
-        Log.debug('')
+        logger.debug('')
         self.plotter: pg.PlotItem
         self.plotter.setRange(xRange=x_range, yRange=y_range, padding=False, disableAutoRange=True)
         return self
 
     def schedule(self, jump_to, bias, stop_at, emitter):
-        Log.debug(jump_to, bias, stop_at, emitter, self._flag_cur_index)
+        logger.debug(f'{jump_to}, {bias}, {stop_at}, {emitter}, {self._flag_cur_index}')
         if jump_to != -1:
             bias = None
 

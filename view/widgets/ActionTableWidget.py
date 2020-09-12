@@ -1,8 +1,8 @@
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model.Action import Action
 from presenter.CommonUnit import CommonUnit
 from view.widgets.TableViewCommon import TableViewCommon
@@ -34,7 +34,7 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         self.blockSignals(False)
 
     def slot_cellChanged(self, r, c):
-        Log.debug(r, c)
+        logger.debug(f'{r}, {c}')
         if c == 2:
             if self.item(r, c).checkState() == Qt.Checked:
                 self._unselect_others(except_=r)
@@ -47,19 +47,19 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
         # global_.g_all_actions = self.get_all_actions
 
     def slot_cellDoubleClicked(self, r, c):
-        Log.debug(r, c)
+        logger.debug(f'{r}, {c}')
         if c == 1:
             item = self.item(r, c)
             color = QColorDialog().getColor(initial=item.background().color())  # type:QColor
             if color.isValid():
                 if color == Qt.white:
                     CommonUnit.status_prompt('Cannot set white color to action!')
-                    Log.warn('Cannot set white color to action!')
+                    logger.warn('Cannot set white color to action!')
                     return
                 item.setBackground(color)
 
     def get_all_actions(self):
-        Log.debug('')
+        logger.debug('')
         actions = []
         for r in range(self.rowCount()):
             try:
@@ -67,11 +67,11 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
             except AttributeError as e:
                 pass
             except Exception as e:
-                Log.error(e.__str__())
+                logger.error(e.__str__())
         return actions
 
     def get_default_action(self):
-        Log.debug('')
+        logger.debug('')
         rows = self.rowCount()
         if rows == 0:
             QMessageBox().information(self, 'ActionLabel',
@@ -141,4 +141,4 @@ class ActionTableWidget(QTableWidget, TableViewCommon):
                       xml_ymin, xml_ymax)
 
     def slot_test(self, *arg):
-        Log.debug(*arg)
+        logger.debug(*arg)

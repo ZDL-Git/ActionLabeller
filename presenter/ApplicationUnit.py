@@ -1,10 +1,10 @@
-from common.Log import Log
+from zdl.io.log import darkThemeColorLogger as logger
 
 
 class ApplicationUnit:
 
     def __init__(self, mwindow):
-        Log.debug('')
+        logger.debug('')
         self.mw = mwindow
 
         (

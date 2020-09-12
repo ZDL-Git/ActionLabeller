@@ -1,7 +1,7 @@
 import pyqtgraph as pg
 from PyQt5.QtCore import Qt, QObject
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model import File
 from model.PosePlotting import PosePlotting
 from presenter.CommonUnit import CommonUnit
@@ -11,7 +11,7 @@ from presenter.MySignals import mySignals
 class PosePlottingUnit(QObject):
     # inheriting QObject, required by pyqtSlot decorator
     def __init__(self, mwindow):
-        Log.debug('')
+        logger.debug('')
         self.mw = mwindow
         super().__init__()
 
@@ -79,7 +79,7 @@ class PosePlottingUnit(QObject):
         # TODO: remove native directory
         got = CommonUnit.get_open_name(filter_="(*.json)")
         # got = ['../sequence_poses_008-part2-count388-dur16s.npy']
-        Log.info(got)
+        logger.info(got)
         self.fname = got
         if not self.fname:
             return

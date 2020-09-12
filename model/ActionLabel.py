@@ -1,6 +1,6 @@
 from PyQt5.QtGui import QBrush
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from presenter.CommonUnit import CommonUnit
 
 
@@ -17,26 +17,28 @@ class ActionLabel:
 
     def merge(self, label_section):
         if self.action != label_section.action:
-            Log.error('different actions:', self, label_section)
+            logger.error('different actions:')
+            logger.error(self)
+            logger.error(label_section)
         elif self.begin <= label_section.begin <= self.end or self.begin <= label_section.end <= self.end:
             self.begin = min(self.begin, label_section.begin)
             self.end = max(self.end, label_section.end)
         else:
-            Log.error('actions not continuous')
+            logger.error('actions not continuous')
 
     def is_valid(self, checklist: list) -> bool:
-        Log.debug(self)
+        logger.debug(self)
         for attr in checklist:
             value = eval(f'self.{attr}')
             if value in [None, '', []]:
                 warn_ = f"Label's attr [{attr}]  is [{value}], invalid!"
                 CommonUnit.status_prompt(warn_)
-                Log.warn(warn_)
+                logger.warn(warn_)
                 return False
         if self.begin is not None and self.end is not None and self.begin > self.end:
             warn_ = f"Label's begin[{self.begin}] exceeds end[{self.end}], invalid!"
             CommonUnit.status_prompt(warn_)
-            Log.warn(warn_)
+            logger.warn(warn_)
             return False
         return True
 

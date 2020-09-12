@@ -1,12 +1,12 @@
 from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit
 
-from common.Log import Log
+from zdl.io.log import darkThemeColorLogger as logger
 
 
 class CommonUnit:
     @classmethod
     def set_mw(cls, mwindow):
-        Log.debug('')
+        logger.debug('')
         cls.mw = mwindow
 
         cls.get_default_action = cls.mw.table_action.get_default_action

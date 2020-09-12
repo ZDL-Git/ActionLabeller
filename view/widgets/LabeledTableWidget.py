@@ -3,8 +3,8 @@ from typing import List
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
@@ -33,7 +33,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     #     Log.debug(r, c)
 
     def keyReleaseEvent(self, e: QKeyEvent) -> None:
-        Log.debug('here', e.key())
+        logger.debug(e.key())
         if e.key() in [Qt.Key_Backspace, Qt.Key_D]:
             rows, labels = self._labels_selected()
             mySignals.labeled_delete.emit(labels, MySignals.Emitter.T_LABELED)
@@ -43,17 +43,17 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
                 self._slot_video_play(self.label_clicked.begin, self.label_clicked.end)
 
     def slot_itemSelectionChanged(self):
-        Log.debug('here')
+        logger.debug('here')
 
     def slot_cellDoubleClicked(self, r, c):
-        Log.debug(r, c)
+        logger.debug(f'{r}, {c}')
         label = self.label_at(r)
         mySignals.labeled_selected.emit(label, MySignals.Emitter.T_LABELED)
 
     @TableDecorators.dissort
     @TableDecorators.block_signals
     def slot_label_created(self, action_label: ActionLabel, emitter):
-        Log.debug(action_label, emitter)
+        logger.debug(f'{action_label}, {emitter}')
         self._label_cells_delete({action_label.timeline_row: list(range(action_label.begin, action_label.end + 1))})
         row_i = self.add_label(action_label)
         self._select_row(row_i)
@@ -61,7 +61,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     @TableDecorators.dissort
     @TableDecorators.block_signals
     def slot_label_selected(self, action_label, emitter):
-        Log.debug(action_label, emitter)
+        logger.debug(f'{action_label}, {emitter}')
         label_row = self._get_label_row_num(action_label)
         if label_row is not None:
             self.selectRow(label_row)
@@ -69,7 +69,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     @TableDecorators.dissort
     @TableDecorators.block_signals
     def slot_label_delete(self, action_label, emitter):
-        Log.debug(action_label, emitter)
+        logger.debug(f'{action_label}, {emitter}')
         row_i = self._get_label_row_num(action_label)
         if row_i is not None:
             self._delete_rows(row_i)
@@ -77,7 +77,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
     @TableDecorators.dissort
     @TableDecorators.block_signals
     def slot_label_cells_delete(self, label_cells, emitter):
-        Log.debug(label_cells, emitter)
+        logger.debug(f'{label_cells}, {emitter}')
         self._label_cells_delete(label_cells)
 
     @TableDecorators.dissort
@@ -93,7 +93,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
                 self.item(r, 5).setBackground(_actions_dict[id].color)
                 labels_updated.append(self.label_at(r))
             else:
-                Log.debug(_actions_dict)
+                logger.debug(_actions_dict)
                 rows_delete_later.add(r)
         self._delete_rows(rows_delete_later)
         return labels_updated

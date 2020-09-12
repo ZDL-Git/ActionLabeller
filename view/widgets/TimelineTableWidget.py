@@ -6,8 +6,8 @@ from PyQt5.QtCore import Qt, QVariant, QRect, QItemSelection, QItemSelectionMode
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEvent, QIntValidator
 from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
     QPushButton
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
@@ -60,7 +60,7 @@ class TimelineTableView(TableViewCommon):
         self.ckb_follow.stateChanged.connect(self.slot_ckb_follow)
 
     def keyPressEvent(self, e: QKeyEvent) -> None:
-        Log.debug(e, e.key(), e.type())
+        logger.debug(f'{e}, {e.key()}, {e.type()}')
         if e.key() == Qt.Key_Control:
             self.key_control_pressing = True
             self.hcenter_before_wheeling = self._center_col()
@@ -68,7 +68,7 @@ class TimelineTableView(TableViewCommon):
         #     pass
 
     def keyReleaseEvent(self, e: QKeyEvent) -> None:
-        Log.debug('here', e.key())
+        logger.debug(e.key())
         if e.key() == Qt.Key_Control:
             self.key_control_pressing = False
         elif e.key() in [Qt.Key_Backspace, Qt.Key_D]:
@@ -80,7 +80,7 @@ class TimelineTableView(TableViewCommon):
                 # self._emit_video_play(self.label_clicked.begin, self.label_clicked.end)
 
     def mouseReleaseEvent(self, e):
-        Log.debug('here')
+        logger.debug('here')
         super().mouseReleaseEvent(e)
         if not self.entry_cell_pos:
             return
@@ -93,7 +93,7 @@ class TimelineTableView(TableViewCommon):
             rows.add(qindex.row())
             cols.add(qindex.column())
         l, r, t, b = min(cols), max(cols), min(rows), max(rows)
-        Log.debug('l r t b', l, r, t, b)
+        logger.debug(f'l r t b {l} {r} {t} {b}')
         if l == r and t == b or b - t == self.model().rowCount() - 1:
             return
         entry_item = self.model().item(*self.entry_cell_pos)
@@ -122,7 +122,7 @@ class TimelineTableView(TableViewCommon):
                 mySignals.label_created.emit(found_label, MySignals.Emitter.T_LABEL)
 
     def wheelEvent(self, e: QWheelEvent) -> None:
-        Log.debug(f'wheel {e.angleDelta()}')
+        logger.debug(f'wheel {e.angleDelta()}')
         idler_forward = e.angleDelta().y() > 0
         if self.key_control_pressing:
             col_width = self.columnWidth(0)
@@ -131,7 +131,7 @@ class TimelineTableView(TableViewCommon):
             cols = self.horizontalHeader().count()
             col_width_to = max(col_width, int(t_width / cols))
 
-            Log.debug(self.hcenter_before_wheeling)
+            logger.debug(self.hcenter_before_wheeling)
             self.horizontalHeader().setDefaultSectionSize(col_width_to)
             self.col_to_center(self.hcenter_before_wheeling)
         else:
@@ -140,7 +140,7 @@ class TimelineTableView(TableViewCommon):
             mySignals.schedule.emit(-1, bias, -1, MySignals.Emitter.T_WHEEL)
 
     def slot_ckb_follow(self, state):
-        Log.debug('')
+        logger.debug('')
         # if state == Qt.Checked:
         #     global_.mySignals.follow_to.connect(self.slot_follow_to)
         # else:
@@ -149,7 +149,7 @@ class TimelineTableView(TableViewCommon):
 
     def slot_cellPressed(self, qindex):
         r, c = qindex.row(), qindex.column()
-        Log.debug(r, c, self.model().item(r, c))
+        logger.debug(f'{r}, {c}, {self.model().item(r, c)}')
         if not self.model().item(r, c):
             item = QStandardItem('')
             item.setBackground(Qt.white)
@@ -158,7 +158,7 @@ class TimelineTableView(TableViewCommon):
 
     def slot_cellClicked(self, qindex):
         r, c = qindex.row(), qindex.column()
-        Log.debug(r, c)
+        logger.debug(f'{r}, {c}')
         label = self._detect_label(r, c)
         if label is None:
             self.label_clicked = None
@@ -168,7 +168,7 @@ class TimelineTableView(TableViewCommon):
             mySignals.label_selected.emit(label, MySignals.Emitter.T_LABEL)
 
     def slot_sliderMoved(self, pos):
-        Log.debug(pos)
+        logger.debug(pos)
         # col_c = self.columnCount()
         # hscrollbar = self.horizontalScrollBar()
         index = (self.model().columnCount() - 1) * pos / self.horizontalScrollBar().maximum()
@@ -198,14 +198,14 @@ class TimelineTableView(TableViewCommon):
 
     @TableDecorators.block_signals
     def slot_label_delete(self, action_labels: typing.List[ActionLabel], emitter):
-        Log.debug(action_labels, emitter)
+        logger.debug(f'{action_labels}, {emitter}')
         self.unselect_all()
         for label in action_labels:
             self._del_label(label)
 
     @TableDecorators.block_signals
     def slot_label_update(self, action_labels: typing.List[ActionLabel], emitter):
-        Log.debug(action_labels, emitter)
+        logger.debug(f'{action_labels}, {emitter}')
         self.unselect_all()
         for label in action_labels:
             self._update_label(label)
@@ -224,7 +224,7 @@ class TimelineTableView(TableViewCommon):
                 break
         if t_r is None:
             warn_ = 'All related lines are not empty, please check!'
-            Log.warn(warn_)
+            logger.warn(warn_)
             CommonUnit.status_prompt(warn_)
             return None
         label.timeline_row = t_r
@@ -262,12 +262,12 @@ class TimelineTableView(TableViewCommon):
                 r = ci
             else:
                 break
-        Log.debug(item.toolTip(), item.whatsThis(), item.background())
+        logger.debug(f'{item.toolTip()}, {item.whatsThis()}, {item.background()}')
         return ActionLabel(item.toolTip(), int(item.whatsThis()), item.background(), l, r, row)
 
     def select_label(self, label: ActionLabel):
-        Log.debug(label)
-        Log.debug(QRect(label.begin, label.timeline_row, label.end - label.begin + 1, 1))
+        logger.debug(label)
+        logger.debug(QRect(label.begin, label.timeline_row, label.end - label.begin + 1, 1))
         self.selectionModel().select(
             QItemSelection(self.model().index(label.timeline_row, label.begin),
                            self.model().index(label.timeline_row, label.end)),
@@ -293,7 +293,7 @@ class TimelineTableView(TableViewCommon):
             item.setToolTip(None)
 
     def _del_selected_label_cells(self):
-        Log.info('here')
+        logger.info('here')
         label_cells = {}  # key:row,value:cols list
         for qindex in self.selectedIndexes():
             r, c = qindex.row(), qindex.column()
@@ -390,7 +390,7 @@ class TimelineTableView(TableViewCommon):
 
         # FIXME
         def slot_btn_finish_clicked(self, w_action, w_begin, w_end, index_in_labels_unfinished):
-            Log.debug('')
+            logger.debug('')
             action_name = w_action.currentText()
             action = list(filter(lambda a: a.name == action_name, self.actions))[0]
             begin = w_begin.text() and int(w_begin.text())
@@ -408,10 +408,10 @@ class TimelineTableView(TableViewCommon):
                 self._load_unfinished()
 
         def slot_btn_new_clicked(self):
-            Log.debug('')
+            logger.debug('')
             action_name = self.combo_action_names.currentText()
             if not action_name:
-                Log.info('Please add action first!')
+                logger.info('Please add action first!')
                 return
             action = list(filter(lambda a: a.name == action_name, self.actions))[0]
             begin = self.line_begin.text() and int(self.line_begin.text())
@@ -431,7 +431,7 @@ class TimelineTableView(TableViewCommon):
                 self._load_unfinished()
 
         def _commit_label(self, label: ActionLabel):
-            Log.debug('', label)
+            logger.debug(label)
             if not label.is_valid(['action', 'action_id', 'color', 'begin', 'end']):
                 return False
             if self.parent().settle_label(label) is None:

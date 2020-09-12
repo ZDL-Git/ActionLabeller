@@ -2,8 +2,8 @@ import os
 
 import pyqtgraph as pg
 from PyQt5.QtCore import QEvent, QObject
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model.ActionLabel import ActionLabel
 from model.File import load_dict
 from model.Playable import Playable
@@ -21,7 +21,7 @@ class PlayingUnit(QObject):
     only_ins = None
 
     def __init__(self, mwindow):
-        Log.debug('')
+        logger.debug('')
         super().__init__()
         self.__class__.only_ins = self
         self.mw = mwindow
@@ -71,7 +71,8 @@ class PlayingUnit(QObject):
         # Log.debug(source, event)
         if source == self.mw.label_show:
             if event.type() == QEvent.MouseButtonPress:
-                Log.debug(source, event)
+                logger.debug(source)
+                logger.debug(event)
                 self.slot_play_toggle()
 
         return False
@@ -82,7 +83,7 @@ class PlayingUnit(QObject):
         file_uri = CommonUnit.get_open_name(filter_=f"Media Files ({all_types_filter})")
         # got = '/Users/zdl/Downloads/下载-视频/poses.json'
         # got = '/Users/zdl/Downloads/下载-视频/金鞭溪-张家界.mp4'
-        Log.info(file_uri)
+        logger.info(file_uri)
         if not file_uri:
             return
         ext = os.path.splitext(file_uri)[1]
@@ -104,18 +105,19 @@ class PlayingUnit(QObject):
             self.pose_model = pose_model
             self.set_model(pose_model)
         else:
-            Log.warn(file_uri, ext)
+            logger.warn(file_uri)
+            logger.warn(ext)
         self.media_model.signals.flushed.connect(self.mw.table_timeline.slot_follow_to)
         self.media_model.signals.flushed.connect(self.mw.slot_follow_to)
         self.media_model.start()
 
     def slot_btn_stop(self):
-        Log.debug('')
+        logger.debug('')
         self.video_playing = False
         self.mw.label_show.clear()
 
     def slot_play_toggle(self):
-        Log.debug('')
+        logger.debug('')
         if self.media_model is None:
             return
         if self.media_model.is_playing():
@@ -124,13 +126,13 @@ class PlayingUnit(QObject):
             self.media_model.start()
 
     def slot_stop(self):
-        Log.debug('')
+        logger.debug('')
         if self.media_model is None:
             return
         self.media_model.stop()
 
     def slot_start(self):
-        Log.debug('')
+        logger.debug('')
         if self.media_model is None:
             return
         self.media_model.start()
@@ -145,18 +147,18 @@ class PlayingUnit(QObject):
     #         self.media_model.schedule(jump_to, bias, stop_at, emitter)
 
     def set_model(self, model):
-        Log.debug(type(model))
+        logger.debug(type(model))
         self.media_model = model
 
     def slot_fast_backward(self):
-        Log.debug('')
+        logger.debug('')
         if self.media_model is None:
             return
         step = CommonUnit.get_value(self.mw.input_step, int)
         self.media_model.schedule(-1, -1 * step, -1, MySignals.Emitter.BTN)
 
     def slot_rewind(self):
-        Log.debug('')
+        logger.debug('')
         if self.media_model is None:
             return
         step = CommonUnit.get_value(self.mw.input_step, int)
@@ -169,7 +171,7 @@ class PlayingUnit(QObject):
         pass
 
     def slot_speed_changed(self):
-        Log.debug('')
+        logger.debug('')
         try:
             factor = float(self.mw.combo_speed.currentText())
             if not factor:
@@ -187,10 +189,10 @@ class PlayingUnit(QObject):
             jump_to = int(text)
             self.media_model.schedule(jump_to, -1, -1, MySignals.Emitter.INPUT_JUMPTO)
         except Exception:
-            Log.warn('Only int number supported!')
+            logger.warn('Only int number supported!')
 
     def slot_tabmedia_current_changed(self, index):
-        Log.debug(index)
+        logger.debug(index)
         self.media_model and self.media_model.stop()
         if index == 0:
             self.mw.stacked_widget.setCurrentIndex(0)
@@ -203,7 +205,7 @@ class PlayingUnit(QObject):
             self.set_model(self.pose_model)
 
     def slot_tabletimeline_header_clicked(self, i):
-        Log.info('index', i)
+        logger.info(f'index {i}')
         if self.media_model is None:
             return
         self.media_model.schedule(i, -1, -1, MySignals.Emitter.T_HHEADER)
@@ -245,13 +247,13 @@ class PlayingUnit(QObject):
         # bottom_axis.setTicks([[(i, str(i)) for i in range(0, w + 1, 20)], []])
 
     def table_labeled_cell_double_clicked(self, r, c):
-        Log.debug('')
+        logger.debug('')
         label = self.mw.table_labeled.label_at(r)
         if not self.label_play(label):
             self.mw.table_timeline.col_to_center(label.begin)
 
     def table_timeline_cell_double_clicked(self, qindex):
-        Log.debug('')
+        logger.debug('')
         r, c = qindex.row(), qindex.column()
         label = self.mw.table_timeline._detect_label(r, c)  # type:ActionLabel
         if label:

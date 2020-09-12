@@ -2,8 +2,8 @@ from typing import List, Dict
 
 from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QGridLayout, QTextBrowser, QDialog
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model.Action import Action
 from model.ActionLabel import ActionLabel
 from model.Xml_ import AnnotationXml
@@ -12,21 +12,21 @@ from presenter.CommonUnit import CommonUnit
 
 class XmlSettingUnit:
     def __init__(self, mwindow):
-        Log.debug('')
+        logger.debug('')
         self.mw = mwindow
         # Log.debug(self.parent())
         self.mw.btn_export_xml.clicked.connect(self.slot_export_xml)
         self.mw.btn_xml_template.clicked.connect(self.slot_xml_template)
 
     def slot_export_xml(self):
-        Log.debug('')
+        logger.debug('')
         labels = CommonUnit.get_all_labels()  # type:List[ActionLabel]
         labels.sort(key=lambda l: l.begin)
         actions = CommonUnit.get_all_actions()  # type:List[Action]
         id_action_dict = {a.id: a for a in actions}  # type:Dict[int,Action]
         framespan = int(self.mw.line_framespan.text())
         overlap = int(self.mw.line_overlap.text())
-        Log.debug(framespan, overlap, labels)
+        logger.debug(f'{framespan}, {overlap}, {labels}')
 
         anno = AnnotationXml()
         file_num = 0
@@ -54,10 +54,10 @@ class XmlSettingUnit:
                     cursor += 1
             anno.dump()
             file_num += 1
-        Log.info('labels abandoned:', abandoned)
+        logger.info(f'labels abandoned: {abandoned}')
 
     def slot_xml_template(self):
-        Log.debug('')
+        logger.debug('')
         layout = QGridLayout()
         layout.addWidget(QTextBrowser())
         layout.setContentsMargins(2, 2, 2, 2)

@@ -1,7 +1,7 @@
 import numpy as np
 import pyqtgraph as pg
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model.Plotting import Plotting
 
 
@@ -41,6 +41,6 @@ class PosePlotting(Plotting):
                                   symbolBrush=symbol_brush, symbolPen=symbol_pen, symbolSize=markersize)
 
     def set_view(self, view):
-        Log.debug('')
+        logger.debug('')
         self.plotter = view
         return self

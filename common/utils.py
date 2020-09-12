@@ -3,14 +3,14 @@ import json
 import sys
 import time
 
-from common.Log import Log
+from zdl.io.log import darkThemeColorLogger as logger
 
 
 def python_version_required(v: str, ge=True):
     v_tuple = tuple(map(int, v.split('.')))
     v_len = len(v_tuple)
     if v_len > 3:
-        Log.error('required version error!')
+        logger.error('required version error!')
         return
     if (not ge and v_tuple != sys.version_info[:v_len]) or (ge and v_tuple > sys.version_info[:v_len]):
         raise Exception(f'python version {sys.version_info[:3]} not meets the requirement!')
@@ -44,7 +44,7 @@ def timeit(method):
             name = kw.get('log_name', method.__name__.upper())
             kw['log_time'][name] = int((te - ts) * 1000)
         else:
-            Log.debug('Timeit:: %r :: %2.2f s' % (method.__name__, (te - ts)))
+            logger.debug('Timeit:: %r :: %2.2f s' % (method.__name__, (te - ts)))
         return result
 
     return timed
@@ -59,7 +59,7 @@ def hash_of_file(file, fn='md5') -> str:
     elif fn == 'sha1':
         res = hashlib.sha1()
     else:
-        Log.error('fn should in [md5,sha1]')
+        logger.error('fn should in [md5,sha1]')
         return None
     with open(file, 'rb') as f:
         while True:

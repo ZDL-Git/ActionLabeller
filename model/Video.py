@@ -3,8 +3,8 @@ import queue
 import cv2
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from model.Playable import Playable
 from presenter import MySignals
 from presenter.Settings import Settings
@@ -51,7 +51,7 @@ class Video(Playable):
         return self._info
 
     def schedule(self, jump_to, bias, stop_at, emitter):
-        Log.debug(jump_to, bias, stop_at, emitter, self.cur_index)
+        logger.debug(f'{jump_to}, {bias}, {stop_at}, {emitter}, {self.cur_index}')
 
         jump_to = self.cur_index + bias if jump_to == -1 else max(0, min(jump_to, self.get_info()['frame_c'] - 1))
         stop_at = None if stop_at == -1 else max(0, min(stop_at, self.get_info()['frame_c'] - 1))

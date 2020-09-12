@@ -5,8 +5,8 @@ import time
 from PyQt5.QtCore import QRandomGenerator
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from common.utils import hash_of_file
 from model.Action import Action
 from model.ActionLabel import ActionLabel
@@ -18,7 +18,7 @@ from presenter.PlayingUnit import PlayingUnit
 
 class ActionLabellingUnit:
     def __init__(self, mwindow):
-        Log.debug('')
+        logger.debug('')
         self.mw = mwindow
         (
             self.mw.table_action.cellChanged.connect(self.slot_action_update),
@@ -46,7 +46,7 @@ class ActionLabellingUnit:
         )
 
     def slot_export_labeled(self):
-        Log.debug('')
+        logger.debug('')
         labels = self.mw.table_labeled.get_all_labels()
         video_obj = PlayingUnit.only_ins.media_model
         video_info = video_obj and video_obj.get_info()
@@ -76,9 +76,9 @@ class ActionLabellingUnit:
                 json.dump(json_content, f, indent=2, ensure_ascii=False)
 
     def slot_import_labeled(self):
-        Log.debug('')
+        logger.debug('')
         file_name = CommonUnit.get_open_name(filter_="(*.json)")
-        Log.debug(file_name)
+        logger.debug(file_name)
         if file_name == '':
             return
         with open(file_name, 'r', encoding='utf-8') as f:
@@ -101,20 +101,20 @@ class ActionLabellingUnit:
             self.mw.table_labeled.add_label(action_label)
 
     def slot_action_add(self, checked):  # if use decorator, must receive checked param of button clicked event
-        Log.debug('')
+        logger.debug('')
         action = Action(self.mw.table_action.generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
         self.mw.table_action.insert_action(action)
         self.mw.table_action.editItem(self.mw.table_action.item(self.mw.table_action.rowCount() - 1, 0))
 
     def slot_action_update(self, r, c):
-        Log.debug('')
+        logger.debug('')
         labels_updated = self.mw.table_labeled.action_update()
         if labels_updated:
             self.mw.table_timeline.slot_label_update(labels_updated, MySignals.Emitter.T_LABELED)
 
     def slot_del_selected_actions(self,
                                   checked):  # if use decorator, must receive checked param of button clicked event
-        Log.debug('')
+        logger.debug('')
         if not self.mw.table_action.selectedIndexes():
             QMessageBox().information(self.mw, 'ActionLabel Warning',
                                       "Select action first!",
@@ -134,7 +134,7 @@ class ActionLabellingUnit:
         mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
 
     def table_timeline_cell_double_clicked(self, qindex):
-        Log.debug('')
+        logger.debug('')
         r, c = qindex.row(), qindex.column()
         label = self.mw.table_timeline._detect_label(r, c)  # type:ActionLabel
         if not label:

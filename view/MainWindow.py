@@ -3,8 +3,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCloseEvent, QColor, QDoubleValidator
 from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
     QHeaderView, QComboBox
+from zdl.io.log import darkThemeColorLogger as logger
 
-from common.Log import Log
 from presenter.ActionLabellingUnit import ActionLabellingUnit
 from presenter.ApplicationUnit import ApplicationUnit
 from presenter.CommonUnit import CommonUnit
@@ -72,7 +72,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self._holder4 = PosePlottingUnit(self)
 
     def common_slot(self, *arg):
-        Log.debug(f'common slot print:', arg)
+        logger.debug(f'common slot print:{arg}')
 
     def slot_interval_changed(self):
         Settings.v_interval = int(self.spin_interval.text() or 1)
@@ -86,13 +86,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return False
 
     def closeEvent(self, e: QCloseEvent):
-        Log.debug('')
+        logger.debug('')
         # TODO: uncomment this block
         # if QMessageBox.Ok != QMessageBox.information(self, 'ActionLabel',
         #                                              "Are you sure to quit, the unsaved labels will be lost?",
         #                                              QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
         #     e.ignore()
-        Log.debug('Main window closed.')
+        logger.debug('Main window closed.')
 
     # def resizeEvent(self, e):
     #     pass
@@ -101,7 +101,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def slot_eval(self):
         eval_content = self.ptext_eval_in.toPlainText()
-        Log.info(eval_content)
+        logger.info(eval_content)
         try:
             resp = eval(eval_content)
         except Exception as e:

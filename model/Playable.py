@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
-
-from common.Log import Log
+from zdl.io.log import darkThemeColorLogger as logger
 
 
 class Playable(ABC):
@@ -20,7 +19,7 @@ class Playable(ABC):
         self.timer.timeout.connect(self.flush)
 
     def set_fps(self, fps):
-        Log.debug(fps)
+        logger.debug(fps)
         self.timer.setInterval(1000 / fps)
         return self
 
@@ -28,12 +27,12 @@ class Playable(ABC):
         return self._flag_playing
 
     def stop(self):
-        Log.debug('')
+        logger.debug('')
         self._flag_playing = False
         # self.timer.stop()
 
     def start(self):
-        Log.debug('')
+        logger.debug('')
         self._flag_playing = True
         if not self.timer.isActive():
             self.timer.start()
@@ -60,7 +59,8 @@ class Playable(ABC):
             self.emitter = emitter
             self.jump_to = jump_to
             self.stop_at = stop_at
-            Log.debug('scheduled--', self)
+            logger.debug('scheduled--')
+            logger.debug(self)
 
         def clear(self):
             self.emitter = None
