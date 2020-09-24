@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 import pyqtgraph as pg
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from model.Playable import Playable
 from presenter.CommonUnit import CommonUnit

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from PyQt5.QtCore import QObject, pyqtSignal, QTimer
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 
 class Playable(ABC):

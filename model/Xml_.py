@@ -19,7 +19,7 @@ from lxml import etree
 #
 # tree = etree.ElementTree(root)
 # tree.write('xmldemo.xml', pretty_print=True)
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 
 class AnnotationXml:

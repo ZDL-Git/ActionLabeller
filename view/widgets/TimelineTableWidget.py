@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QVariant, QRect, QItemSelection, QItemSelectionMode
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEvent, QIntValidator
 from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
     QPushButton
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from model.ActionLabel import ActionLabel
 from presenter import MySignals

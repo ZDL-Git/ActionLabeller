@@ -1,6 +1,6 @@
 import pyqtgraph as pg
 from PyQt5.QtCore import Qt, QObject
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from model import File
 from model.PosePlotting import PosePlotting

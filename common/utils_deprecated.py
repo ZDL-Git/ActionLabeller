@@ -3,7 +3,7 @@ import json
 import sys
 import time
 
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 
 def python_version_required(v: str, ge=True):

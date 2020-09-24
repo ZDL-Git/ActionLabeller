@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit
 
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 
 class CommonUnit:

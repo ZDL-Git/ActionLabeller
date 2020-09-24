@@ -5,9 +5,9 @@ import time
 from PyQt5.QtCore import QRandomGenerator
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.file import hashOfFile
+from zdl.utils.io.log import logger
 
-from common.utils import hash_of_file
 from model.Action import Action
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
@@ -52,7 +52,7 @@ class ActionLabellingUnit:
         video_info = video_obj and video_obj.get_info()
         video_uri = video_info and video_info['fname']
         video_name = video_uri and os.path.basename(video_uri)
-        md5 = video_uri and hash_of_file(video_uri)
+        md5 = video_uri and hashOfFile(video_uri)
         h = video_info and video_info['height']
         w = video_info and video_info['width']
         json_content = {

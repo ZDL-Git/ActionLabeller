@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCloseEvent, QColor, QDoubleValidator
 from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
     QHeaderView, QComboBox
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from presenter.ActionLabellingUnit import ActionLabellingUnit
 from presenter.ApplicationUnit import ApplicationUnit

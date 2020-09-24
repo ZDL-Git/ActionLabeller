@@ -2,7 +2,9 @@ import sys
 
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication
+from zdl.utils.io import log
 
+log.theme('dark')
 from view.MainWindow import MainWindow
 
 if __name__ == '__main__':

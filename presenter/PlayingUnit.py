@@ -2,7 +2,7 @@ import os
 
 import pyqtgraph as pg
 from PyQt5.QtCore import QEvent, QObject
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from model.ActionLabel import ActionLabel
 from model.File import load_dict

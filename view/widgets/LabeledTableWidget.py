@@ -3,7 +3,7 @@ from typing import List
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from model.ActionLabel import ActionLabel
 from presenter import MySignals

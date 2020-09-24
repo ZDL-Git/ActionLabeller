@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QBrush
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from presenter.CommonUnit import CommonUnit
 

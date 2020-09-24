@@ -3,7 +3,7 @@ import queue
 import cv2
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from model.Playable import Playable
 from presenter import MySignals

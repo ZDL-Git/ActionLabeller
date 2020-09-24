@@ -1,6 +1,6 @@
 import numpy as np
 import pyqtgraph as pg
-from zdl.io.log import darkThemeColorLogger as logger
+from zdl.utils.io.log import logger
 
 from model.Plotting import Plotting
 
