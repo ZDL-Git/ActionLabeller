@@ -44,8 +44,12 @@ class Plotting(Playable):
     def clear_per_frame(self, v):
         self._flag_clear_per_frame = v
 
-    def set_range(self, x_range: list = [0, 1280], y_range: list = [0, 720]):
+    def set_range(self, x_range=None, y_range=None):
         logger.debug('')
+        if x_range is None:
+            x_range = [0, 1280]
+        if y_range is None:
+            y_range = [0, 720]
         self.plotter: pg.PlotItem
         self.plotter.setRange(xRange=x_range, yRange=y_range, padding=False, disableAutoRange=True)
         return self
