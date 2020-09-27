@@ -1,3 +1,6 @@
+import codecs
+import json
+
 from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit
 
 from zdl.utils.io.log import logger
@@ -26,6 +29,13 @@ class CommonUnit:
         name = QFileDialog().getOpenFileName(cls.mw, caption, directory,
                                              filter_, options=QFileDialog.ReadOnly)
         return name[0]
+
+    @classmethod
+    def save_to_file(cls, content, default_fname):
+        save_as = cls.get_save_name(default=default_fname)
+        if save_as:
+            with codecs.getwriter("utf8")(open(save_as, "wb")) as f:
+                json.dump(content, f, indent=2, ensure_ascii=False)
 
     @classmethod
     def get_value(cls, obj, type_=str):

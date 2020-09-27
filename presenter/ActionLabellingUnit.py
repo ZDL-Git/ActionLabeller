@@ -70,10 +70,8 @@ class ActionLabellingUnit:
             json_content['labels'][i] = {'action': label.action,
                                          'begin': label.begin,
                                          'end': label.end, }
-        save_as = CommonUnit.get_save_name(default=f'{video_name}.json')
-        if save_as:
-            with open(save_as, "w") as f:
-                json.dump(json_content, f, indent=2, ensure_ascii=False)
+        logger.debug(json_content['video_info'])
+        CommonUnit.save_to_file(json_content, default_fname=f'{video_name}.json')
 
     def slot_import_labeled(self):
         logger.debug('')
