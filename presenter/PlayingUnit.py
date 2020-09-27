@@ -96,8 +96,10 @@ class PlayingUnit(QObject):
             self.set_model(video_model)
         elif ext in Settings.plotting_exts:
             self.mw.tab_media.setCurrentIndex(2)
-            pose_data = load_dict(file_uri)
-            pose_model = PosePlotting() \
+            content = load_dict(file_uri)
+            pose_data = content['poses']
+            pose_type = content['info']['pose_type']
+            pose_model = PosePlotting(pose_type) \
                 .set_data(pose_data) \
                 .set_view(self.main_plotter) \
                 .set_range()

@@ -1,22 +1,24 @@
 import numpy as np
 import pyqtgraph as pg
+from zdl.AI.pose_estimation.pose import *
 from zdl.utils.io.log import logger
 
 from model.Plotting import Plotting
 
 
 class PosePlotting(Plotting):
-    def __init__(self, ):
+    def __init__(self, pose_type):
         super().__init__()
+        all_sub_pose_types = {cls.__name__: cls for cls in pose.Pose.__subclasses__()}
+        assert pose_type in all_sub_pose_types, f'pose_type {pose_type} not in {list(all_sub_pose_types.keys())}'
+        self.pose_type = all_sub_pose_types[pose_type]
 
         self.flag_playing = False
         # self.clear_per_frame = True
 
     def plot(self, key):
         pose_colors = ['#fe8a71', '#0e9aa7', 'gray']
-        pose_sections = [[4, 2, 0, 1, 3], [18, 17, 6, 12, 11, 5, 17], [6, 8, 10], [5, 7, 9],
-                         [12, 14, 16],
-                         [11, 13, 15], [16, 22, 23, 16, 24], [15, 19, 20, 15, 21]]
+        pose_sections = self.pose_type.SECTIONS
 
         if self.clear_per_frame:
             self.plotter.clear()
