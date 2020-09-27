@@ -9,7 +9,7 @@ from model.Plotting import Plotting
 class PosePlotting(Plotting):
     def __init__(self, pose_type):
         super().__init__()
-        all_sub_pose_types = {cls.__name__: cls for cls in pose.Pose.__subclasses__()}
+        all_sub_pose_types = {cls.__name__: cls for cls in base_pose.BasePose.__subclasses__()}
         assert pose_type in all_sub_pose_types, f'pose_type {pose_type} not in {list(all_sub_pose_types.keys())}'
         self.pose_type = all_sub_pose_types[pose_type]
 
