@@ -16,7 +16,9 @@ class CommonUnit:
 
     @classmethod
     def get_save_name(cls, default=None):
-        name = QFileDialog().getSaveFileName(cls.mw, 'Save File', default)
+        fd = QFileDialog()
+        fd.setAcceptMode(QFileDialog.AcceptSave)
+        name = fd.getSaveFileName(cls.mw, 'Save File', default)
         return name[0]
 
     @classmethod
