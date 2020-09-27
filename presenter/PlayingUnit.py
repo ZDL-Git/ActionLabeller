@@ -90,7 +90,7 @@ class PlayingUnit(QObject):
         if ext in Settings.video_exts:
             self.mw.tab_media.setCurrentIndex(0)
             video_model = Video(file_uri).set_view(self.mw.label_show)
-            video_model.set_fps(video_model.get_info()['fps'] * float(self.mw.combo_speed.currentText()))
+            video_model.fps = video_model.get_info()['fps'] * float(self.mw.combo_speed.currentText())
             self.mw.table_timeline.set_column_num(video_model.get_info()['frame_c'])
             self.video_model = video_model
             self.set_model(video_model)
@@ -176,13 +176,15 @@ class PlayingUnit(QObject):
         logger.debug('')
         try:
             factor = float(self.mw.combo_speed.currentText())
-            if not factor:
-                return
+            if isinstance(self.media_model, Video):
+                self.media_model.fps = self.media_model.get_info()['fps'] * factor
+            elif isinstance(self.media_model, PosePlotting):
+                self.media_model.fps = 20 * factor
+            # if self.media_model:
+            #     new_speed = 1000 / self.media_model.get_info()['fps'] / factor
+            #     mySignals.timer_video.setInterval(new_speed)
         except Exception:
-            return
-        if self.media_model:
-            new_speed = 1000 / self.media_model.get_info()['fps'] / factor
-            mySignals.timer_video.setInterval(new_speed)
+            logger.warning('slot_speed_changed fail.', exc_info=True)
 
     def slot_input_jumpto_changed(self, text):
         try:

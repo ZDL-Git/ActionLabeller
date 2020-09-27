@@ -18,10 +18,14 @@ class Playable(ABC):
 
         self.timer.timeout.connect(self.flush)
 
-    def set_fps(self, fps):
+    @property
+    def fps(self):
+        return 1000 / self.timer.interval()
+
+    @fps.setter
+    def fps(self, fps):
         logger.debug(fps)
         self.timer.setInterval(1000 / fps)
-        return self
 
     def is_playing(self):
         return self._flag_playing
