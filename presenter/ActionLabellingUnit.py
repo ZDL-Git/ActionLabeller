@@ -69,24 +69,20 @@ class ActionLabellingUnit:
         for i, label in enumerate(labels):
             json_content['labels'][i] = {'action': label.action,
                                          'begin': label.begin,
-                                         'end': label.end, }
+                                         'end': label.end,
+                                         'pose_index': label.pose_index, }
         logger.debug(json_content['video_info'])
-        CommonUnit.save_to_file(json_content, default_fname=f'{video_name}.json')
+        CommonUnit.save_dict(json_content, default_fname=f'{video_name}.json')
 
     def slot_import_labeled(self):
         logger.debug('')
-        file_name = CommonUnit.get_open_name(filter_="(*.json)")
-        logger.debug(file_name)
-        if file_name == '':
-            return
-        with open(file_name, 'r', encoding='utf-8') as f:
-            json_content = json.load(f)
-
+        json_content = CommonUnit.load_dict()
         all_actions = {}
         for i in json_content['labels']:
             action_name = json_content['labels'][i]['action']
             begin = json_content['labels'][i]['begin']
             end = json_content['labels'][i]['end']
+            pose_index = json_content['labels'][i].get('pose_index', -1)
             if action_name not in all_actions:
                 action = Action(self.mw.table_action.generate_id(), action_name,
                                 QColor(QRandomGenerator().global_().generate()), False)
@@ -94,7 +90,8 @@ class ActionLabellingUnit:
                 all_actions[action_name] = action
             else:
                 action = all_actions[action_name]
-            action_label = ActionLabel(action.name, action.id, action.color, begin, end, None)
+            action_label = ActionLabel(action.name, action.id, action.color, begin, end, None, pose_index)
+            logger.debug(action_label)
             self.mw.table_timeline.settle_label(action_label)
             self.mw.table_labeled.add_label(action_label)
 

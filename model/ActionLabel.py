@@ -1,3 +1,5 @@
+from typing import Optional
+
 from PyQt5.QtGui import QBrush
 from zdl.utils.io.log import logger
 
@@ -5,7 +7,8 @@ from presenter.CommonUnit import CommonUnit
 
 
 class ActionLabel:
-    def __init__(self, action: str, action_id: int, color, begin: int, end: int, timeline_row: int):
+    def __init__(self, action: str, action_id: int, color, begin: int, end: int, timeline_row: Optional[int],
+                 pose_index: int = -1):
         self.action = action
         self.action_id = action_id
         if isinstance(color, QBrush):
@@ -13,6 +16,7 @@ class ActionLabel:
         self.color = color
         self.begin = begin
         self.end = end
+        self.pose_index = pose_index  # pose index from 0, within one frame.
         self.timeline_row = timeline_row
 
     def merge(self, label_section):
@@ -48,4 +52,5 @@ class ActionLabel:
                f"action_id[{self.action_id}] " \
                f"color[{self.color.getRgb()}] " \
                f"begin[{self.begin}] end[{self.end}] " \
+               f"pose_index[{self.pose_index}] " \
                f"timeline_row[{self.timeline_row}]"

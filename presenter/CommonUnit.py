@@ -31,11 +31,20 @@ class CommonUnit:
         return name[0]
 
     @classmethod
-    def save_to_file(cls, content, default_fname):
+    def save_dict(cls, content, default_fname):
         save_as = cls.get_save_name(default=default_fname)
         if save_as:
             with codecs.getwriter("utf8")(open(save_as, "wb")) as f:
                 json.dump(content, f, indent=2, ensure_ascii=False)
+
+    @classmethod
+    def load_dict(cls) -> dict:
+        file_name = cls.get_open_name(filter_="(*.json)")
+        logger.debug(file_name)
+        assert file_name, 'file not selected!'
+        with open(file_name, 'r', encoding='utf-8') as f:
+            json_content = json.load(f)
+        return json_content
 
     @classmethod
     def get_value(cls, obj, type_=str):

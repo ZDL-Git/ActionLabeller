@@ -1,5 +1,6 @@
 from typing import List
 
+from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
@@ -22,17 +23,22 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         # self.cellChanged.connect(self.slot_cellChanged)
 
     def __init_later__(self):
-        self.setColumnCount(6)
-        self.setHorizontalHeaderLabels(['Action', 'Begin', 'End', 'Timeline Row', 'Action Id', 'Action Color'])
+        self.setColumnCount(7)
+        self.setHorizontalHeaderLabels(
+            ['Action', 'Begin', 'End', 'Timeline Row', 'Action Id', 'Action Color', 'Pose Index'])
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.setColumnHidden(3, True)
         self.setColumnHidden(4, True)
         self.setColumnHidden(5, True)
+        self.setColumnHidden(6, False)
 
     # def slot_cellChanged(self, r, c):
     #     Log.debug(r, c)
 
     def keyReleaseEvent(self, e: QKeyEvent) -> None:
+        if self.state() == QtGui.QAbstractItemView.EditingState:
+            return
+
         logger.debug(e.key())
         if e.key() in [Qt.Key_Backspace, Qt.Key_D]:
             rows, labels = self._labels_selected()
@@ -106,10 +112,13 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         return labels
 
     def label_at(self, r):
-        return ActionLabel(self.item(r, 0).text(), int(self.item(r, 4).text()), self.item(r, 5).background(),
-                           int(self.item(r, 1).text()),
-                           int(self.item(r, 2).text()),
-                           int(self.item(r, 3).text()))
+        label = ActionLabel(self.item(r, 0).text(), int(self.item(r, 4).text()), self.item(r, 5).background(),
+                            int(self.item(r, 1).text()),
+                            int(self.item(r, 2).text()),
+                            int(self.item(r, 3).text()),
+                            int(self.item(r, 6).text()))
+        logger.debug(label)
+        return label
 
     def _labels_selected(self) -> (set, List[ActionLabel]):
         rows = set()
@@ -131,11 +140,15 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
 
     def add_label(self, action_label: ActionLabel):
         action = QTableWidgetItem(action_label.action)
-        # action.setFlags(action.flags() & ~Qt.ItemIsEditable)
+        action.setFlags(action.flags() & ~Qt.ItemIsEditable)
         begin = QTableWidgetItem()
+        begin.setFlags(begin.flags() & ~Qt.ItemIsEditable)
         begin.setData(Qt.DisplayRole, action_label.begin)
         end = QTableWidgetItem()
+        end.setFlags(end.flags() & ~Qt.ItemIsEditable)
         end.setData(Qt.DisplayRole, action_label.end)
+        pose_index = QTableWidgetItem()
+        pose_index.setData(Qt.DisplayRole, action_label.pose_index)
         timeline_row = QTableWidgetItem(str(action_label.timeline_row))
         action_id = QTableWidgetItem(str(action_label.action_id))
         action_color = QTableWidgetItem()
@@ -149,6 +162,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
         self.setItem(new_row_i, 3, timeline_row)
         self.setItem(new_row_i, 4, action_id)
         self.setItem(new_row_i, 5, action_color)
+        self.setItem(new_row_i, 6, pose_index)
         return new_row_i
 
     def _label_cells_delete(self, label_cells):
@@ -162,6 +176,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
                 continue
             label_begin = int(self.item(t_r, 1).text())
             label_end = int(self.item(t_r, 2).text())
+            pose_index = int(self.item(t_r, 6).text())
             if label_cells[timeline_row][0] > label_end or label_cells[timeline_row][-1] < label_begin:
                 continue
             elif label_cells[timeline_row][0] <= label_begin:
@@ -175,7 +190,7 @@ class LabeledTableWidget(QTableWidget, TableViewCommon):
                                 int(self.item(t_r, 4).text()),
                                 self.item(t_r, 5).background(),
                                 label_cells[timeline_row][-1] + 1,
-                                label_end, timeline_row))
+                                label_end, timeline_row, pose_index))
 
             if int(self.item(t_r, 1).text()) > int(self.item(t_r, 2).text()):
                 rows_delete_later.add(t_r)
