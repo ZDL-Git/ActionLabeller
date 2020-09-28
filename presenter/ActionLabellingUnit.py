@@ -58,7 +58,7 @@ class ActionLabellingUnit:
         json_content = {
             'video_info': {
                 'name': video_name,
-                'url': video_uri,
+                'uri': video_uri,
                 'hash_md5': md5,
                 'h': h,
                 'w': w,
