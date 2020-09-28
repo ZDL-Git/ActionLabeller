@@ -24,10 +24,9 @@ class Plotting(Playable):
     def set_data(self, v):
         logger.debug('')
         self._fdata = v
-        type_ = type(self._fdata)
-        if type_ == np.array:
+        if isinstance(self._fdata, np.ndarray):
             self.indices = len(self._fdata)
-        elif type_ == dict:
+        elif isinstance(self._fdata, dict):
             self.indices = sorted(list(self._fdata.keys()), key=lambda x: int(x))
             # assert type(self.indices[0]) == int, 'covert please!'
 
