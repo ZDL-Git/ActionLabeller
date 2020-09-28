@@ -71,7 +71,7 @@ class ActionLabellingUnit:
                                          'begin': label.begin,
                                          'end': label.end,
                                          'pose_index': label.pose_index, }
-        logger.debug(json_content['video_info'])
+        logger.debug(json_content)
         CommonUnit.save_dict(json_content, default_fname=f'{video_name}.json')
 
     def slot_import_labeled(self):
