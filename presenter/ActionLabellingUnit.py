@@ -48,7 +48,7 @@ class ActionLabellingUnit:
     def slot_export_labeled(self):
         logger.debug('')
         labels = self.mw.table_labeled.get_all_labels()
-        video_obj = PlayingUnit.only_ins.media_model
+        video_obj = PlayingUnit.only_ins.video_model
         video_info = video_obj and video_obj.get_info()
         video_uri = video_info and video_info['fname']
         video_name = video_uri and os.path.basename(video_uri)
