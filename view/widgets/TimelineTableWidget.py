@@ -37,6 +37,9 @@ class TimelineTableView(TableViewExtended):
 
     def __init_later__(self):
         self.setModel(TimelineTableModel(20, 50))
+        table_height = 20 * self.rowHeight(0) + self.horizontalHeader().height() + 2 * self.frameWidth()
+        self.setMinimumHeight(table_height)
+        self.setMaximumHeight(table_height)
 
         header = self.horizontalHeader()
         header.sectionPressed.disconnect()
