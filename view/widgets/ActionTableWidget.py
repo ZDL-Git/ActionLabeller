@@ -5,10 +5,10 @@ from zdl.utils.io.log import logger
 
 from model.Action import Action
 from presenter.CommonUnit import CommonUnit
-from view.widgets.TableViewCommon import TableViewCommon
+from view.widgets.TableViewExtended import TableViewExtended
 
 
-class ActionTableWidget(QTableWidget, TableViewCommon):
+class ActionTableWidget(QTableWidget, TableViewExtended):
     def __init__(self, parent):
         super().__init__()
         # TODO

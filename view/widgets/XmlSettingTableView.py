@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QTableView, QHeaderView
 
-from view.widgets.TableViewCommon import TableViewCommon
+from view.widgets.TableViewExtended import TableViewExtended
 
 
 class XmlSettingTableView(QTableView):
@@ -15,6 +15,6 @@ class XmlSettingTableView(QTableView):
         self.setColumnHidden(3, True)
         self.setColumnHidden(4, False)
         self.setColumnHidden(5, False)
-        delegate = TableViewCommon.IntDelegate()
+        delegate = TableViewExtended.IntDelegate()
         self.setItemDelegateForColumn(4, delegate)
         self.setItemDelegateForColumn(5, delegate)

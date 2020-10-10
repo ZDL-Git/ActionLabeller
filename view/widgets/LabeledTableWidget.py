@@ -11,10 +11,10 @@ from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
 from view.widgets.Common import TableDecorators
-from view.widgets.TableViewCommon import TableViewCommon
+from view.widgets.TableViewExtended import TableViewExtended
 
 
-class LabeledTableWidget(QTableWidget, TableViewCommon):
+class LabeledTableWidget(QTableWidget, TableViewExtended):
     def __init__(self, parent):
         super().__init__()
 

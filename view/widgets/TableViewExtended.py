@@ -3,7 +3,7 @@ from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QTableView, QItemDelegate, QWidget, QStyleOptionViewItem, QLineEdit
 
 
-class TableViewCommon(QTableView):
+class TableViewExtended(QTableView):
     def _delete_rows(self: QTableView, rows):
         for r_d in sorted(rows, reverse=True):
             self.model().removeRow(r_d)
