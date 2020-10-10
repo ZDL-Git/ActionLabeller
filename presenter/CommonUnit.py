@@ -48,11 +48,10 @@ class CommonUnit:
 
     @classmethod
     def get_value(cls, obj, type_=str):
-        try:
-            if type(obj) in [QComboBox]:
-                text = obj.currentText()
-            elif type(obj) in [QLineEdit]:
-                text = obj.text()
-            return type_(text)
-        except ValueError:
-            return None
+        if type(obj) in [QComboBox]:
+            text = obj.currentText()
+        elif type(obj) in [QLineEdit]:
+            text = obj.text()
+        else:
+            raise ValueError('The obj arg is wrong.')
+        return type_(text)
