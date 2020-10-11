@@ -74,7 +74,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         logger.debug('')
         rows = self.rowCount()
         if rows == 0:
-            QMessageBox().information(self, 'ActionLabel',
+            QMessageBox().information(self, 'ActionLabeller',
                                       "Please add action first!",
                                       QMessageBox.Ok, QMessageBox.Ok)
             return None
@@ -83,14 +83,14 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         for action in actions:
             if action.default:
                 if not action.name:
-                    QMessageBox().information(self, 'ActionLabel',
+                    QMessageBox().information(self, 'ActionLabeller',
                                               "Please complete action name first!",
                                               QMessageBox.Ok, QMessageBox.Ok)
                     return None
                 # 1.return default
                 return action
         # 2.select from dialog
-        action_name, ok_pressed = QInputDialog().getItem(self, "ActionLabel",
+        action_name, ok_pressed = QInputDialog().getItem(self, "ActionLabeller",
                                                          "Select or check as default in Action Setting:",
                                                          [a.name for a in actions], 0,
                                                          False)

@@ -111,12 +111,12 @@ class ActionLabellingUnit:
                                   checked):  # if use decorator, must receive checked param of button clicked event
         logger.debug('')
         if not self.mw.table_action.selectedIndexes():
-            QMessageBox().information(self.mw, 'ActionLabel Warning',
+            QMessageBox().information(self.mw, 'ActionLabeller Warning',
                                       "Select action first!",
                                       QMessageBox.Ok, QMessageBox.Ok)
             return
         if self.mw.table_labeled.rowCount():
-            if QMessageBox.Cancel == QMessageBox().warning(self.mw, 'ActionLabel Warning',
+            if QMessageBox.Cancel == QMessageBox().warning(self.mw, 'ActionLabeller Warning',
                                                            "All you sure to delete action template?"
                                                            " All the related action labels will be deleted!",
                                                            QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):

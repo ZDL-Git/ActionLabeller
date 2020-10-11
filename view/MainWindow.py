@@ -88,7 +88,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def closeEvent(self, e: QCloseEvent):
         logger.debug('')
         # TODO: uncomment this block
-        # if QMessageBox.Ok != QMessageBox.information(self, 'ActionLabel',
+        # if QMessageBox.Ok != QMessageBox.information(self, 'ActionLabeller',
         #                                              "Are you sure to quit, the unsaved labels will be lost?",
         #                                              QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
         #     e.ignore()
