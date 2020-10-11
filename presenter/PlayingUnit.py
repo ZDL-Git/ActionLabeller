@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 import pyqtgraph as pg
 from PyQt5.QtCore import QEvent, QObject
@@ -27,7 +28,7 @@ class PlayingUnit(QObject):
         self.mw = mwindow
 
         # self.entry_row_index = None
-        self.media_model = None  # type:Playable
+        self.media_model = None  # type:Optional[Playable]
         self.video_model = None
         self.images_model = None
         self.pose_model = None
