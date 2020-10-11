@@ -3,6 +3,7 @@ import queue
 import cv2
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
+from zdl.utils.helper.opencv import countFrames
 from zdl.utils.io.log import logger
 
 from model.Playable import Playable
@@ -27,17 +28,11 @@ class Video(Playable):
         return self
 
     def get_info(self):
-        def _count_frames(cap=None):
-            cap = cap or cv2.VideoCapture(self.fname)
-            cap.set(cv2.CAP_PROP_POS_AVI_RATIO, 1)
-            count = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
-            return count
-
         if self._info is None:
             cap = cv2.VideoCapture(self.fname)
             success, img = cap.read()
             fps = cap.get(cv2.CAP_PROP_FPS)
-            frame_count = _count_frames(cap=cap)
+            frame_count = countFrames(cap=cap)
             duration = frame_count / fps
             self._info = {'fname': self.fname,
                           'frame_c': frame_count,
