@@ -16,6 +16,11 @@ class PosePlotting(Plotting):
         self.flag_playing = False
         # self.clear_per_frame = True
 
+    def set_view(self, view):
+        logger.debug('')
+        self.plotter = view
+        return self
+
     def plot(self, key):
         pose_colors = ['#fe8a71', '#0e9aa7', 'gray']  # orange, green, gray
         pose_sections = self.pose_type.SECTIONS
@@ -41,8 +46,3 @@ class PosePlotting(Plotting):
                 markersize = 6 if i in [0, 6, 7] else 8
                 self.plotter.plot(x=x_a, y=y_a, pen=pen,
                                   symbolBrush=symbol_brush, symbolPen=symbol_pen, symbolSize=markersize)
-
-    def set_view(self, view):
-        logger.debug('')
-        self.plotter = view
-        return self
