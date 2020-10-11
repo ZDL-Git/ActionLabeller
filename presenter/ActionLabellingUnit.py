@@ -1,4 +1,5 @@
 import json
+import numpy as np
 import os
 import time
 
@@ -43,6 +44,7 @@ class ActionLabellingUnit:
             self.mw.btn_del_action.clicked.connect(self.slot_del_selected_actions),
             self.mw.btn_export_labeled.clicked.connect(self.slot_export_labeled),
             self.mw.btn_import_labeled.clicked.connect(self.slot_import_labeled),
+            self.mw.btn_export_npy_and_label.clicked.connect(self.slot_export_npy_and_label),
         )
 
     def slot_export_labeled(self):
@@ -94,6 +96,32 @@ class ActionLabellingUnit:
             logger.debug(action_label)
             self.mw.table_timeline.settle_label(action_label)
             self.mw.table_labeled.add_label(action_label)
+
+    def slot_export_npy_and_label(self):
+        poses = PlayingUnit.only_ins.pose_model._fdata
+        logger.debug(list(poses.keys()))
+        labels = self.mw.table_labeled.get_all_labels()
+        logger.debug(len(labels))
+        npy = []
+        label_len_max = 0
+        for label in labels:
+            one_action_pose = []
+            label_len_max = max(label_len_max, label.end - label.begin + 1)
+            for frame_index in range(label.begin, label.end + 1):
+                one_action_pose.append(np.asarray(poses[str(frame_index)][int(label.pose_index)]))
+            npy.append(np.asarray(one_action_pose))
+        logger.debug([len(o_a_p) for o_a_p in npy])
+        logger.debug(label_len_max)
+        for one_action_pose in npy:
+            one_action_pose.resize((label_len_max, *one_action_pose.shape[1:]), refcheck=False)
+        npy = np.asarray(npy)
+        npy = np.expand_dims(npy, axis=1)
+        npy = np.repeat(npy, 3, axis=1)
+        logger.info(npy.shape)
+        time_stamp = int(time.time())
+        CommonUnit.save_ndarray(npy, f'train_data_{time_stamp}.npy')
+        CommonUnit.save_pkl(([f'name{i}' for i in range(len(npy))], [l.action for l in labels]),
+                            f'train_label_{time_stamp}.pkl')
 
     def slot_action_add(self, checked):  # if use decorator, must receive checked param of button clicked event
         logger.debug('')

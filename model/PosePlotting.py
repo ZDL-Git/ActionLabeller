@@ -17,7 +17,7 @@ class PosePlotting(Plotting):
         # self.clear_per_frame = True
 
     def plot(self, key):
-        pose_colors = ['#fe8a71', '#0e9aa7', 'gray']
+        pose_colors = ['#fe8a71', '#0e9aa7', 'gray']  # orange, green, gray
         pose_sections = self.pose_type.SECTIONS
 
         if self.clear_per_frame:

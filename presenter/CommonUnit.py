@@ -1,5 +1,8 @@
 import codecs
 import json
+import pickle
+
+import numpy as np
 
 from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit
 
@@ -45,6 +48,19 @@ class CommonUnit:
         with open(file_name, 'r', encoding='utf-8') as f:
             json_content = json.load(f)
         return json_content
+
+    @classmethod
+    def save_ndarray(cls, array: np.ndarray, default_fname):
+        save_as = cls.get_save_name(default=default_fname)
+        if save_as:
+            np.save(save_as, array)
+
+    @classmethod
+    def save_pkl(cls, pickleable, default_fname):
+        save_as = cls.get_save_name(default=default_fname)
+        if save_as:
+            with open(save_as, 'wb') as f:
+                pickle.dump(pickleable, f)
 
     @classmethod
     def get_value(cls, obj, type_=str):

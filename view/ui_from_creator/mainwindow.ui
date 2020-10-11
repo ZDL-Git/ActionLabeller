@@ -267,6 +267,9 @@ border: 1 solid gray;</string>
               <property name="spacing">
                <number>4</number>
               </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
               <item>
                <widget class="QPushButton" name="btn_open_video">
                 <property name="sizePolicy">
@@ -627,7 +630,7 @@ QTabBar::tab:selected {
                    <number>0</number>
                   </property>
                   <item>
-                   <widget class="QTextBrowser" name="textBrowser"/>
+                   <widget class="QTextBrowser" name="video_textBrowser"/>
                   </item>
                  </layout>
                 </item>
@@ -658,7 +661,7 @@ QTabBar::tab:selected {
               <item row="1" column="0" rowspan="2" colspan="2">
                <layout class="QVBoxLayout" name="verticalLayout_6">
                 <item>
-                 <widget class="QListView" name="listView_2">
+                 <widget class="QListView" name="images_listView">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                     <horstretch>0</horstretch>
@@ -741,6 +744,9 @@ QTabBar::tab:selected {
                 <property name="bottomMargin">
                  <number>0</number>
                 </property>
+                <item>
+                 <widget class="QTextBrowser" name="plotting_textBrowser"/>
+                </item>
                </layout>
               </item>
              </layout>
@@ -752,7 +758,7 @@ QTabBar::tab:selected {
        </layout>
       </item>
       <item>
-       <layout class="QGridLayout" name="right_half_layout" rowstretch="3,2" columnstretch="0">
+       <layout class="QGridLayout" name="right_half_layout" rowstretch="6,5" columnstretch="0">
         <property name="sizeConstraint">
          <enum>QLayout::SetDefaultConstraint</enum>
         </property>
@@ -774,7 +780,7 @@ QTabBar::tab:selected {
            </sizepolicy>
           </property>
           <property name="title">
-           <string>Labeled Actions</string>
+           <string/>
           </property>
           <layout class="QGridLayout" name="gridLayout_4">
            <property name="leftMargin">
@@ -806,7 +812,7 @@ QTabBar::tab:selected {
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Import json</string>
+                <string>Import label</string>
                </property>
               </widget>
              </item>
@@ -819,7 +825,14 @@ QTabBar::tab:selected {
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Export json</string>
+                <string>Export label</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btn_export_npy_and_label">
+               <property name="text">
+                <string>Gen npy+label</string>
                </property>
               </widget>
              </item>
@@ -898,6 +911,18 @@ QTabBar::tab:selected {
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="styleSheet">
+           <string notr="true">QTabBar::tab {
+	background: lightgray;
+	color: black;
+	padding: 2px 10px;
+	border: 1px solid gray;
+}
+QTabBar::tab:selected {
+	background: rgb(242, 248, 233);
+	color: black;
+}</string>
+          </property>
           <property name="tabPosition">
            <enum>QTabWidget::North</enum>
           </property>
@@ -920,7 +945,7 @@ QTabBar::tab:selected {
            <bool>false</bool>
           </property>
           <property name="documentMode">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <widget class="QWidget" name="tab_action_setting">
            <attribute name="title">
@@ -1141,7 +1166,7 @@ QTabBar::tab:selected {
                <enum>Qt::StrongFocus</enum>
               </property>
               <property name="placeholderText">
-               <string>Input Expression</string>
+               <string>Input expression code here.</string>
               </property>
              </widget>
             </item>
@@ -1248,7 +1273,7 @@ QTabBar::tab:selected {
  <tabstops>
   <tabstop>btn_open_video</tabstop>
   <tabstop>btn_stop</tabstop>
-  <tabstop>listView_2</tabstop>
+  <tabstop>images_listView</tabstop>
   <tabstop>btn_import_labeled</tabstop>
   <tabstop>btn_export_labeled</tabstop>
   <tabstop>table_labeled</tabstop>
