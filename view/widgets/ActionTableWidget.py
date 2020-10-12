@@ -82,12 +82,6 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         actions = self.get_all_actions()
         for action in actions:
             if action.default:
-                if not action.name:
-                    QMessageBox().information(self, 'ActionLabeller',
-                                              "Please complete action name first!",
-                                              QMessageBox.Ok, QMessageBox.Ok)
-                    return None
-                # 1.return default
                 return action
         # 2.select from dialog
         action_name, ok_pressed = QInputDialog().getItem(self, "ActionLabeller",
