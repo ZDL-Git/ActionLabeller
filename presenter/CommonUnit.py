@@ -1,6 +1,7 @@
 import codecs
 import json
 import pickle
+from typing import Callable
 
 import numpy as np
 
@@ -10,6 +11,11 @@ from zdl.utils.io.log import logger
 
 
 class CommonUnit:
+    get_default_action: Callable
+    get_all_actions: Callable
+    status_prompt: Callable
+    get_all_labels: Callable
+
     @classmethod
     def set_mw(cls, mwindow):
         logger.debug('')
