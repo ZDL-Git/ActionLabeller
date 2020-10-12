@@ -6,6 +6,7 @@ from PyQt5.QtGui import QKeyEvent
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
 from zdl.utils.io.log import logger
 
+from model.Action import Action
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
@@ -82,6 +83,13 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
     def slot_label_cells_delete(self, label_cells: Dict[int, List[int]], emitter):
         logger.debug(f'{label_cells}, {emitter}')
         self._label_cells_delete(label_cells)
+
+    @TableDecorators.dissort
+    @TableDecorators.block_signals
+    def slot_label_action_info_update_by_row(self, r, action: Action, emitter):
+        logger.debug(f'{r}, {action}, {emitter}')
+        self.item(r, 0).setText(action.name)
+        self.item(r, 5).setBackground(action.color)
 
     def get_all_labels(self) -> list:
         labels = []

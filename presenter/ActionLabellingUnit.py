@@ -143,9 +143,11 @@ class ActionLabellingUnit:
             id_ = label.action_id
             if id_ in action_dict:
                 # update label
-                table_labeled.item(r, 0).setText(action_dict[id_].name)
-                table_labeled.item(r, 5).setBackground(action_dict[id_].color)
-                table_timeline.slot_label_update([label], MySignals.Emitter.T_LABELED)
+                action = action_dict[id_]
+                label.action = action.name
+                label.color = action.color
+                table_labeled.slot_label_action_info_update_by_row(r, action, MySignals.Emitter.T_ACTION)
+                table_timeline.slot_label_update([label], MySignals.Emitter.T_ACTION)
             else:
                 # delete label
                 table_labeled.slot_label_delete(label, MySignals.Emitter.T_ACTION)
