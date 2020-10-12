@@ -44,7 +44,7 @@ class TimelineTableView(TableViewExtended):
         header = self.horizontalHeader()
         header.sectionPressed.disconnect()
 
-        self.horizontalScrollBar().installEventFilter(self)
+        # self.horizontalScrollBar().installEventFilter(self)
         self.horizontalScrollBar().sliderMoved.connect(self.slot_sliderMoved)
         # self.installEventFilter(self)
 
@@ -226,7 +226,7 @@ class TimelineTableView(TableViewExtended):
                 t_r = r
                 break
         if t_r is None:
-            warn_ = 'All related lines are not empty, please check!'
+            warn_ = 'All related rows are already occupied and new ones cannot be placed!'
             logger.warn(warn_)
             CommonUnit.status_prompt(warn_)
             return None
@@ -277,14 +277,7 @@ class TimelineTableView(TableViewExtended):
             QItemSelectionModel.ClearAndSelect)
 
     def _update_label(self, label: ActionLabel):
-        for c in range(label.begin, label.end + 1):
-            item = self.model().item(label.timeline_row, c)
-            if item is None:
-                item = QStandardItem()
-                self.model().setItem(label.timeline_row, c, item)
-            item.setBackground(label.color)
-            item.setWhatsThis(str(label.action_id))
-            item.setToolTip(label.action)
+        self._plot_label(label)
 
     def _del_label(self, label: ActionLabel):
         for c in range(label.begin, label.end + 1):

@@ -58,6 +58,10 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
                     return
                 item.setBackground(color)
 
+    def slot_delete_selected(self):
+        logger.debug('')
+        self._delete_selected_rows()
+
     def get_all_actions(self):
         logger.debug('')
         actions = []

@@ -210,7 +210,7 @@ class PlayingUnit(QObject):
             self.set_model(self.pose_model)
 
     def slot_tabletimeline_header_clicked(self, i):
-        logger.info(f'index {i}')
+        logger.debug(f'index {i}')
         if self.media_model is None:
             return
         self.media_model.schedule(i, -1, -1, MySignals.Emitter.T_HHEADER)

@@ -3,7 +3,7 @@ import numpy as np
 import os
 import time
 
-from PyQt5.QtCore import QRandomGenerator
+from PyQt5.QtCore import QRandomGenerator, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
 from zdl.utils.io.file import hashOfFile
@@ -22,7 +22,7 @@ class ActionLabellingUnit:
         logger.debug('')
         self.mw = mwindow
         (
-            self.mw.table_action.cellChanged.connect(self.slot_action_update),
+            self.mw.table_action.cellChanged.connect(self.slot_sync_action_update),
             self.mw.table_timeline.doubleClicked.connect(self.table_timeline_cell_double_clicked),
         )
 
@@ -34,7 +34,7 @@ class ActionLabellingUnit:
         )
         (
             mySignals.label_created.connect(self.mw.table_labeled.slot_label_created),
-            mySignals.label_selected.connect(self.mw.table_labeled.slot_label_selected),
+            mySignals.label_selected.connect(self.mw.table_labeled.slot_label_select),
             mySignals.label_delete.connect(self.mw.table_labeled.slot_label_delete),
             mySignals.label_cells_delete.connect(self.mw.table_labeled.slot_label_cells_delete),
             # mySignals.action_update.connect(self.mw.table_labeled.slot_action_update),
@@ -43,7 +43,7 @@ class ActionLabellingUnit:
             self.mw.btn_new_action.clicked.connect(self.slot_action_add),
             self.mw.btn_del_action.clicked.connect(self.slot_del_selected_actions),
             self.mw.btn_export_labeled.clicked.connect(self.slot_export_labeled),
-            self.mw.btn_import_labeled.clicked.connect(self.slot_import_labeled),
+            self.mw.btn_import_labeled.clicked.connect(self.slot_import_labeled, Qt.QueuedConnection),
             self.mw.btn_export_npy_and_label.clicked.connect(self.slot_export_npy_and_label),
         )
 
@@ -78,8 +78,9 @@ class ActionLabellingUnit:
 
     def slot_import_labeled(self):
         logger.debug('')
+        CommonUnit.status_prompt('Importing labels...')
         json_content = CommonUnit.load_dict()
-        all_actions = {}
+        all_actions = {action.name: action for action in CommonUnit.get_all_actions()}
         for i in json_content['labels']:
             action_name = json_content['labels'][i]['action']
             begin = json_content['labels'][i]['begin']
@@ -129,11 +130,28 @@ class ActionLabellingUnit:
         self.mw.table_action.insert_action(action)
         self.mw.table_action.editItem(self.mw.table_action.item(self.mw.table_action.rowCount() - 1, 0))
 
-    def slot_action_update(self, r, c):
+    def slot_sync_action_update(self):
         logger.debug('')
-        labels_updated = self.mw.table_labeled.action_update()
-        if labels_updated:
-            self.mw.table_timeline.slot_label_update(labels_updated, MySignals.Emitter.T_LABELED)
+        actions = CommonUnit.get_all_actions()
+        action_dict = {a.id: a for a in actions}
+        table_labeled = self.mw.table_labeled
+        table_timeline = self.mw.table_timeline
+        table_labeled.setSortingEnabled(False)
+        table_timeline.setSortingEnabled(False)
+        for r in reversed(range(table_labeled.rowCount())):
+            label = table_labeled.label_at(r)
+            id_ = label.action_id
+            if id_ in action_dict:
+                # update label
+                table_labeled.item(r, 0).setText(action_dict[id_].name)
+                table_labeled.item(r, 5).setBackground(action_dict[id_].color)
+                table_timeline.slot_label_update([label], MySignals.Emitter.T_LABELED)
+            else:
+                # delete label
+                table_labeled.slot_label_delete(label, MySignals.Emitter.T_ACTION)
+                table_timeline.slot_label_delete([label], MySignals.Emitter.T_ACTION)
+        table_labeled.setSortingEnabled(True)
+        table_timeline.setSortingEnabled(True)
 
     def slot_del_selected_actions(self,
                                   checked):  # if use decorator, must receive checked param of button clicked event
@@ -149,12 +167,9 @@ class ActionLabellingUnit:
                                                            " All the related action labels will be deleted!",
                                                            QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
                 return
-        rows = set()
-        for index in self.mw.table_action.selectedIndexes():
-            rows.add(index.row())
-        for r in sorted(rows, reverse=True):
-            self.mw.table_action.removeRow(r)
-        mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
+        self.mw.table_action.slot_delete_selected()
+        self.slot_sync_action_update()
+        # mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
 
     def table_timeline_cell_double_clicked(self, qindex):
         logger.debug('')

@@ -19,7 +19,7 @@ class MySignals(QObject):
     labeled_selected = pyqtSignal(ActionLabel, Enum)
     labeled_update = pyqtSignal(list, Enum)
     labeled_delete = pyqtSignal(list, Enum)
-    action_update = pyqtSignal(Enum)
+    # action_update = pyqtSignal(Enum)
 
     timer_video = QTimer()
     timer_plotting = QTimer()
@@ -35,8 +35,9 @@ class Emitter(Enum):
     T_WHEEL = 4
     T_LABEL = 5
     T_LABELED = 6
-    T_TEMP = 7
-    V_PLAYER = 8
+    T_ACTION = 7
+    T_TEMP = 8
+    V_PLAYER = 9
     INPUT_JUMPTO = 10
     BTN = 11
 

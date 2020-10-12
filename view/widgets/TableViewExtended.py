@@ -11,6 +11,13 @@ class TableViewExtended(QTableView):
     def _select_row(self: QTableView, row):
         self.selectRow(row)
 
+    def _delete_selected_rows(self):
+        rows = set()
+        for index in self.selectedIndexes():
+            rows.add(index.row())
+        for r in sorted(rows, reverse=True):
+            self.removeRow(r)
+
     def unselect_all(self: QTableView):
         rowc = self.model().rowCount()
         colc = self.model().columnCount()

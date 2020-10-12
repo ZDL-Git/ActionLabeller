@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
@@ -44,9 +44,6 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             rows, labels = self._labels_selected()
             mySignals.labeled_delete.emit(labels, MySignals.Emitter.T_LABELED)
             self._delete_rows(rows)
-        elif e.key() == Qt.Key_R:
-            if self.label_clicked is not None:
-                self._slot_video_play(self.label_clicked.begin, self.label_clicked.end)
 
     def slot_itemSelectionChanged(self):
         logger.debug('here')
@@ -66,7 +63,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
 
     @TableDecorators.dissort
     @TableDecorators.block_signals
-    def slot_label_selected(self, action_label, emitter):
+    def slot_label_select(self, action_label, emitter):
         logger.debug(f'{action_label}, {emitter}')
         label_row = self._get_label_row_num(action_label)
         if label_row is not None:
@@ -78,31 +75,13 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         logger.debug(f'{action_label}, {emitter}')
         row_i = self._get_label_row_num(action_label)
         if row_i is not None:
-            self._delete_rows(row_i)
+            self._delete_rows([row_i])
 
     @TableDecorators.dissort
     @TableDecorators.block_signals
-    def slot_label_cells_delete(self, label_cells, emitter):
+    def slot_label_cells_delete(self, label_cells: Dict[int, List[int]], emitter):
         logger.debug(f'{label_cells}, {emitter}')
         self._label_cells_delete(label_cells)
-
-    @TableDecorators.dissort
-    def action_update(self):
-        rows_delete_later = set()
-        labels_updated = []
-        actions = CommonUnit.get_all_actions()
-        _actions_dict = {a.id: a for a in actions}
-        for r in range(self.rowCount()):
-            id = int(self.item(r, 4).text())
-            if id in _actions_dict:
-                self.item(r, 0).setText(_actions_dict[id].name)
-                self.item(r, 5).setBackground(_actions_dict[id].color)
-                labels_updated.append(self.label_at(r))
-            else:
-                logger.debug(_actions_dict)
-                rows_delete_later.add(r)
-        self._delete_rows(rows_delete_later)
-        return labels_updated
 
     def get_all_labels(self) -> list:
         labels = []
@@ -111,8 +90,10 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         labels.sort(key=lambda l: l.begin)
         return labels
 
-    def label_at(self, r):
-        label = ActionLabel(self.item(r, 0).text(), int(self.item(r, 4).text()), self.item(r, 5).background(),
+    def label_at(self, r) -> ActionLabel:
+        label = ActionLabel(self.item(r, 0).text(),
+                            int(self.item(r, 4).text()),
+                            self.item(r, 5).background(),
                             int(self.item(r, 1).text()),
                             int(self.item(r, 2).text()),
                             int(self.item(r, 3).text()),
@@ -165,7 +146,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         self.setItem(new_row_i, 6, pose_index)
         return new_row_i
 
-    def _label_cells_delete(self, label_cells):
+    def _label_cells_delete(self, label_cells: Dict[int, List[int]]):
         for k in label_cells:
             label_cells[k].sort()
         rows_delete_later = set()
