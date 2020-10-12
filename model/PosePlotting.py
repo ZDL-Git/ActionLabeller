@@ -19,6 +19,7 @@ class PosePlotting(Plotting):
     def set_view(self, view):
         logger.debug('')
         self.plotter = view
+        self.plotter.addLegend()
         return self
 
     def plot(self, key):
@@ -44,5 +45,7 @@ class PosePlotting(Plotting):
                 y_a = person_points[s_nonzero][..., 1]
 
                 markersize = 6 if i in [0, 6, 7] else 8
+                name = f'pose {p}' if i == 0 else None
                 self.plotter.plot(x=x_a, y=y_a, pen=pen,
-                                  symbolBrush=symbol_brush, symbolPen=symbol_pen, symbolSize=markersize)
+                                  symbolBrush=symbol_brush, symbolPen=symbol_pen, symbolSize=markersize,
+                                  name=name)
