@@ -37,6 +37,7 @@ class TimelineTableView(TableViewExtended):
 
     def __init_later__(self):
         self.setModel(TimelineTableModel(20, 50))
+        self.setSortingEnabled(False)
         table_height = 20 * self.rowHeight(0) + self.horizontalHeader().height() + 2 * self.frameWidth()
         self.setMinimumHeight(table_height)
         self.setMaximumHeight(table_height)
@@ -172,10 +173,7 @@ class TimelineTableView(TableViewExtended):
 
     def slot_sliderMoved(self, pos):
         logger.debug(pos)
-        # col_c = self.columnCount()
-        # hscrollbar = self.horizontalScrollBar()
         index = (self.model().columnCount() - 1) * pos / self.horizontalScrollBar().maximum()
-
         mySignals.schedule.emit(index, -1, -1, MySignals.Emitter.T_HSCROLL)
         # self.selectColumn(index)  # crash bug
 
