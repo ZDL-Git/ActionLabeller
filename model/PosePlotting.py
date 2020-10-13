@@ -3,7 +3,7 @@ import pyqtgraph as pg
 from zdl.AI.pose_estimation.pose import *
 from zdl.utils.io.log import logger
 
-from model.Plotting import Plotting
+from model.AbcPlotting import Plotting
 
 
 class PosePlotting(Plotting):

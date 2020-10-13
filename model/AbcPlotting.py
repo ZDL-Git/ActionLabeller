@@ -5,8 +5,8 @@ import numpy as np
 import pyqtgraph as pg
 from zdl.utils.io.log import logger
 
-from model.Playable import Playable
-from model.Scheduleable import Scheduleable
+from model.AbcPlayable import Playable
+from model.AbcScheduleable import Scheduleable
 from presenter.CommonUnit import CommonUnit
 
 

@@ -6,8 +6,8 @@ from PyQt5.QtGui import QImage, QPixmap
 from zdl.utils.helper.opencv import countFrames
 from zdl.utils.io.log import logger
 
-from model.Playable import Playable
-from model.Scheduleable import Scheduleable
+from model.AbcPlayable import Playable
+from model.AbcScheduleable import Scheduleable
 from presenter import MySignals
 from presenter.Settings import Settings
 

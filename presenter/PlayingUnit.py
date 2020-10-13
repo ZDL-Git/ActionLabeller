@@ -7,7 +7,7 @@ from zdl.utils.io.log import logger
 
 from model.ActionLabel import ActionLabel
 from model.File import load_dict
-from model.Playable import Playable
+from model.AbcPlayable import Playable
 from model.PosePlotting import PosePlotting
 from model.Video import Video
 from presenter import MySignals
