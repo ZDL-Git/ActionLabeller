@@ -53,8 +53,8 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
 
     def slot_cellDoubleClicked(self, r, c):
         logger.debug(f'{r}, {c}')
-        label = self.label_at(r)
-        mySignals.labeled_selected.emit(label, MySignals.Emitter.T_LABELED)
+        # label = self.label_at(r)
+        # mySignals.labeled_selected.emit(label, MySignals.Emitter.T_LABELED)
 
     @TableDecorators.dissort
     @TableDecorators.block_signals

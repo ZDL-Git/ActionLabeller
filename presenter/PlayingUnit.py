@@ -265,10 +265,10 @@ class PlayingUnit(QObject):
             self.label_play(label)
 
     def label_play(self, action_label: ActionLabel):
-        if self.media_model is None:
-            return False
         self.mw.table_timeline.unselect_all()
         self.mw.table_timeline.select_label(action_label)
+        if self.media_model is None:
+            return False
         self.media_model.schedule(action_label.begin, -1, action_label.end, MySignals.Emitter.T_LABEL)
         self.media_model.start()
         return True
