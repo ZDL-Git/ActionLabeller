@@ -7,11 +7,12 @@ from zdl.utils.helper.opencv import countFrames
 from zdl.utils.io.log import logger
 
 from model.Playable import Playable
+from model.Scheduleable import Scheduleable
 from presenter import MySignals
 from presenter.Settings import Settings
 
 
-class Video(Playable):
+class Video(Playable, Scheduleable):
     def __init__(self, fname):
         super().__init__()
         self.fname = fname

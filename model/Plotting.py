@@ -6,10 +6,11 @@ import pyqtgraph as pg
 from zdl.utils.io.log import logger
 
 from model.Playable import Playable
+from model.Scheduleable import Scheduleable
 from presenter.CommonUnit import CommonUnit
 
 
-class Plotting(Playable):
+class Plotting(Playable, Scheduleable):
     def __init__(self):
         super().__init__()
         self.plotter = None
