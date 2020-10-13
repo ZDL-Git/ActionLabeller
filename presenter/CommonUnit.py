@@ -40,11 +40,11 @@ class CommonUnit:
         return name[0]
 
     @classmethod
-    def save_dict(cls, content, default_fname):
-        save_as = cls.get_save_name(default=default_fname)
-        if save_as:
-            with codecs.getwriter("utf8")(open(save_as, "wb")) as f:
-                json.dump(content, f, indent=2, ensure_ascii=False)
+    def save_dict(cls, content, fname=None, default_fname='xxx.json'):
+        if fname is None:
+            fname = cls.get_save_name(default=default_fname)
+        with codecs.getwriter("utf8")(open(fname, "wb")) as f:
+            json.dump(content, f, indent=2, ensure_ascii=False)
 
     @classmethod
     def load_dict(cls) -> dict:

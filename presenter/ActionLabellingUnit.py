@@ -49,11 +49,13 @@ class ActionLabellingUnit:
 
     def slot_export_labeled(self):
         logger.debug('')
-        labels = self.mw.table_labeled.get_all_labels()
         video_obj = PlayingUnit.only_ins.video_model
         video_info = video_obj and video_obj.get_info()
         video_uri = video_info and video_info['fname']
         video_name = video_uri and os.path.basename(video_uri)
+        save_as = CommonUnit.get_save_name(f'{video_name}.json')
+        if not save_as:
+            return
         md5 = video_uri and hashOfFile(video_uri)
         h = video_info and video_info['height']
         w = video_info and video_info['width']
@@ -68,13 +70,14 @@ class ActionLabellingUnit:
             'timestamp': time.ctime(),
             'labels': dict()
         }
+        labels = self.mw.table_labeled.get_all_labels()
         for i, label in enumerate(labels):
             json_content['labels'][i] = {'action': label.action,
                                          'begin': label.begin,
                                          'end': label.end,
                                          'pose_index': label.pose_index, }
         logger.debug(json_content)
-        CommonUnit.save_dict(json_content, default_fname=f'{video_name}.json')
+        CommonUnit.save_dict(json_content, fname=save_as)
 
     def slot_import_labeled(self):
         logger.debug('')
