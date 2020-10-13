@@ -1,10 +1,10 @@
 from functools import partial
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent, QColor
-from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
+from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem, QAbstractItemView
 from zdl.utils.io.log import logger
 
 from model.Action import Action
@@ -39,7 +39,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
     #     Log.debug(r, c)
 
     def keyReleaseEvent(self, e: QKeyEvent) -> None:
-        if self.state() == QtGui.QAbstractItemView.EditingState:
+        if self.state() == QAbstractItemView.EditingState:
             return
 
         logger.debug(e.key())
@@ -123,31 +123,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         return None
 
     def add_label(self, action_label: ActionLabel):
-        action = QTableWidgetItem(action_label.action)
-        action.setFlags(action.flags() & ~Qt.ItemIsEditable)
-        begin = QTableWidgetItem()
-        begin.setFlags(begin.flags() & ~Qt.ItemIsEditable)
-        begin.setData(Qt.DisplayRole, action_label.begin)
-        end = QTableWidgetItem()
-        end.setFlags(end.flags() & ~Qt.ItemIsEditable)
-        end.setData(Qt.DisplayRole, action_label.end)
-        pose_index = QTableWidgetItem()
-        pose_index.setData(Qt.DisplayRole, action_label.pose_index)
-        timeline_row = QTableWidgetItem(str(action_label.timeline_row))
-        action_id = QTableWidgetItem(str(action_label.action_id))
-        action_color = QTableWidgetItem()
-        action_color.setBackground(action_label.color)
-        # timeline_row.setData(Qt.DisplayRole, action_label.timeline_row)
-        new_row_i = self.rowCount()
-        self.insertRow(new_row_i)
-        self.setItem(new_row_i, 0, action)
-        self.setItem(new_row_i, 1, begin)
-        self.setItem(new_row_i, 2, end)
-        self.setItem(new_row_i, 3, timeline_row)
-        self.setItem(new_row_i, 4, action_id)
-        self.setItem(new_row_i, 5, action_color)
-        self.setItem(new_row_i, 6, pose_index)
-        return new_row_i
+        return self.RowLabel(action_label).row_num
 
     def _label_cells_delete(self, label_cells: Dict[int, List[int]]):
         for k in label_cells:
@@ -183,16 +159,26 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
     class _Row:
         COLS = ['Action', 'Begin', 'End', 'Timeline Row', 'Action Id', 'Action Color', 'Pose Index']
 
-        def __init__(self, row_num: int, table: 'LabeledTableWidget'):
+        def __init__(self, row_num_or_actionlabel: Union[int, ActionLabel], table: 'LabeledTableWidget'):
             self.table = table
-            self.row_num = row_num
+            if isinstance(row_num_or_actionlabel, int):
+                self.row_num = row_num_or_actionlabel
+            elif isinstance(row_num_or_actionlabel, ActionLabel):
+                self.row_num = self.table.rowCount()
+                self._insert(row_num_or_actionlabel)
+            else:
+                raise TypeError
 
         @property
         def action(self):
             return self.table.item(self.row_num, 0).text()
 
-        def set_action(self, action: str):
-            self.table.item(self.row_num, 0).setText(action)
+        def set_action(self, action_name: str):
+            if self.table.item(self.row_num, 0) is None:
+                action = QTableWidgetItem()
+                action.setFlags(action.flags() & ~Qt.ItemIsEditable)
+                self.table.setItem(self.row_num, 0, action)
+            self.table.item(self.row_num, 0).setText(action_name)
             return self
 
         @property
@@ -201,7 +187,11 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             return text and int(text)
 
         def set_begin(self, begin_: int):
-            self.table.item(self.row_num, 1).setText(str(begin_))
+            if self.table.item(self.row_num, 1) is None:
+                begin = QTableWidgetItem()
+                begin.setFlags(begin.flags() & ~Qt.ItemIsEditable)
+                self.table.setItem(self.row_num, 1, begin)
+            self.table.item(self.row_num, 1).setData(Qt.DisplayRole, begin_)
             return self
 
         @property
@@ -210,7 +200,11 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             return text and int(text)
 
         def set_end(self, end_: int):
-            self.table.item(self.row_num, 2).setText(str(end_))
+            if self.table.item(self.row_num, 2) is None:
+                end = QTableWidgetItem()
+                end.setFlags(end.flags() & ~Qt.ItemIsEditable)
+                self.table.setItem(self.row_num, 2, end)
+            self.table.item(self.row_num, 2).setData(Qt.DisplayRole, end_)
             return self
 
         @property
@@ -219,6 +213,10 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             return text and int(text)
 
         def set_timeline_row(self, row_num: int):
+            if self.table.item(self.row_num, 3) is None:
+                timeline_row = QTableWidgetItem()
+                timeline_row.setFlags(timeline_row.flags() & ~Qt.ItemIsEditable)
+                self.table.setItem(self.row_num, 3, timeline_row)
             self.table.item(self.row_num, 3).setText(str(row_num))
             return self
 
@@ -228,6 +226,10 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             return text and int(text)
 
         def set_action_id(self, id_: int):
+            if self.table.item(self.row_num, 4) is None:
+                action_id = QTableWidgetItem()
+                action_id.setFlags(action_id.flags() & ~Qt.ItemIsEditable)
+                self.table.setItem(self.row_num, 4, action_id)
             self.table.item(self.row_num, 4).setText(str(id_))
             return self
 
@@ -236,6 +238,9 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             return self.table.item(self.row_num, 5).background()
 
         def set_action_color(self, color: QColor):
+            if self.table.item(self.row_num, 5) is None:
+                action_color = QTableWidgetItem()
+                self.table.setItem(self.row_num, 5, action_color)
             self.table.item(self.row_num, 5).setBackground(color)
             return self
 
@@ -245,8 +250,21 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             return text and int(text)
 
         def set_pose_index(self, index: int):
-            self.table.item(self.row_num, 6).setText(str(index))
+            if self.table.item(self.row_num, 6) is None:
+                pose_index = QTableWidgetItem()
+                self.table.setItem(self.row_num, 6, pose_index)
+            self.table.item(self.row_num, 6).setData(Qt.DisplayRole, index)
             return self
+
+        def _insert(self, action_label: ActionLabel):
+            self.table.insertRow(self.row_num)
+            self.set_action(action_label.action) \
+                .set_begin(action_label.begin) \
+                .set_end(action_label.end) \
+                .set_timeline_row(action_label.timeline_row) \
+                .set_action_id(action_label.action_id) \
+                .set_action_color(action_label.color) \
+                .set_pose_index(action_label.pose_index)
 
         def delete(self):
             self.table._delete_rows([self.row_num])
