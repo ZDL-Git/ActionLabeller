@@ -1,8 +1,9 @@
+from functools import partial
 from typing import List, Dict
 
 from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QKeyEvent
+from PyQt5.QtGui import QKeyEvent, QColor
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem
 from zdl.utils.io.log import logger
 
@@ -19,14 +20,15 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
     def __init__(self, parent):
         super().__init__()
 
+        self.RowLabel = partial(self._Row, table=self)
+
         self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
         self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
         # self.cellChanged.connect(self.slot_cellChanged)
 
     def __init_later__(self):
         self.setColumnCount(7)
-        self.setHorizontalHeaderLabels(
-            ['Action', 'Begin', 'End', 'Timeline Row', 'Action Id', 'Action Color', 'Pose Index'])
+        self.setHorizontalHeaderLabels(self._Row.COLS)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.setColumnHidden(3, True)
         self.setColumnHidden(4, True)
@@ -88,8 +90,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
     @TableDecorators.block_signals
     def slot_label_action_info_update_by_row(self, r, action: Action, emitter):
         logger.debug(f'{r}, {action}, {emitter}')
-        self.item(r, 0).setText(action.name)
-        self.item(r, 5).setBackground(action.color)
+        self.RowLabel(r).set_action(action.name).set_action_color(action.color)
 
     def get_all_labels(self) -> list:
         labels = []
@@ -99,13 +100,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         return labels
 
     def label_at(self, r) -> ActionLabel:
-        label = ActionLabel(self.item(r, 0).text(),
-                            int(self.item(r, 4).text()),
-                            self.item(r, 5).background(),
-                            int(self.item(r, 1).text()),
-                            int(self.item(r, 2).text()),
-                            int(self.item(r, 3).text()),
-                            int(self.item(r, 6).text()))
+        label = self.RowLabel(r).to_actionlabel()
         logger.debug(label)
         return label
 
@@ -119,12 +114,12 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         return rows, labels
 
     def _get_label_row_num(self, action_label: ActionLabel):
-        rows = self.rowCount()
-        for r in range(rows):
-            if self.item(r, 1) and self.item(r, 1).text() == str(action_label.begin):
-                if self.item(r, 2) and self.item(r, 2).text() == str(action_label.end):
-                    if self.item(r, 3) and self.item(r, 3).text() == str(action_label.timeline_row):
-                        return r
+        for r in range(self.rowCount()):
+            row_label = self.RowLabel(r)
+            if row_label.begin == action_label.begin \
+                    and row_label.end == action_label.end \
+                    and row_label.timeline_row == action_label.timeline_row:
+                return r
         return None
 
     def add_label(self, action_label: ActionLabel):
@@ -160,31 +155,108 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         rows_delete_later = set()
         labels_add_later = []
         for t_r in range(self.rowCount()):
-            timeline_row = self.item(t_r, 3).text() and int(self.item(t_r, 3).text())
-            if timeline_row not in label_cells:
+            row_label: LabeledTableWidget._Row = self.RowLabel(t_r)
+            if row_label.timeline_row not in label_cells:
                 continue
-            label_begin = int(self.item(t_r, 1).text())
-            label_end = int(self.item(t_r, 2).text())
-            pose_index = int(self.item(t_r, 6).text())
-            if label_cells[timeline_row][0] > label_end or label_cells[timeline_row][-1] < label_begin:
+            left_cell = label_cells[row_label.timeline_row][0]
+            right_cell = label_cells[row_label.timeline_row][-1]
+            if left_cell > row_label.end or right_cell < row_label.begin:
                 continue
-            elif label_cells[timeline_row][0] <= label_begin:
-                self.item(t_r, 1).setData(Qt.DisplayRole, label_cells[timeline_row][-1] + 1)
-            elif label_cells[timeline_row][-1] >= label_end:
-                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[timeline_row][0] - 1)
+            elif left_cell <= row_label.begin:
+                row_label.set_begin(right_cell + 1)
+            elif right_cell >= row_label.end:
+                row_label.set_end(left_cell - 1)
             else:
-                self.item(t_r, 2).setData(Qt.DisplayRole, label_cells[timeline_row][0] - 1)
-                labels_add_later.append(
-                    ActionLabel(self.item(t_r, 0).text(),
-                                int(self.item(t_r, 4).text()),
-                                self.item(t_r, 5).background(),
-                                label_cells[timeline_row][-1] + 1,
-                                label_end, timeline_row, pose_index))
+                new_label = row_label.to_actionlabel()
+                new_label.begin = right_cell + 1
+                labels_add_later.append(new_label)
+                row_label.set_end(left_cell - 1)
 
-            if int(self.item(t_r, 1).text()) > int(self.item(t_r, 2).text()):
+            if row_label.begin > row_label.end:
                 rows_delete_later.add(t_r)
 
         self._delete_rows(rows_delete_later)
 
         for l_add in labels_add_later:
             self.add_label(l_add)
+
+    class _Row:
+        COLS = ['Action', 'Begin', 'End', 'Timeline Row', 'Action Id', 'Action Color', 'Pose Index']
+
+        def __init__(self, row_num: int, table: 'LabeledTableWidget'):
+            self.table = table
+            self.row_num = row_num
+
+        @property
+        def action(self):
+            return self.table.item(self.row_num, 0).text()
+
+        def set_action(self, action: str):
+            self.table.item(self.row_num, 0).setText(action)
+            return self
+
+        @property
+        def begin(self):
+            text = self.table.item(self.row_num, 1).text()
+            return text and int(text)
+
+        def set_begin(self, begin_: int):
+            self.table.item(self.row_num, 1).setText(str(begin_))
+            return self
+
+        @property
+        def end(self):
+            text = self.table.item(self.row_num, 2).text()
+            return text and int(text)
+
+        def set_end(self, end_: int):
+            self.table.item(self.row_num, 2).setText(str(end_))
+            return self
+
+        @property
+        def timeline_row(self):
+            text = self.table.item(self.row_num, 3).text()
+            return text and int(text)
+
+        def set_timeline_row(self, row_num: int):
+            self.table.item(self.row_num, 3).setText(str(row_num))
+            return self
+
+        @property
+        def action_id(self):
+            text = self.table.item(self.row_num, 4).text()
+            return text and int(text)
+
+        def set_action_id(self, id_: int):
+            self.table.item(self.row_num, 4).setText(str(id_))
+            return self
+
+        @property
+        def action_color(self):
+            return self.table.item(self.row_num, 5).background()
+
+        def set_action_color(self, color: QColor):
+            self.table.item(self.row_num, 5).setBackground(color)
+            return self
+
+        @property
+        def pose_index(self):
+            text = self.table.item(self.row_num, 6).text()
+            return text and int(text)
+
+        def set_pose_index(self, index: int):
+            self.table.item(self.row_num, 6).setText(str(index))
+            return self
+
+        def delete(self):
+            self.table._delete_rows([self.row_num])
+
+        def to_actionlabel(self) -> ActionLabel:
+            label = ActionLabel(self.action,
+                                self.action_id,
+                                self.action_color,
+                                self.begin,
+                                self.end,
+                                self.timeline_row,
+                                self.pose_index)
+            return label
