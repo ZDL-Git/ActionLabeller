@@ -1,5 +1,6 @@
 import codecs
 import json
+import os
 import pickle
 from typing import Callable
 
@@ -16,6 +17,9 @@ class CommonUnit:
     status_prompt: Callable
     get_all_labels: Callable
 
+    last_save_directory: str = ''
+    last_open_directory: str = ''
+
     @classmethod
     def set_mw(cls, mwindow):
         logger.debug('')
@@ -30,13 +34,17 @@ class CommonUnit:
     def get_save_name(cls, default=None):
         fd = QFileDialog()
         fd.setAcceptMode(QFileDialog.AcceptSave)
-        name = fd.getSaveFileName(cls.mw, 'Save File', default)
+        directory = os.path.join(cls.last_save_directory or cls.last_open_directory, default)
+        name = fd.getSaveFileName(cls.mw, 'Save File', directory)
+        cls.last_save_directory = os.path.dirname(name[0])
         return name[0]
 
     @classmethod
     def get_open_name(cls, caption="Open File", directory="", filter_="*"):
-        name = QFileDialog().getOpenFileName(cls.mw, caption, directory,
+        name = QFileDialog().getOpenFileName(cls.mw, caption,
+                                             directory or cls.last_open_directory or cls.last_save_directory,
                                              filter_, options=QFileDialog.ReadOnly)
+        cls.last_open_directory = os.path.dirname(name[0])
         return name[0]
 
     @classmethod
