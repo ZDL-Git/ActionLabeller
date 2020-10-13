@@ -74,9 +74,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def common_slot(self, *arg):
         logger.debug(f'common slot print:{arg}')
 
-    def slot_interval_changed(self):
-        Settings.v_interval = int(self.spin_interval.text() or 1)
-
     def slot_follow_to(self, to):
         CommonUnit.status_prompt(f'Frame {to}')
 

@@ -48,14 +48,14 @@ class PlayingUnit(QObject):
             # mySignals.video_pause_or_resume.connect(self.pause_or_resume),
             # mySignals.video_start.connect(self.slot_start),
             # mySignals.video_pause.connect(self.slot_pause),
-            mySignals.follow_to.connect(self.mw.slot_follow_to),
+            # mySignals.follow_to.connect(self.mw.slot_follow_to),
             mySignals.schedule.connect(self.slot_schedule),
         )
         (
             self.mw.label_show.installEventFilter(self),
         )
         (
-            self.mw.spin_interval.textChanged.connect(self.mw.slot_interval_changed),
+            self.mw.spin_interval.textChanged.connect(self.slot_interval_changed),
             self.mw.combo_speed.currentTextChanged.connect(self.slot_speed_changed),
             self.mw.input_jumpto.textChanged.connect(self.slot_input_jumpto_changed),
         )
@@ -173,6 +173,9 @@ class PlayingUnit(QObject):
 
     def to_tail(self):
         pass
+
+    def slot_interval_changed(self):
+        Settings.v_interval = int(self.mw.spin_interval.text() or 1)
 
     def slot_speed_changed(self):
         logger.debug('')
