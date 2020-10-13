@@ -49,6 +49,7 @@ class PlayingUnit(QObject):
             # mySignals.video_start.connect(self.slot_start),
             # mySignals.video_pause.connect(self.slot_pause),
             mySignals.follow_to.connect(self.mw.slot_follow_to),
+            mySignals.schedule.connect(self.slot_schedule),
         )
         (
             self.mw.label_show.installEventFilter(self),
@@ -211,9 +212,13 @@ class PlayingUnit(QObject):
 
     def slot_tabletimeline_header_clicked(self, i):
         logger.debug(f'index {i}')
+        self.slot_schedule(i, -1, -1, MySignals.Emitter.T_HSCROLL)
+
+    def slot_schedule(self, jump_to, bias, stop_at, emitter):
+        logger.debug('')
         if self.media_model is None:
             return
-        self.media_model.schedule(i, -1, -1, MySignals.Emitter.T_HHEADER)
+        self.media_model.schedule(jump_to, bias, stop_at, MySignals.Emitter.T_HSCROLL)
 
     def _init_pyqtgraph(self):
         pg.setConfigOptions(antialias=True)
