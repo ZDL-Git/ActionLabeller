@@ -92,7 +92,7 @@ class ActionLabellingUnit:
             if action_name not in all_actions:
                 action = Action(self.mw.table_action.generate_id(), action_name,
                                 QColor(QRandomGenerator().global_().generate()), False)
-                self.mw.table_action.insert_action(action)
+                self.mw.table_action.slot_insert_action(action)
                 all_actions[action_name] = action
             else:
                 action = all_actions[action_name]
@@ -130,7 +130,7 @@ class ActionLabellingUnit:
     def slot_action_add(self, checked):  # if use decorator, must receive checked param of button clicked event
         logger.debug('')
         action = Action(self.mw.table_action.generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
-        self.mw.table_action.insert_action(action)
+        self.mw.table_action.slot_insert_action(action)
         self.mw.table_action.editItem(self.mw.table_action.item(self.mw.table_action.rowCount() - 1, 0))
 
     def slot_sync_action_update(self):

@@ -158,9 +158,9 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         begin = EnumColsHelper.Col()(1, int, 'Begin', False, True, True)
         end = EnumColsHelper.Col()(2, int, 'End', False, True, True)
         duration = EnumColsHelper.Col()(3, int, 'Duration', False, True, True)
-        timeline_row = EnumColsHelper.Col()(4, int, 'Timeline Row', False, False, False)
+        timeline_row = EnumColsHelper.Col()(4, int, 'Timeline Row', False, True, False)
         pose_index = EnumColsHelper.Col()(5, int, 'Pose Index', True, True, True)
-        action_id = EnumColsHelper.Col()(6, int, 'Action Id', False, False, False)
+        action_id = EnumColsHelper.Col()(6, int, 'Action Id', False, True, False)
         action_color = EnumColsHelper.Col()(7, QColor, 'Action Color', False, False, False)
 
     class _Row(RowHelper):

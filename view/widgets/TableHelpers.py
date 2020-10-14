@@ -100,7 +100,7 @@ class RowHelper(ABC):
         if vt in [QBrush, QColor]:
             self._col_item(col).setBackground(value)
         elif vt in [bool]:
-            self._col_item(col).setCheckState(value)
+            self._col_item(col).setCheckState(Qt.Checked if value else Qt.Unchecked)
         elif col.value.num_sort:
             self._col_item(col).setData(Qt.DisplayRole, value)
         else:
