@@ -49,7 +49,9 @@ class EnumColsHelper(Enum):
     def Col(cls):
         if not hasattr(cls, 'col_info_namedtuple'):
             cls.col_info_namedtuple = namedtuple('Col_namedtuple',
-                                                 ['index', 'value_type', 'header', 'editable', 'num_sort', 'show'])
+                                                 ['index', 'value_type', 'header',
+                                                  'editable', 'selectable', 'num_sort',
+                                                  'show'])
         return cls.col_info_namedtuple
 
     @classmethod
@@ -76,11 +78,13 @@ class RowHelper(ABC):
         self.table = table
 
     def _col_item(self, col: EnumColsHelper):
-        r, c, e = self.row_num, col.value.index, col.value.editable
+        r, c, e, s = self.row_num, col.value.index, col.value.editable, col.value.selectable
         if self.table.item(r, c) is None:
             item = QTableWidgetItem()
             if not e:
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+            if not s:
+                item.setFlags(item.flags() & ~Qt.ItemIsSelectable)
             self.table.setItem(r, c, item)
         return self.table.item(r, c)
 
