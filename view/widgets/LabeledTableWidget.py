@@ -28,12 +28,12 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         # self.cellChanged.connect(self.slot_cellChanged)
 
     def __init_later__(self):
-        self.setColumnCount(8)
-        self.setHorizontalHeaderLabels(self._Cols.headers())
+        col_headers = self._Cols.headers()
+        self.setColumnCount(len(col_headers))
+        self.setHorizontalHeaderLabels(col_headers)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.setColumnHidden(4, True)
-        self.setColumnHidden(6, True)
-        self.setColumnHidden(7, True)
+        for i in self._Cols.hidden_cols():
+            self.setColumnHidden(i, True)
 
     # def slot_cellChanged(self, r, c):
     #     Log.debug(r, c)
@@ -158,19 +158,24 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             self.add_label(l_add)
 
     class _Cols(Enum):
-        _attrs = namedtuple('attrs', ['index', 'value_type', 'header', 'editable', 'num_sort'])
-        action = _attrs(0, str, 'Action', False, False)
-        begin = _attrs(1, int, 'Begin', False, True)
-        end = _attrs(2, int, 'End', False, True)
-        duration = _attrs(3, int, 'Duration', False, True)
-        timeline_row = _attrs(4, int, 'Timeline Row', False, False)
-        pose_index = _attrs(5, int, 'Pose Index', True, True)
-        action_id = _attrs(6, int, 'Action Id', False, False)
-        action_color = _attrs(7, QColor, 'Action Color', False, False)
+        _attrs = namedtuple('attrs', ['index', 'value_type', 'header', 'editable', 'num_sort', 'show'])
+        action = _attrs(0, str, 'Action', False, False, True)
+        begin = _attrs(1, int, 'Begin', False, True, True)
+        end = _attrs(2, int, 'End', False, True, True)
+        duration = _attrs(3, int, 'Duration', False, True, True)
+        timeline_row = _attrs(4, int, 'Timeline Row', False, False, False)
+        pose_index = _attrs(5, int, 'Pose Index', True, True, True)
+        action_id = _attrs(6, int, 'Action Id', False, False, False)
+        action_color = _attrs(7, QColor, 'Action Color', False, False, False)
 
         @classmethod
         def headers(cls):
             return [v.value.header for k, v in cls.__members__.items() if isinstance(v.value, cls._attrs.value)]
+
+        @classmethod
+        def hidden_cols(cls):
+            return [v.value.index for k, v in cls.__members__.items() if
+                    isinstance(v.value, cls._attrs.value) and not v.value.show]
 
     class _Row:
 
