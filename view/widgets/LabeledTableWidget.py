@@ -145,7 +145,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
                 labels_add_later.append(new_label)
                 row_label.set_end(left_cell - 1)
 
-            if row_label_b > row_label_e:
+            if row_label.begin() > row_label.end():
                 rows_delete_later.add(t_r)
 
         self._delete_rows(rows_delete_later)
