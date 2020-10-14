@@ -22,7 +22,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
 
     def __init_later__(self):
-        self._Cols.to_table(self)
+        self.Cols.to_table(self)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         self.blockSignals(True)
@@ -36,7 +36,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
     def slot_cellChanged(self, r, c):
         logger.debug(f'{r}, {c}')
         row_action = self.RowAction(r)
-        if c == self._Cols.default.value.index:
+        if c == self.Cols.default.value.index:
             if row_action.default():
                 self._unselect_others(except_=r)
 
@@ -45,7 +45,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
 
     def slot_cellDoubleClicked(self, r, c):
         logger.debug(f'{r}, {c}')
-        if c == self._Cols.color.value.index:
+        if c == self.Cols.color.value.index:
             row_action = self.RowAction(r)
             color = QColorDialog().getColor(initial=QColor(row_action.color()))  # type:QColor
             if color.isValid():
@@ -112,7 +112,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
     def slot_test(self, *arg):
         logger.debug(*arg)
 
-    class _Cols(EnumColsHelper):
+    class Cols(EnumColsHelper):
         id = EnumColsHelper.Col()(0, int, 'Action Id', False, True, True, False)
         name = EnumColsHelper.Col()(1, str, 'Action Name', True, True, False, True)
         color = EnumColsHelper.Col()(2, QColor, 'Label Color', False, False, False, True)
@@ -122,28 +122,28 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
 
     class _Row(RowHelper):
 
-        def __init__(self, row_num_or_actionlabel: Union[int, Action], table: 'ActionTableWidget'):
-            super().__init__(table)
+        def __init__(self, row_num_or_action: Union[int, Action], table: 'ActionTableWidget'):
+            self.table = table
 
-            self.id: callable = partial(self._col_value, col=self.table._Cols.id)
-            self.name: callable = partial(self._col_value, col=self.table._Cols.name)
-            self.color: callable = partial(self._col_value, col=self.table._Cols.color)
-            self.default: callable = partial(self._col_value, col=self.table._Cols.default)
-            self.xml_ymin: callable = partial(self._col_value, col=self.table._Cols.xml_ymin)
-            self.xml_ymax: callable = partial(self._col_value, col=self.table._Cols.xml_ymax)
+            self.id: callable = partial(self._col_value, col=self.table.Cols.id)
+            self.name: callable = partial(self._col_value, col=self.table.Cols.name)
+            self.color: callable = partial(self._col_value, col=self.table.Cols.color)
+            self.default: callable = partial(self._col_value, col=self.table.Cols.default)
+            self.xml_ymin: callable = partial(self._col_value, col=self.table.Cols.xml_ymin)
+            self.xml_ymax: callable = partial(self._col_value, col=self.table.Cols.xml_ymax)
 
-            self.set_id: callable = partial(self._set_col_value, col=self.table._Cols.id)
-            self.set_name: callable = partial(self._set_col_value, col=self.table._Cols.name)
-            self.set_color: callable = partial(self._set_col_value, col=self.table._Cols.color)
-            self.set_default: callable = partial(self._set_col_value, col=self.table._Cols.default)
-            self.set_xml_ymin: callable = partial(self._set_col_value, col=self.table._Cols.xml_ymin)
-            self.set_xml_ymax: callable = partial(self._set_col_value, col=self.table._Cols.xml_ymax)
+            self.set_id: callable = partial(self._set_col_value, col=self.table.Cols.id)
+            self.set_name: callable = partial(self._set_col_value, col=self.table.Cols.name)
+            self.set_color: callable = partial(self._set_col_value, col=self.table.Cols.color)
+            self.set_default: callable = partial(self._set_col_value, col=self.table.Cols.default)
+            self.set_xml_ymin: callable = partial(self._set_col_value, col=self.table.Cols.xml_ymin)
+            self.set_xml_ymax: callable = partial(self._set_col_value, col=self.table.Cols.xml_ymax)
 
-            if isinstance(row_num_or_actionlabel, int):
-                self.row_num = row_num_or_actionlabel
-            elif isinstance(row_num_or_actionlabel, Action):
+            if isinstance(row_num_or_action, int):
+                self.row_num = row_num_or_action
+            elif isinstance(row_num_or_action, Action):
                 self.row_num = self.table.rowCount()
-                self._insert(row_num_or_actionlabel)
+                self._insert(row_num_or_action)
             else:
                 raise TypeError
 

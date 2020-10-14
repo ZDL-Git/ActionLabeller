@@ -73,8 +73,9 @@ class EnumColsHelper(Enum):
 
 
 class RowHelper(ABC):
-    def __init__(self, table: TableViewExtended):
+    def __init__(self, table: QTableView, row_num: int):
         self.table = table
+        self.row_num = row_num
 
     def _col_item(self, col: EnumColsHelper):
         r, c, e, s = self.row_num, col.value.index, col.value.editable, col.value.selectable

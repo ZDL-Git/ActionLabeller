@@ -26,7 +26,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         # self.cellChanged.connect(self.slot_cellChanged)
 
     def __init_later__(self):
-        self._Cols.to_table(self)
+        self.Cols.to_table(self)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
     # def slot_cellChanged(self, r, c):
@@ -151,7 +151,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         for l_add in labels_add_later:
             self.add_label(l_add)
 
-    class _Cols(EnumColsHelper):
+    class Cols(EnumColsHelper):
         action = EnumColsHelper.Col()(0, str, 'Action', False, True, False, True)
         begin = EnumColsHelper.Col()(1, int, 'Begin', False, True, True, True)
         end = EnumColsHelper.Col()(2, int, 'End', False, True, True, True)
@@ -164,21 +164,22 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
     class _Row(RowHelper):
 
         def __init__(self, row_num_or_actionlabel: Union[int, ActionLabel], table: 'LabeledTableWidget'):
-            super().__init__(table)
-            self.action: callable = partial(self._col_value, col=self.table._Cols.action)
-            self.begin: callable = partial(self._col_value, col=self.table._Cols.begin)
-            self.end: callable = partial(self._col_value, col=self.table._Cols.end)
-            self.duration: callable = partial(self._col_value, col=self.table._Cols.duration)
-            self.timeline_row: callable = partial(self._col_value, col=self.table._Cols.timeline_row)
-            self.pose_index: callable = partial(self._col_value, col=self.table._Cols.pose_index)
-            self.action_id: callable = partial(self._col_value, col=self.table._Cols.action_id)
-            self.action_color: callable = partial(self._col_value, col=self.table._Cols.action_color)
+            self.table = table
 
-            self.set_action: callable = partial(self._set_col_value, col=self.table._Cols.action)
-            self.set_timeline_row: callable = partial(self._set_col_value, col=self.table._Cols.timeline_row)
-            self.set_pose_index: callable = partial(self._set_col_value, col=self.table._Cols.pose_index)
-            self.set_action_id: callable = partial(self._set_col_value, col=self.table._Cols.action_id)
-            self.set_action_color: callable = partial(self._set_col_value, col=self.table._Cols.action_color)
+            self.action: callable = partial(self._col_value, col=self.table.Cols.action)
+            self.begin: callable = partial(self._col_value, col=self.table.Cols.begin)
+            self.end: callable = partial(self._col_value, col=self.table.Cols.end)
+            self.duration: callable = partial(self._col_value, col=self.table.Cols.duration)
+            self.timeline_row: callable = partial(self._col_value, col=self.table.Cols.timeline_row)
+            self.pose_index: callable = partial(self._col_value, col=self.table.Cols.pose_index)
+            self.action_id: callable = partial(self._col_value, col=self.table.Cols.action_id)
+            self.action_color: callable = partial(self._col_value, col=self.table.Cols.action_color)
+
+            self.set_action: callable = partial(self._set_col_value, col=self.table.Cols.action)
+            self.set_timeline_row: callable = partial(self._set_col_value, col=self.table.Cols.timeline_row)
+            self.set_pose_index: callable = partial(self._set_col_value, col=self.table.Cols.pose_index)
+            self.set_action_id: callable = partial(self._set_col_value, col=self.table.Cols.action_id)
+            self.set_action_color: callable = partial(self._set_col_value, col=self.table.Cols.action_color)
 
             if isinstance(row_num_or_actionlabel, int):
                 self.row_num = row_num_or_actionlabel
@@ -189,19 +190,19 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
                 raise TypeError
 
         def set_begin(self, begin_: int):
-            self._set_col_value(begin_, self.table._Cols.begin)
+            self._set_col_value(begin_, self.table.Cols.begin)
             self._set_duration()
             return self
 
         def set_end(self, end_: int):
-            self._set_col_value(end_, self.table._Cols.end)
+            self._set_col_value(end_, self.table.Cols.end)
             self._set_duration()
             return self
 
         def _set_duration(self):
             b, e = self.begin(), self.end()
             if b is not None and e is not None:
-                self._set_col_value(e - b + 1, self.table._Cols.duration)
+                self._set_col_value(e - b + 1, self.table.Cols.duration)
             return self
 
         @TableDecorators.dissort(table_lambda=lambda self: self.table)

@@ -1,6 +1,8 @@
+from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QTableView, QHeaderView
 
-from view.widgets.TableHelpers import TableViewExtended
+from view.widgets.ActionTableWidget import ActionTableWidget
+from view.widgets.TableHelpers import TableViewExtended, EnumColsHelper
 
 
 class XmlSettingTableView(QTableView):
@@ -10,11 +12,12 @@ class XmlSettingTableView(QTableView):
     def __init_later__(self, model):
         self.setModel(model)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.setColumnHidden(1, True)
-        self.setColumnHidden(2, True)
-        self.setColumnHidden(3, True)
-        self.setColumnHidden(4, False)
-        self.setColumnHidden(5, False)
         delegate = TableViewExtended.IntDelegate()
-        self.setItemDelegateForColumn(4, delegate)
-        self.setItemDelegateForColumn(5, delegate)
+        self.setItemDelegateForColumn(ActionTableWidget.Cols.xml_ymin.value.index, delegate)
+        self.setItemDelegateForColumn(ActionTableWidget.Cols.xml_ymax.value.index, delegate)
+        for col in ActionTableWidget.Cols:
+            if col in [ActionTableWidget.Cols.name, ActionTableWidget.Cols.xml_ymin,
+                       ActionTableWidget.Cols.xml_ymax]:
+                self.setColumnHidden(col.value.index, False)
+            else:
+                self.setColumnHidden(col.value.index, True)
