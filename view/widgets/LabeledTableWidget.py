@@ -14,7 +14,7 @@ from model.Action import Action
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.MySignals import mySignals
-from view.widgets.TableHelpers import TableViewExtended
+from view.widgets.TableHelpers import TableViewExtended, EnumColsHelper, RowHelper
 
 
 class LabeledTableWidget(QTableWidget, TableViewExtended):
@@ -28,12 +28,8 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         # self.cellChanged.connect(self.slot_cellChanged)
 
     def __init_later__(self):
-        col_headers = self._Cols.headers()
-        self.setColumnCount(len(col_headers))
-        self.setHorizontalHeaderLabels(col_headers)
+        self._Cols.to_table(self)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        for i in self._Cols.hidden_cols():
-            self.setColumnHidden(i, True)
 
     # def slot_cellChanged(self, r, c):
     #     Log.debug(r, c)
@@ -157,31 +153,20 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         for l_add in labels_add_later:
             self.add_label(l_add)
 
-    class _Cols(Enum):
-        _attrs = namedtuple('attrs', ['index', 'value_type', 'header', 'editable', 'num_sort', 'show'])
-        action = _attrs(0, str, 'Action', False, False, True)
-        begin = _attrs(1, int, 'Begin', False, True, True)
-        end = _attrs(2, int, 'End', False, True, True)
-        duration = _attrs(3, int, 'Duration', False, True, True)
-        timeline_row = _attrs(4, int, 'Timeline Row', False, False, False)
-        pose_index = _attrs(5, int, 'Pose Index', True, True, True)
-        action_id = _attrs(6, int, 'Action Id', False, False, False)
-        action_color = _attrs(7, QColor, 'Action Color', False, False, False)
+    class _Cols(EnumColsHelper):
+        action = EnumColsHelper.Col()(0, str, 'Action', False, False, True)
+        begin = EnumColsHelper.Col()(1, int, 'Begin', False, True, True)
+        end = EnumColsHelper.Col()(2, int, 'End', False, True, True)
+        duration = EnumColsHelper.Col()(3, int, 'Duration', False, True, True)
+        timeline_row = EnumColsHelper.Col()(4, int, 'Timeline Row', False, False, False)
+        pose_index = EnumColsHelper.Col()(5, int, 'Pose Index', True, True, True)
+        action_id = EnumColsHelper.Col()(6, int, 'Action Id', False, False, False)
+        action_color = EnumColsHelper.Col()(7, QColor, 'Action Color', False, False, False)
 
-        @classmethod
-        def headers(cls):
-            return [v.value.header for k, v in cls.__members__.items() if isinstance(v.value, cls._attrs.value)]
-
-        @classmethod
-        def hidden_cols(cls):
-            return [v.value.index for k, v in cls.__members__.items() if
-                    isinstance(v.value, cls._attrs.value) and not v.value.show]
-
-    class _Row:
+    class _Row(RowHelper):
 
         def __init__(self, row_num_or_actionlabel: Union[int, ActionLabel], table: 'LabeledTableWidget'):
-            self.table = table
-
+            super().__init__(table)
             self.action: callable = partial(self._col_value, col=self.table._Cols.action)
             self.begin: callable = partial(self._col_value, col=self.table._Cols.begin)
             self.end: callable = partial(self._col_value, col=self.table._Cols.end)
@@ -221,34 +206,6 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
                 self._set_col_value(e - b + 1, self.table._Cols.duration)
             return self
 
-        def _col_item(self, col: 'LabeledTableWidget._Cols'):
-            r, c, e = self.row_num, col.value.index, col.value.editable
-            if self.table.item(r, c) is None:
-                item = QTableWidgetItem()
-                if not e:
-                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                self.table.setItem(r, c, item)
-            return self.table.item(r, c)
-
-        @except_as_None()
-        def _col_value(self, col: 'LabeledTableWidget._Cols'):
-            r, c, vt = self.row_num, col.value.index, col.value.value_type
-            if vt in [QBrush, QColor]:
-                v = self._col_item(col).background()
-            else:
-                v = vt(self._col_item(col).text())
-            return v
-
-        def _set_col_value(self, value, col: 'LabeledTableWidget._Cols'):
-            r, c, vt = self.row_num, col.value.index, col.value.value_type
-            if vt in [QBrush, QColor]:
-                self._col_item(col).setBackground(value)
-            elif col.value.num_sort:
-                self._col_item(col).setData(Qt.DisplayRole, value)
-            else:
-                self._col_item(col).setText(str(value))
-            return self
-
         @TableDecorators.dissort(table_lambda=lambda self: self.table)
         def _insert(self, action_label: ActionLabel):
             self.table.insertRow(self.row_num)
@@ -259,9 +216,6 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
                 .set_pose_index(action_label.pose_index) \
                 .set_action_id(action_label.action_id) \
                 .set_action_color(action_label.color)
-
-        def delete(self):
-            self.table._delete_rows([self.row_num])
 
         def to_actionlabel(self) -> ActionLabel:
             label = ActionLabel(self.action(),

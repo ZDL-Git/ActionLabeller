@@ -1,11 +1,18 @@
+from collections import namedtuple
+from enum import Enum
+from functools import partial
+from typing import Union
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from zdl.utils.helper.python import except_as_None
+from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.log import logger
 
 from model.Action import Action
 from presenter.CommonUnit import CommonUnit
-from view.widgets.TableHelpers import TableViewExtended
+from view.widgets.TableHelpers import TableViewExtended, EnumColsHelper, RowHelper
 
 
 class ActionTableWidget(QTableWidget, TableViewExtended):
@@ -18,12 +25,8 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
 
     def __init_later__(self):
-        self.setColumnCount(6)
-        self.setHorizontalHeaderLabels(['Action Name', 'Label Color', 'Default', 'Action Id', 'Y-min', 'Y-max'])
+        self._Cols.to_table(self)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.setColumnHidden(3, True)
-        self.setColumnHidden(4, True)
-        self.setColumnHidden(5, True)
 
         self.blockSignals(True)
         for i in range(2):
@@ -140,3 +143,57 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
 
     def slot_test(self, *arg):
         logger.debug(*arg)
+
+    class _Cols(EnumColsHelper):
+        id = EnumColsHelper.Col()(0, int, 'Action Id', False, False, False)
+        name = EnumColsHelper.Col()(1, str, 'Action Name', False, True, True)
+        color = EnumColsHelper.Col()(2, QColor, 'Label Color', False, True, True)
+        default = EnumColsHelper.Col()(3, bool, 'Default', False, True, True)
+        xml_ymin = EnumColsHelper.Col()(4, int, 'Y-min', False, False, False)
+        xml_ymax = EnumColsHelper.Col()(5, int, 'Y-max', True, True, False)
+
+    class _Row(RowHelper):
+
+        def __init__(self, row_num_or_actionlabel: Union[int, Action], table: 'ActionTableWidget'):
+            super().__init__(table)
+
+            self.id: callable = partial(self._col_value, col=self.table._Cols.id)
+            self.name: callable = partial(self._col_value, col=self.table._Cols.name)
+            self.color: callable = partial(self._col_value, col=self.table._Cols.color)
+            self.default: callable = partial(self._col_value, col=self.table._Cols.default)
+            self.xml_ymin: callable = partial(self._col_value, col=self.table._Cols.xml_ymin)
+            self.xml_ymax: callable = partial(self._col_value, col=self.table._Cols.xml_ymax)
+
+            self.set_id: callable = partial(self._set_col_value, col=self.table._Cols.id)
+            self.set_name: callable = partial(self._set_col_value, col=self.table._Cols.name)
+            self.set_color: callable = partial(self._set_col_value, col=self.table._Cols.color)
+            self.set_default: callable = partial(self._set_col_value, col=self.table._Cols.default)
+            self.set_xml_ymin: callable = partial(self._set_col_value, col=self.table._Cols.xml_ymin)
+            self.set_xml_ymax: callable = partial(self._set_col_value, col=self.table._Cols.xml_ymax)
+
+            if isinstance(row_num_or_actionlabel, int):
+                self.row_num = row_num_or_actionlabel
+            elif isinstance(row_num_or_actionlabel, Action):
+                self.row_num = self.table.rowCount()
+                self._insert(row_num_or_actionlabel)
+            else:
+                raise TypeError
+
+        @TableDecorators.dissort(table_lambda=lambda self: self.table)
+        def _insert(self, action: Action):
+            self.table.insertRow(self.row_num)
+            self.set_id(action.id) \
+                .set_name(action.name) \
+                .set_color(action.color) \
+                .set_default(action.default) \
+                .set_xml_ymin(action.xml_ymin) \
+                .set_xml_ymax(action.xml_ymax)
+
+        def to_action(self) -> Action:
+            label = Action(self.id(),
+                           self.name(),
+                           self.color(),
+                           self.default(),
+                           self.xml_ymin(),
+                           self.xml_ymax())
+            return label
