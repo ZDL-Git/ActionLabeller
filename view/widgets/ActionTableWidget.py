@@ -5,7 +5,7 @@ from zdl.utils.io.log import logger
 
 from model.Action import Action
 from presenter.CommonUnit import CommonUnit
-from view.widgets.TableViewExtended import TableViewExtended
+from view.widgets.TableExtended import TableViewExtended
 
 
 class ActionTableWidget(QTableWidget, TableViewExtended):

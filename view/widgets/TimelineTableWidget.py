@@ -13,7 +13,7 @@ from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
-from view.widgets.TableViewExtended import TableViewExtended
+from view.widgets.TableExtended import TableViewExtended
 
 
 class TimelineTableView(TableViewExtended):
