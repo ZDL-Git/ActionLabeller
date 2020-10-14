@@ -44,6 +44,7 @@ class CommonUnit:
         name = QFileDialog().getOpenFileName(cls.mw, caption,
                                              directory or cls.last_open_directory or cls.last_save_directory,
                                              filter_, options=QFileDialog.ReadOnly)
+        assert name, 'file not selected!'
         cls.last_open_directory = os.path.dirname(name[0])
         return name[0]
 
@@ -58,7 +59,6 @@ class CommonUnit:
     def load_dict(cls) -> dict:
         file_name = cls.get_open_name(filter_="(*.json)")
         logger.debug(file_name)
-        assert file_name, 'file not selected!'
         with open(file_name, 'r', encoding='utf-8') as f:
             json_content = json.load(f)
         return json_content

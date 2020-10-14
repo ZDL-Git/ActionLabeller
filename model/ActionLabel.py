@@ -7,7 +7,8 @@ from presenter.CommonUnit import CommonUnit
 
 
 class ActionLabel:
-    def __init__(self, action: str, action_id: int, color, begin: int, end: int, timeline_row: Optional[int],
+    def __init__(self, action: str, action_id: int, color, begin: int, end: int,
+                 timeline_row: Optional[int],
                  pose_index: int = -1):
         self.action = action
         self.action_id = action_id
@@ -16,6 +17,7 @@ class ActionLabel:
         self.color = color
         self.begin = begin
         self.end = end
+        self.duration = self.end - self.begin + 1
         self.pose_index = pose_index  # pose index from 0, within one frame.
         self.timeline_row = timeline_row
 
