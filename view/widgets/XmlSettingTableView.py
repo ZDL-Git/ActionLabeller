@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QTableView, QHeaderView
 
-from view.widgets.TableExtended import TableViewExtended
+from view.widgets.TableHelpers import TableViewExtended
 
 
 class XmlSettingTableView(QTableView):

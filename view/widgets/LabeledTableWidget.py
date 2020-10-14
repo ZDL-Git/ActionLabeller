@@ -14,7 +14,7 @@ from model.Action import Action
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.MySignals import mySignals
-from view.widgets.TableExtended import TableViewExtended
+from view.widgets.TableHelpers import TableViewExtended
 
 
 class LabeledTableWidget(QTableWidget, TableViewExtended):
