@@ -1,8 +1,7 @@
-from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QTableView, QHeaderView
 
 from view.widgets.ActionTableWidget import ActionTableWidget
-from view.widgets.TableHelpers import TableViewExtended, EnumColsHelper
+from view.widgets.TableHelpers import TableViewExtended
 
 
 class XmlSettingTableView(QTableView):

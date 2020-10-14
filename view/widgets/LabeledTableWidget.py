@@ -1,5 +1,4 @@
 from functools import partial
-from functools import partial
 from typing import List, Dict, Union
 
 from PyQt5.QtCore import Qt
