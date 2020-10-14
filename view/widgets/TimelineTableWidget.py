@@ -6,13 +6,13 @@ from PyQt5.QtCore import Qt, QVariant, QRect, QItemSelection, QItemSelectionMode
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEvent, QIntValidator
 from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
     QPushButton
+from zdl.utils.helper.qt import TableDecorators, clear_layout
 from zdl.utils.io.log import logger
 
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
-from view.widgets.Common import TableDecorators, clear_layout
 from view.widgets.TableViewExtended import TableViewExtended
 
 

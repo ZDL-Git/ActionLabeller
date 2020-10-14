@@ -6,14 +6,14 @@ from typing import List, Dict, Union
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent, QColor, QBrush
 from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem, QAbstractItemView
-from zdl.utils.decorator import except_as_None
+from zdl.utils.helper.python import except_as_None
+from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.log import logger
 
 from model.Action import Action
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.MySignals import mySignals
-from view.widgets.Common import TableDecorators
 from view.widgets.TableViewExtended import TableViewExtended
 
 
@@ -56,7 +56,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         # label = self.label_at(r)
         # mySignals.labeled_selected.emit(label, MySignals.Emitter.T_LABELED)
 
-    @TableDecorators.dissort
+    @TableDecorators.dissort()
     @TableDecorators.block_signals
     def slot_label_created(self, action_label: ActionLabel, emitter):
         logger.debug(f'{action_label}, {emitter}')
@@ -64,7 +64,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         row_i = self.add_label(action_label)
         self._select_row(row_i)
 
-    @TableDecorators.dissort
+    @TableDecorators.dissort()
     @TableDecorators.block_signals
     def slot_label_select(self, action_label, emitter):
         logger.debug(f'{action_label}, {emitter}')
@@ -72,7 +72,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         if label_row is not None:
             self.selectRow(label_row)
 
-    @TableDecorators.dissort
+    @TableDecorators.dissort()
     @TableDecorators.block_signals
     def slot_label_delete(self, action_label, emitter):
         logger.debug(f'{action_label}, {emitter}')
@@ -80,13 +80,13 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         if row_i is not None:
             self._delete_rows([row_i])
 
-    @TableDecorators.dissort
+    @TableDecorators.dissort()
     @TableDecorators.block_signals
     def slot_label_cells_delete(self, label_cells: Dict[int, List[int]], emitter):
         logger.debug(f'{label_cells}, {emitter}')
         self._label_cells_delete(label_cells)
 
-    @TableDecorators.dissort
+    @TableDecorators.dissort()
     @TableDecorators.block_signals
     def slot_label_action_info_update_by_row(self, r, action: Action, emitter):
         logger.debug(f'{r}, {action}, {emitter}')
@@ -244,11 +244,8 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
                 self._col_item(col).setText(str(value))
             return self
 
-        def _disable_sort(self, disable=True):
-            self.table.setSortingEnabled(not disable)
-
+        @TableDecorators.dissort(table_lambda=lambda self: self.table)
         def _insert(self, action_label: ActionLabel):
-            self._disable_sort(True)
             self.table.insertRow(self.row_num)
             self.set_action(action_label.action) \
                 .set_begin(action_label.begin) \
@@ -257,7 +254,6 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
                 .set_pose_index(action_label.pose_index) \
                 .set_action_id(action_label.action_id) \
                 .set_action_color(action_label.color)
-            self._disable_sort(False)
 
         def delete(self):
             self.table._delete_rows([self.row_num])
