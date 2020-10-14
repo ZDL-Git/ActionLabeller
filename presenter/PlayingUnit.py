@@ -5,9 +5,9 @@ import pyqtgraph as pg
 from PyQt5.QtCore import QEvent, QObject
 from zdl.utils.io.log import logger
 
+from model.AbcPlayable import Playable
 from model.ActionLabel import ActionLabel
 from model.File import load_dict
-from model.AbcPlayable import Playable
 from model.PosePlotting import PosePlotting
 from model.Video import Video
 from presenter import MySignals

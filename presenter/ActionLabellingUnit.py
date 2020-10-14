@@ -1,8 +1,7 @@
-import json
-import numpy as np
 import os
 import time
 
+import numpy as np
 from PyQt5.QtCore import QRandomGenerator, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox

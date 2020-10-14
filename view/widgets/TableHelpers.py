@@ -1,7 +1,6 @@
-from abc import ABCMeta, abstractmethod, ABC
+from abc import abstractmethod, ABC
 from collections import namedtuple
 from enum import Enum
-from typing import NamedTuple
 
 from PyQt5.QtCore import QItemSelection, QItemSelectionModel, QModelIndex, Qt
 from PyQt5.QtGui import QIntValidator, QBrush, QColor

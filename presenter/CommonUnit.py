@@ -5,9 +5,7 @@ import pickle
 from typing import Callable
 
 import numpy as np
-
 from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit
-
 from zdl.utils.io.log import logger
 
 

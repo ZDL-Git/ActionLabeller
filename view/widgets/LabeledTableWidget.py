@@ -1,12 +1,10 @@
-from collections import namedtuple
-from enum import Enum
+from functools import partial
 from functools import partial
 from typing import List, Dict, Union
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QKeyEvent, QColor, QBrush
-from PyQt5.QtWidgets import QTableWidget, QHeaderView, QTableWidgetItem, QAbstractItemView
-from zdl.utils.helper.python import except_as_None
+from PyQt5.QtGui import QKeyEvent, QColor
+from PyQt5.QtWidgets import QTableWidget, QHeaderView, QAbstractItemView
 from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.log import logger
 
