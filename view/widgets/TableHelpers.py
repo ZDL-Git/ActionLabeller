@@ -92,7 +92,7 @@ class RowHelper(ABC):
     def __repr__(self):
         return f'{self.__class__}: row_num={self.row_num}'
 
-    def _col_item(self, col: EnumColsHelper):
+    def __col_item(self, col: EnumColsHelper):
         r, c, e, s = self.row_num, col.value.index, col.value.editable, col.value.selectable
         if self.table.item(r, c) is None:
             item = QTableWidgetItem()
@@ -107,23 +107,23 @@ class RowHelper(ABC):
     def _col_value(self, col: EnumColsHelper):
         vt = col.value.value_type
         if vt in [QBrush, QColor]:
-            v = self._col_item(col).background()
+            v = self.__col_item(col).background()
         elif vt in [bool]:
-            v = self._col_item(col).checkState() == Qt.Checked
+            v = self.__col_item(col).checkState() == Qt.Checked
         else:
-            v = vt(self._col_item(col).text())
+            v = vt(self.__col_item(col).text())
         return v
 
     def _set_col_value(self, value, col: EnumColsHelper):
         vt = col.value.value_type
         if vt in [QBrush, QColor]:
-            self._col_item(col).setBackground(value)
+            self.__col_item(col).setBackground(value)
         elif vt in [bool]:
-            self._col_item(col).setCheckState(Qt.Checked if value else Qt.Unchecked)
+            self.__col_item(col).setCheckState(Qt.Checked if value else Qt.Unchecked)
         elif col.value.num_sort:
-            self._col_item(col).setData(Qt.DisplayRole, value)
+            self.__col_item(col).setData(Qt.DisplayRole, value)
         else:
-            self._col_item(col).setText(str(value))
+            self.__col_item(col).setText(str(value))
         return self
 
     def _col_del(self, col: EnumColsHelper):
@@ -137,4 +137,4 @@ class RowHelper(ABC):
         self.table._delete_rows([self.row_num])
 
     def to_edit(self, col: EnumColsHelper):
-        self.table.editItem(self._col_item(col))
+        self.table.editItem(self.__col_item(col))
