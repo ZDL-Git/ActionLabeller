@@ -1,15 +1,16 @@
-from PyQt5.QtWidgets import QTableView, QHeaderView
+from PyQt5.QtWidgets import QHeaderView
 
 from view.widgets.ActionTableWidget import ActionTableWidget
 from view.widgets.TableHelpers import TableViewExtended
 
 
-class XmlSettingTableView(QTableView):
+class XmlSettingTableView(TableViewExtended):
     def __init__(self, parent):
         super().__init__()
 
     def __init_later__(self, model):
         self.setModel(model)
+        self.setSortingEnabled(True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         delegate = TableViewExtended.IntDelegate()
         self.setItemDelegateForColumn(ActionTableWidget.Cols.xml_ymin.value.index, delegate)

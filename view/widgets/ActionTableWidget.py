@@ -23,6 +23,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
 
     def __init_later__(self):
         self.Cols.to_table(self)
+        self.setSortingEnabled(True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
         self.blockSignals(True)
