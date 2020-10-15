@@ -152,14 +152,14 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             self.add_label(l_add)
 
     class Cols(EnumColsHelper):
-        action = EnumColsHelper.Col()(0, str, 'Action', False, True, False, True)
-        begin = EnumColsHelper.Col()(1, int, 'Begin', False, True, True, True)
-        end = EnumColsHelper.Col()(2, int, 'End', False, True, True, True)
-        duration = EnumColsHelper.Col()(3, int, 'Duration', False, True, True, True)
-        timeline_row = EnumColsHelper.Col()(4, int, 'Timeline Row', False, True, True, False)
-        pose_index = EnumColsHelper.Col()(5, int, 'Pose Index', True, True, True, True)
-        action_id = EnumColsHelper.Col()(6, int, 'Action Id', False, True, True, False)
-        action_color = EnumColsHelper.Col()(7, QColor, 'Action Color', False, True, False, False)
+        action = EnumColsHelper.ColType()(0, str, 'Action', False, True, False, True)
+        begin = EnumColsHelper.ColType()(1, int, 'Begin', False, True, True, True)
+        end = EnumColsHelper.ColType()(2, int, 'End', False, True, True, True)
+        duration = EnumColsHelper.ColType()(3, int, 'Duration', False, True, True, True)
+        timeline_row = EnumColsHelper.ColType()(4, int, 'Timeline Row', False, True, True, False)
+        pose_index = EnumColsHelper.ColType()(5, int, 'Pose Index', True, True, True, True)
+        action_id = EnumColsHelper.ColType()(6, int, 'Action Id', False, True, True, False)
+        action_color = EnumColsHelper.ColType()(7, QColor, 'Action Color', False, True, False, False)
 
     class _Row(RowHelper):
 

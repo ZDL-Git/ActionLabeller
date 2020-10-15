@@ -121,12 +121,12 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         logger.debug(*arg)
 
     class Cols(EnumColsHelper):
-        id = EnumColsHelper.Col()(0, int, 'Action Id', False, True, True, False)
-        name = EnumColsHelper.Col()(1, str, 'Action Name', True, True, False, True)
-        color = EnumColsHelper.Col()(2, QColor, 'Label Color', False, False, False, True)
-        default = EnumColsHelper.Col()(3, bool, 'Default', False, True, False, True)
-        xml_ymin = EnumColsHelper.Col()(4, int, 'Y-min', True, True, True, False)
-        xml_ymax = EnumColsHelper.Col()(5, int, 'Y-max', True, True, True, False)
+        id = EnumColsHelper.ColType()(0, int, 'Action Id', False, True, True, False)
+        name = EnumColsHelper.ColType()(1, str, 'Action Name', True, True, False, True)
+        color = EnumColsHelper.ColType()(2, QColor, 'Label Color', False, False, False, True)
+        default = EnumColsHelper.ColType()(3, bool, 'Default', False, True, False, True)
+        xml_ymin = EnumColsHelper.ColType()(4, int, 'Y-min', True, True, True, False)
+        xml_ymax = EnumColsHelper.ColType()(5, int, 'Y-max', True, True, True, False)
 
     class _Row(RowHelper):
 

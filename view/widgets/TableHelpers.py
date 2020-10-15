@@ -45,7 +45,7 @@ class EnumColsHelper(Enum):
     # can not use any class var as this _attrs, cause:
     #     TypeError: Cannot extend enumerations
     @classmethod
-    def Col(cls):
+    def ColType(cls):
         if not hasattr(cls, 'col_info_namedtuple'):
             cls.col_info_namedtuple = namedtuple('Col_namedtuple',
                                                  ['index', 'value_type', 'header',
@@ -55,13 +55,13 @@ class EnumColsHelper(Enum):
 
     @classmethod
     def headers(cls):
-        # using isinstance(v.value, cls.Col()) to get rid of cls.col_info_namedtuple
-        return [str(v.value.header) for k, v in cls.__members__.items() if isinstance(v.value, cls.Col())]
+        # using isinstance(v.value, cls.ColType()) to get rid of cls.col_info_namedtuple
+        return [str(v.value.header) for k, v in cls.__members__.items() if isinstance(v.value, cls.ColType())]
 
     @classmethod
     def hidden_cols(cls):
         return [v.value.index for k, v in cls.__members__.items() if
-                isinstance(v.value, cls.Col()) and not v.value.show]
+                isinstance(v.value, cls.ColType()) and not v.value.show]
 
     @classmethod
     def to_table(cls, table: QTableView):
