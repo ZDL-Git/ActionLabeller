@@ -39,7 +39,7 @@ class ActionLabellingUnit:
             # mySignals.action_update.connect(self.mw.table_labeled.slot_action_update),
         )
         (
-            self.mw.btn_new_action.clicked.connect(self.slot_action_add),
+            self.mw.btn_new_action.clicked.connect(self.mw.table_action.slot_insert_action),
             self.mw.btn_del_action.clicked.connect(self.slot_del_selected_actions),
             self.mw.btn_export_labeled.clicked.connect(self.slot_export_labeled),
             self.mw.btn_import_labeled.clicked.connect(self.slot_import_labeled, Qt.QueuedConnection),
@@ -125,12 +125,6 @@ class ActionLabellingUnit:
         CommonUnit.save_ndarray(npy, f'train_data_{time_stamp}.npy')
         CommonUnit.save_pkl(([f'name{i}' for i in range(len(npy))], [l.action for l in labels]),
                             f'train_label_{time_stamp}.pkl')
-
-    def slot_action_add(self, checked):  # if use decorator, must receive checked param of button clicked event
-        logger.debug('')
-        action = Action(self.mw.table_action.generate_id(), '', QColor(QRandomGenerator().global_().generate()), False)
-        self.mw.table_action.slot_insert_action(action)
-        self.mw.table_action.editItem(self.mw.table_action.item(self.mw.table_action.rowCount() - 1, 0))
 
     def slot_sync_action_update(self):
         logger.debug('')

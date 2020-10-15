@@ -102,7 +102,14 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         return 0
 
     def slot_insert_action(self, action: Action):
-        self.RowAction(action)
+        if isinstance(action, Action):
+            self.RowAction(action)
+        else:
+            action = Action(self.generate_id(),
+                            '',
+                            QColor(QRandomGenerator().global_().generate()),
+                            False)
+            self.RowAction(action).to_edit(self.Cols.name)
 
     def _unselect_others(self, except_):
         for r in range(self.rowCount()):

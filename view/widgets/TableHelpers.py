@@ -117,3 +117,6 @@ class RowHelper(ABC):
 
     def delete(self):
         self.table._delete_rows([self.row_num])
+
+    def to_edit(self, col: EnumColsHelper):
+        self.table.editItem(self._col_item(col))
