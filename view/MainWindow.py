@@ -98,9 +98,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def slot_eval(self):
         eval_content = self.ptext_eval_in.toPlainText()
-        logger.info(eval_content)
         try:
             resp = eval(eval_content)
+            logger.info(f'{eval_content} -> {resp}')
         except Exception as e:
             resp = e.__str__()
+            logger.error(f'{eval_content} -> {resp}')
         self.textb_eval_out.setText(str(resp))
