@@ -5,9 +5,8 @@ from enum import Enum
 from PyQt5.QtCore import QItemSelection, QItemSelectionModel, QModelIndex, Qt
 from PyQt5.QtGui import QIntValidator, QBrush, QColor
 from PyQt5.QtWidgets import QTableView, QItemDelegate, QWidget, QStyleOptionViewItem, QLineEdit, QTableWidgetItem, \
-    QTableWidget
+    QTableWidget, QStyledItemDelegate
 from zdl.utils.helper.python import except_as_None
-from zdl.utils.io.log import logger
 
 
 class TableViewExtended(QTableView):
@@ -34,11 +33,30 @@ class TableViewExtended(QTableView):
                                self.model().index(rowc - 1, colc - 1)),
                 QItemSelectionModel.Clear)
 
-    class IntDelegate(QItemDelegate):
+    class IntItemDelegate(QItemDelegate):
         def createEditor(self, parent: QWidget, option: QStyleOptionViewItem, index: QModelIndex):
             line_edit = QLineEdit(parent)
             validator = QIntValidator(line_edit)
             line_edit.setValidator(validator)
+            return line_edit
+
+    class ReadOnlyColumnDelegate(QStyledItemDelegate):
+        def createEditor(self, parent, option, index):
+            return
+
+    class DynamicDelegate(QStyledItemDelegate):
+        def __init__(self, parent, **kwargs):
+            super().__init__(parent)
+            self.value_type = kwargs.get('value_type', str)
+            self.editable = kwargs.get('editable', False)
+
+        def createEditor(self, parent, option, index):
+            if not self.editable:
+                return
+            line_edit = QLineEdit(parent)
+            if self.value_type in [int]:
+                validator = QIntValidator(line_edit)
+                line_edit.setValidator(validator)
             return line_edit
 
 
@@ -51,7 +69,7 @@ class EnumColsHelper(Enum):
         if not hasattr(cls, 'col_info_namedtuple'):
             cls.col_info_namedtuple = namedtuple('Col_namedtuple',
                                                  ['index', 'value_type', 'header',
-                                                  'editable', 'selectable', 'num_sort',
+                                                  'editable', 'selectable',
                                                   'show'])
         return cls.col_info_namedtuple
 
@@ -72,16 +90,16 @@ class EnumColsHelper(Enum):
         return [str(v.header) for v in cls.values()]
 
     @classmethod
-    def hidden_cols(cls):
-        return [v.index for v in cls.values() if not v.show]
-
-    @classmethod
     def to_table(cls, table: QTableView):
-        col_headers = cls.headers()
-        table.setColumnCount(len(col_headers))
-        table.setHorizontalHeaderLabels(col_headers)
-        for i in cls.hidden_cols():
-            table.setColumnHidden(i, True)
+        headers = cls.headers()
+        table.setColumnCount(len(headers))
+        table.setHorizontalHeaderLabels(headers)
+        for m in cls.members():
+            table.setColumnHidden(m.value.index, not m.value.show)
+            # delegate = TableViewExtended.DynamicDelegate(table,
+            #                                              value_type=m.value.value_type,
+            #                                              editable=m.value.editable,)
+            # table.setItemDelegateForColumn(m.value.index, delegate)
 
 
 class RowHelper(ABC):
@@ -93,12 +111,14 @@ class RowHelper(ABC):
         return f'{self.__class__}: row_num={self.row_num}'
 
     def __col_item(self, col: EnumColsHelper):
-        r, c, e, s = self.row_num, col.value.index, col.value.editable, col.value.selectable
+        r, c, vtype, editable, selectable = self.row_num, col.value.index, col.value.value_type, col.value.editable, col.value.selectable
         if self.table.item(r, c) is None:
             item = QTableWidgetItem()
-            if not e:
+            if not editable:
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-            if not s:
+                if vtype is bool:
+                    item.setFlags(item.flags() & ~Qt.ItemIsUserCheckable)
+            if not selectable:
                 item.setFlags(item.flags() & ~Qt.ItemIsSelectable)
             self.table.setItem(r, c, item)
         return self.table.item(r, c)
@@ -120,7 +140,7 @@ class RowHelper(ABC):
             self.__col_item(col).setBackground(value)
         elif vt in [bool]:
             self.__col_item(col).setCheckState(Qt.Checked if value else Qt.Unchecked)
-        elif col.value.num_sort:
+        elif vt in [int]:
             self.__col_item(col).setData(Qt.DisplayRole, value)
         else:
             self.__col_item(col).setText(str(value))

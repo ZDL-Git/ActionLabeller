@@ -27,7 +27,8 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
     def __init_later__(self):
         self.Cols.to_table(self)
         self.setSortingEnabled(True)
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+        self.horizontalHeader().setStretchLastSection(True)
 
     # def slot_cellChanged(self, r, c):
     #     Log.debug(r, c)
@@ -152,14 +153,14 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             self.add_label(l_add)
 
     class Cols(EnumColsHelper):
-        action = EnumColsHelper.ColType()(0, str, 'Action', False, True, False, True)
-        begin = EnumColsHelper.ColType()(1, int, 'Begin', False, True, True, True)
-        end = EnumColsHelper.ColType()(2, int, 'End', False, True, True, True)
-        duration = EnumColsHelper.ColType()(3, int, 'Duration', False, True, True, True)
-        timeline_row = EnumColsHelper.ColType()(4, int, 'Timeline Row', False, True, True, False)
-        pose_index = EnumColsHelper.ColType()(5, int, 'Pose Index', True, True, True, True)
-        action_id = EnumColsHelper.ColType()(6, int, 'Action Id', False, True, True, False)
-        action_color = EnumColsHelper.ColType()(7, QColor, 'Action Color', False, True, False, False)
+        action = EnumColsHelper.ColType()(0, str, 'Action', False, True, True)
+        begin = EnumColsHelper.ColType()(1, int, 'Begin', False, True, True)
+        end = EnumColsHelper.ColType()(2, int, 'End', False, True, True)
+        duration = EnumColsHelper.ColType()(3, int, 'Duration', False, True, True)
+        timeline_row = EnumColsHelper.ColType()(4, int, 'Timeline Row', False, True, False)
+        pose_index = EnumColsHelper.ColType()(5, int, 'Pose Index', True, True, True)
+        action_id = EnumColsHelper.ColType()(6, int, 'Action Id', False, True, False)
+        action_color = EnumColsHelper.ColType()(7, QColor, 'Action Color', False, True, False)
 
     class _Row(RowHelper):
 

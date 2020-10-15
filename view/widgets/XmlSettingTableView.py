@@ -12,7 +12,7 @@ class XmlSettingTableView(TableViewExtended):
         self.setModel(model)
         self.setSortingEnabled(True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        delegate = TableViewExtended.IntDelegate()
+        delegate = TableViewExtended.IntItemDelegate()
         self.setItemDelegateForColumn(ActionTableWidget.Cols.xml_ymin.value.index, delegate)
         self.setItemDelegateForColumn(ActionTableWidget.Cols.xml_ymax.value.index, delegate)
         for col in ActionTableWidget.Cols:
