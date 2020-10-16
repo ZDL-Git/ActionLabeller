@@ -1,5 +1,5 @@
 from functools import partial
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Callable
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QKeyEvent, QColor
@@ -167,20 +167,20 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         def __init__(self, row_num_or_actionlabel: Union[int, ActionLabel], table: 'LabeledTableWidget'):
             self.table = table
 
-            self.action: callable = partial(self._col_value, col=self.table.Cols.action)
-            self.begin: callable = partial(self._col_value, col=self.table.Cols.begin)
-            self.end: callable = partial(self._col_value, col=self.table.Cols.end)
-            self.duration: callable = partial(self._col_value, col=self.table.Cols.duration)
-            self.timeline_row: callable = partial(self._col_value, col=self.table.Cols.timeline_row)
-            self.pose_index: callable = partial(self._col_value, col=self.table.Cols.pose_index)
-            self.action_id: callable = partial(self._col_value, col=self.table.Cols.action_id)
-            self.action_color: callable = partial(self._col_value, col=self.table.Cols.action_color)
+            self.action: Callable = partial(self._col_value, col=self.table.Cols.action)
+            self.begin: Callable = partial(self._col_value, col=self.table.Cols.begin)
+            self.end: Callable = partial(self._col_value, col=self.table.Cols.end)
+            self.duration: Callable = partial(self._col_value, col=self.table.Cols.duration)
+            self.timeline_row: Callable = partial(self._col_value, col=self.table.Cols.timeline_row)
+            self.pose_index: Callable = partial(self._col_value, col=self.table.Cols.pose_index)
+            self.action_id: Callable = partial(self._col_value, col=self.table.Cols.action_id)
+            self.action_color: Callable = partial(self._col_value, col=self.table.Cols.action_color)
 
-            self.set_action: callable = partial(self._set_col_value, col=self.table.Cols.action)
-            self.set_timeline_row: callable = partial(self._set_col_value, col=self.table.Cols.timeline_row)
-            self.set_pose_index: callable = partial(self._set_col_value, col=self.table.Cols.pose_index)
-            self.set_action_id: callable = partial(self._set_col_value, col=self.table.Cols.action_id)
-            self.set_action_color: callable = partial(self._set_col_value, col=self.table.Cols.action_color)
+            self.set_action: Callable = partial(self._set_col_value, col=self.table.Cols.action)
+            self.set_timeline_row: Callable = partial(self._set_col_value, col=self.table.Cols.timeline_row)
+            self.set_pose_index: Callable = partial(self._set_col_value, col=self.table.Cols.pose_index)
+            self.set_action_id: Callable = partial(self._set_col_value, col=self.table.Cols.action_id)
+            self.set_action_color: Callable = partial(self._set_col_value, col=self.table.Cols.action_color)
 
             if isinstance(row_num_or_actionlabel, int):
                 self.row_num = row_num_or_actionlabel

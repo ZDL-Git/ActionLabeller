@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Union
+from typing import Union, Callable
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -133,19 +133,19 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         def __init__(self, row_num_or_action: Union[int, Action], table: 'ActionTableWidget'):
             self.table = table
 
-            self.id: callable = partial(self._col_value, col=self.table.Cols.id)
-            self.name: callable = partial(self._col_value, col=self.table.Cols.name)
-            self.color: callable = partial(self._col_value, col=self.table.Cols.color)
-            self.default: callable = partial(self._col_value, col=self.table.Cols.default)
-            self.xml_ymin: callable = partial(self._col_value, col=self.table.Cols.xml_ymin)
-            self.xml_ymax: callable = partial(self._col_value, col=self.table.Cols.xml_ymax)
+            self.id: Callable = partial(self._col_value, col=self.table.Cols.id)
+            self.name: Callable = partial(self._col_value, col=self.table.Cols.name)
+            self.color: Callable = partial(self._col_value, col=self.table.Cols.color)
+            self.default: Callable = partial(self._col_value, col=self.table.Cols.default)
+            self.xml_ymin: Callable = partial(self._col_value, col=self.table.Cols.xml_ymin)
+            self.xml_ymax: Callable = partial(self._col_value, col=self.table.Cols.xml_ymax)
 
-            self.set_id: callable = partial(self._set_col_value, col=self.table.Cols.id)
-            self.set_name: callable = partial(self._set_col_value, col=self.table.Cols.name)
-            self.set_color: callable = partial(self._set_col_value, col=self.table.Cols.color)
-            self.set_default: callable = partial(self._set_col_value, col=self.table.Cols.default)
-            self.set_xml_ymin: callable = partial(self._set_col_value, col=self.table.Cols.xml_ymin)
-            self.set_xml_ymax: callable = partial(self._set_col_value, col=self.table.Cols.xml_ymax)
+            self.set_id: Callable = partial(self._set_col_value, col=self.table.Cols.id)
+            self.set_name: Callable = partial(self._set_col_value, col=self.table.Cols.name)
+            self.set_color: Callable = partial(self._set_col_value, col=self.table.Cols.color)
+            self.set_default: Callable = partial(self._set_col_value, col=self.table.Cols.default)
+            self.set_xml_ymin: Callable = partial(self._set_col_value, col=self.table.Cols.xml_ymin)
+            self.set_xml_ymax: Callable = partial(self._set_col_value, col=self.table.Cols.xml_ymax)
 
             if isinstance(row_num_or_action, int):
                 self.row_num = row_num_or_action
