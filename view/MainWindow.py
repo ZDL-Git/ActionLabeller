@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
 from zdl.utils.io.log import logger
 
 from presenter.ActionLabellingUnit import ActionLabellingUnit
-from presenter.ApplicationUnit import ApplicationUnit
 from presenter.CommonUnit import CommonUnit
 from presenter.PlayingUnit import PlayingUnit
 from presenter.Settings import Settings
@@ -65,7 +64,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         CommonUnit.set_mw(self)
         # Hold to avoid being destroyed
-        self._holder0 = ApplicationUnit(self)
+        # self._holder0 = ApplicationUnit(self)
         self._holder1 = XmlSettingUnit(self)
         self._holder2 = PlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
