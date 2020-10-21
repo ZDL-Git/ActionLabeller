@@ -84,7 +84,7 @@ class TimelineTableView(TableViewExtended):
                 # self._emit_video_play(self.label_clicked.begin, self.label_clicked.end)
 
     def mouseReleaseEvent(self, e):
-        logger.debug('here')
+        logger.debug('')
         super().mouseReleaseEvent(e)
         if not self.entry_cell_pos:
             return

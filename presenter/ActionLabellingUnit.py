@@ -5,6 +5,7 @@ import numpy as np
 from PyQt5.QtCore import QRandomGenerator, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QMessageBox
+from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.file import hashOfFile
 from zdl.utils.io.log import logger
 
@@ -127,14 +128,14 @@ class ActionLabellingUnit:
         CommonUnit.save_pkl(([f'name{i}' for i in range(len(npy))], [l.action for l in labels]),
                             f'train_label_{time_stamp}.pkl')
 
+    @TableDecorators.dissort(table_lambda=lambda self: self.mw.table_labeled)
+    @TableDecorators.dissort(table_lambda=lambda self: self.mw.table_timeline)
     def slot_sync_action_update(self):
         logger.debug('')
         actions = CommonUnit.get_all_actions()
         action_dict = {a.id: a for a in actions}
         table_labeled = self.mw.table_labeled
         table_timeline = self.mw.table_timeline
-        table_labeled.setSortingEnabled(False)
-        table_timeline.setSortingEnabled(False)
         for r in reversed(range(table_labeled.rowCount())):
             label = table_labeled.label_at(r)
             id_ = label.action_id
@@ -149,8 +150,6 @@ class ActionLabellingUnit:
                 # delete label
                 table_labeled.slot_label_delete(label, MySignals.Emitter.T_ACTION)
                 table_timeline.slot_label_delete([label], MySignals.Emitter.T_ACTION)
-        table_labeled.setSortingEnabled(True)
-        table_timeline.setSortingEnabled(True)
 
     def slot_del_selected_actions(self,
                                   checked):  # if use decorator, must receive checked param of button clicked event
