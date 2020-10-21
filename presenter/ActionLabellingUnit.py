@@ -130,8 +130,8 @@ class ActionLabellingUnit:
 
     @TableDecorators.dissort(table_lambda=lambda self: self.mw.table_labeled)
     @TableDecorators.dissort(table_lambda=lambda self: self.mw.table_timeline)
-    def slot_sync_action_update(self):
-        logger.debug('')
+    def slot_sync_action_update(self, r, c):
+        logger.debug(f'{r} {c}')
         actions = CommonUnit.get_all_actions()
         action_dict = {a.id: a for a in actions}
         table_labeled = self.mw.table_labeled
