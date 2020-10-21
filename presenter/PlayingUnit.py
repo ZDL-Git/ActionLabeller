@@ -5,7 +5,7 @@ import pyqtgraph as pg
 from PyQt5.QtCore import QEvent, QObject
 from zdl.utils.io.log import logger
 
-from model.AbcPlayable import Playable
+from model.AbcPlayable import AbcPlayable
 from model.ActionLabel import ActionLabel
 from model.File import load_dict
 from model.PosePlotting import PosePlotting
@@ -28,7 +28,7 @@ class PlayingUnit(QObject):
         self.mw = mwindow
 
         # self.entry_row_index = None
-        self.media_model = None  # type:Optional[Playable]
+        self.media_model = None  # type:Optional[AbcPlayable]
         self.video_model = None
         self.images_model = None
         self.pose_model = None
@@ -63,7 +63,7 @@ class PlayingUnit(QObject):
             self.mw.btn_to_head.clicked.connect(self.to_head),
             self.mw.btn_to_tail.clicked.connect(self.to_tail),
             self.mw.btn_backward.clicked.connect(self.slot_fast_backward),
-            self.mw.btn_rewind.clicked.connect(self.slot_rewind),
+            self.mw.btn_rewind.clicked.connect(self.slot_fast_rewind),
             self.mw.btn_open_video.clicked.connect(self.slot_open_file),
             self.mw.btn_stop.clicked.connect(self.slot_btn_stop),
             self.mw.btn_play.clicked.connect(self.slot_play_toggle),
@@ -161,7 +161,7 @@ class PlayingUnit(QObject):
         step = CommonUnit.get_value(self.mw.input_step, int)
         self.media_model.schedule(-1, -1 * step, -1, MySignals.Emitter.BTN)
 
-    def slot_rewind(self):
+    def slot_fast_rewind(self):
         logger.debug('')
         if self.media_model is None:
             return

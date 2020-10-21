@@ -4,7 +4,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, QTimer
 from zdl.utils.io.log import logger
 
 
-class Playable(ABC):
+class AbcPlayable(ABC):
     def __init__(self):
         super().__init__()
         # self.signals = Signals()
@@ -13,7 +13,7 @@ class Playable(ABC):
         self.signals = self.Signals()
 
         self._flag_playing = False
-        self._flag_cur_index = 0
+        self._flag_cur_index = -1
 
         self.timer.timeout.connect(self.flush)
 

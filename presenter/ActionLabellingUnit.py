@@ -99,6 +99,7 @@ class ActionLabellingUnit:
             logger.debug(action_label)
             self.mw.table_timeline.settle_label(action_label)
             self.mw.table_labeled.add_label(action_label)
+        CommonUnit.status_prompt('Importing finished.')
 
     def slot_export_npy_and_label(self):
         poses = PlayingUnit.only_ins.pose_model._fdata

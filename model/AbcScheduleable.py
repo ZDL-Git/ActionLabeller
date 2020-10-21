@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from zdl.utils.io.log import logger
 
 
-class Scheduleable(ABC):
+class AbcScheduleable(ABC):
     def __init__(self):
         self.scheduled = self.Schedule(None, None, None)
 

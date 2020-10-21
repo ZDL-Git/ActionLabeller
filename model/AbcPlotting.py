@@ -5,12 +5,12 @@ import numpy as np
 import pyqtgraph as pg
 from zdl.utils.io.log import logger
 
-from model.AbcPlayable import Playable
-from model.AbcScheduleable import Scheduleable
+from model.AbcPlayable import AbcPlayable
+from model.AbcScheduleable import AbcScheduleable
 from presenter.CommonUnit import CommonUnit
 
 
-class Plotting(Playable, Scheduleable):
+class AbcPlotting(AbcPlayable, AbcScheduleable):
     def __init__(self):
         super().__init__()
         self.plotter = None
@@ -89,6 +89,7 @@ class Plotting(Playable, Scheduleable):
 
         self.plot(dest_key)
         self.signals.flushed.emit(dest_index)
+        self._flag_cur_index = dest_index
         return dest_index
 
     @abstractmethod

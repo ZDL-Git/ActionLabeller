@@ -6,19 +6,18 @@ from PyQt5.QtGui import QImage, QPixmap
 from zdl.utils.helper.opencv import countFrames
 from zdl.utils.io.log import logger
 
-from model.AbcPlayable import Playable
-from model.AbcScheduleable import Scheduleable
+from model.AbcPlayable import AbcPlayable
+from model.AbcScheduleable import AbcScheduleable
 from presenter import MySignals
 from presenter.Settings import Settings
 
 
-class Video(Playable, Scheduleable):
+class Video(AbcPlayable, AbcScheduleable):
     def __init__(self, fname):
         super().__init__()
         self.fname = fname
         self._cap = cv2.VideoCapture(self.fname)
         self._info = None
-        self.cur_index = -1
         self.frames_buffer = queue.Queue(maxsize=100)
 
     def __del__(self):
@@ -47,9 +46,9 @@ class Video(Playable, Scheduleable):
         return self._info
 
     def schedule(self, jump_to, bias, stop_at, emitter):
-        logger.debug(f'{jump_to}, {bias}, {stop_at}, {emitter}, {self.cur_index}')
+        logger.debug(f'{jump_to}, {bias}, {stop_at}, {emitter}, {self._flag_cur_index}')
 
-        jump_to = self.cur_index + bias if jump_to == -1 else max(0, min(jump_to, self.get_info()['frame_c'] - 1))
+        jump_to = self._flag_cur_index + bias if jump_to == -1 else max(0, min(jump_to, self.get_info()['frame_c'] - 1))
         stop_at = None if stop_at == -1 else max(0, min(stop_at, self.get_info()['frame_c'] - 1))
         self.scheduled.set(emitter, jump_to, stop_at)
 
@@ -66,7 +65,7 @@ class Video(Playable, Scheduleable):
             # emitter = self.scheduled.emitter
             self.scheduled.jump_to = None
         else:
-            dest_index = self.cur_index + _interval
+            dest_index = self._flag_cur_index + _interval
             # emitter = MySignals.Emitter.TIMER
 
         if self.scheduled.stop_at is not None and dest_index > self.scheduled.stop_at:
@@ -74,7 +73,7 @@ class Video(Playable, Scheduleable):
             self.stop()
             return None
 
-        _gap = dest_index - self.cur_index
+        _gap = dest_index - self._flag_cur_index
         if _gap > 80 or _gap < 1:
             self._cap.set(cv2.CAP_PROP_POS_FRAMES, dest_index)
             _gap = 1
@@ -84,7 +83,7 @@ class Video(Playable, Scheduleable):
             if not ret:
                 self.schedule(0, -1, 0, MySignals.Emitter.V_PLAYER)
                 return None
-        self.cur_index = dest_index
+        self._flag_cur_index = dest_index
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # self.frames_buffer.append((self.cur_index, frame))
@@ -96,5 +95,5 @@ class Video(Playable, Scheduleable):
                                                       Qt.KeepAspectRatio, Qt.SmoothTransformation)
         q_pixmap = QPixmap.fromImage(q_image)
         self.label_show.setPixmap(q_pixmap)
-        self.signals.flushed.emit(self.cur_index)
-        return self.cur_index
+        self.signals.flushed.emit(self._flag_cur_index)
+        return self._flag_cur_index

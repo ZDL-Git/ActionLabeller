@@ -3,10 +3,10 @@ import pyqtgraph as pg
 from zdl.AI.pose_estimation.pose import *
 from zdl.utils.io.log import logger
 
-from model.AbcPlotting import Plotting
+from model.AbcPlotting import AbcPlotting
 
 
-class PosePlotting(Plotting):
+class PosePlotting(AbcPlotting):
     def __init__(self, pose_type):
         super().__init__()
         all_sub_pose_types = {cls.__name__: cls for cls in base_pose.BasePose.__subclasses__()}
