@@ -2,7 +2,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QCloseEvent, QColor, QDoubleValidator
 from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
-    QHeaderView, QComboBox
+    QHeaderView, QComboBox, QMessageBox
 from zdl.utils.io.log import logger
 
 from presenter.ActionLabellingUnit import ActionLabellingUnit
@@ -84,11 +84,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def closeEvent(self, e: QCloseEvent):
         logger.debug('')
-        # TODO: uncomment this block
-        # if QMessageBox.Ok != QMessageBox.information(self, 'ActionLabeller',
-        #                                              "Are you sure to quit, the unsaved labels will be lost?",
-        #                                              QMessageBox.Ok | QMessageBox.Cancel, QMessageBox.Cancel):
-        #     e.ignore()
+        if self.table_labeled.rowCount() \
+                and QMessageBox.Ok != QMessageBox.information(self, 'ActionLabeller',
+                                                              "Are you sure to quit, the unsaved labels will be lost?",
+                                                              QMessageBox.Ok | QMessageBox.Cancel,
+                                                              QMessageBox.Cancel):
+            e.ignore()
         logger.debug('Main window closed.')
 
     # def resizeEvent(self, e):
