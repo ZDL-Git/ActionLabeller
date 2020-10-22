@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, 
 from zdl.utils.helper.qt import TableDecorators, clear_layout
 from zdl.utils.io.log import logger
 
+from model.Action import Action
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
@@ -314,17 +315,16 @@ class TimelineTableView(TableViewExtended):
 
         def _load_new_comb(self):
             # created in qt creator IDE
+            self.line_begin.setText(str(self.cur_frame_index))
+            self.line_end.clear()
             self.combo_action_names.clear()
             self.actions = actions = CommonUnit.get_all_actions()
             if actions:
                 _action_names = [a.name for a in actions]
                 self.combo_action_names.addItems(_action_names)
-                default = list(filter(lambda action: action.default, actions))
+                default: Action = next(filter(lambda action: action.default, actions))
                 if default:
-                    default = default[0].name
-                    self.combo_action_names.setCurrentIndex(_action_names.index(default))
-            self.line_begin.setText(str(self.cur_frame_index))
-            self.line_end.clear()
+                    self.combo_action_names.setCurrentIndex(_action_names.index(default.name))
 
         def _load_unfinished(self):
             clear_layout(self.instore_layout)
