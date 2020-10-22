@@ -9,25 +9,11 @@ __all__ = ['Emitter', 'mySignals']
 
 class MySignals(QObject):
     schedule = pyqtSignal(int, int, int, Enum)  # jumpTo,bias,stopAt,emitter
-    follow_to = pyqtSignal(Enum, int)  # emitter,index
-    video_pause_or_resume = pyqtSignal()
-    video_pause = pyqtSignal()
-    video_start = pyqtSignal()
 
     label_selected = pyqtSignal(ActionLabel, Enum)
     label_created = pyqtSignal(ActionLabel, Enum)
-    label_delete = pyqtSignal(ActionLabel, Enum)
     label_cells_delete = pyqtSignal(dict, Enum)
-    labeled_selected = pyqtSignal(ActionLabel, Enum)
-    labeled_update = pyqtSignal(list, Enum)
     labeled_delete = pyqtSignal(list, Enum)
-    # action_update = pyqtSignal(Enum)
-
-    timer_video = QTimer()
-    timer_plotting = QTimer()
-
-    timer_video.setInterval(50)
-    timer_plotting.setInterval(50)
 
 
 class Emitter(Enum):

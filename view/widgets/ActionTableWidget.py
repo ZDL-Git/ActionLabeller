@@ -41,9 +41,6 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
             if row_action.default():
                 self._unselect_others(except_=r)
 
-        # mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
-        # global_.g_all_actions = self.get_all_actions
-
     def slot_cellDoubleClicked(self, r, c):
         logger.debug(f'{r}, {c}')
         if c == self.Cols.color.value.index:

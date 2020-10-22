@@ -29,11 +29,8 @@ class TimelineTableView(TableViewExtended):
 
         self.clicked.connect(self.slot_cellClicked)
         self.pressed.connect(self.slot_cellPressed)
-        # self.doubleClicked.connect(self.slot_cellDoubleClicked)
 
         self.label_create_dialog = self.TimelineDialog(self)
-
-        # global_.mySignals.jump_to.connect(self.slot_jump_to)
 
     def __init_later__(self):
         self.setModel(TimelineTableModel(20, 50))
@@ -51,7 +48,8 @@ class TimelineTableView(TableViewExtended):
 
         self.ckb_follow = QCheckBox('Follow', self)
         self.ckb_follow.setToolTip('Table column scrolling follows the video playing, will consume a lot of resources')
-        # self.ckb_follow.setCheckState(Qt.Checked if self.b_scroll_follow else Qt.Unchecked)
+        self.ckb_follow.setCheckState(Qt.Checked if self.b_scroll_follow else Qt.Unchecked)
+        self.ckb_follow.stateChanged.connect(self.slot_ckb_follow)
         self.ckb_follow.setStyleSheet(
             f'''QCheckBox {{margin-top: {self.horizontalHeader().height() + 5};
                             margin-left: 5px;
@@ -60,8 +58,6 @@ class TimelineTableView(TableViewExtended):
                                         width: 10px;}}
                 QCheckBox::indicator:checked {{ background-color: red;}}
                 QCheckBox::indicator:unchecked {{ background-color: gray;}}''')
-        self.ckb_follow.setCheckState(self.b_scroll_follow and Qt.Checked or Qt.Unchecked)
-        self.ckb_follow.stateChanged.connect(self.slot_ckb_follow)
 
     def keyPressEvent(self, e: QKeyEvent) -> None:
         logger.debug(f'{e}, {e.key()}, {e.type()}')
@@ -81,7 +77,6 @@ class TimelineTableView(TableViewExtended):
         elif e.key() == Qt.Key_R:
             if self.label_clicked is not None:
                 self._label_play(self.label_clicked)
-                # self._emit_video_play(self.label_clicked.begin, self.label_clicked.end)
 
     def mouseReleaseEvent(self, e):
         logger.debug('')
@@ -140,15 +135,10 @@ class TimelineTableView(TableViewExtended):
             self.col_to_center(self.hcenter_before_wheeling)
         else:
             bias = 2 if idler_forward else -2
-            # self._col_scroll(bias) # conflicts with follow_to
             mySignals.schedule.emit(-1, bias, -1, MySignals.Emitter.T_WHEEL)
 
     def slot_ckb_follow(self, state):
         logger.debug('')
-        # if state == Qt.Checked:
-        #     global_.mySignals.follow_to.connect(self.slot_follow_to)
-        # else:
-        #     global_.mySignals.follow_to.disconnect(self.slot_follow_to)
         self.b_scroll_follow = state == Qt.Checked
 
     def slot_cellPressed(self, qindex):
@@ -177,10 +167,6 @@ class TimelineTableView(TableViewExtended):
         mySignals.schedule.emit(index, -1, -1, MySignals.Emitter.T_HSCROLL)
         # self.selectColumn(index)  # crash bug
 
-    # def slot_horizontalHeaderClicked(self, i):
-    #     Log.info('index', i)
-    #     mySignals.schedule.emit(i, -1, -1, MySignals.Emitter.T_HHEADER)
-
     def set_column_num(self, c):
         self.model().setColumnCount(c)
 
@@ -191,11 +177,6 @@ class TimelineTableView(TableViewExtended):
         #     return
         if self.b_scroll_follow:
             self.col_to_center(index)
-
-    # @TableDecorators.block_signals
-    # def slot_label_play(self, action_label: ActionLabel, emitter):
-    #     Log.debug(action_label, emitter)
-    #     self._label_play(action_label)
 
     @TableDecorators.block_signals
     def slot_label_delete(self, action_labels: typing.List[ActionLabel], emitter):
@@ -323,7 +304,6 @@ class TimelineTableView(TableViewExtended):
 
             self.cur_frame_index = None
             self.labels_unfinished = []  # type:typing.List
-            # self.stress_color = QColor('#b88481')
 
             self.btn_new.clicked.connect(self.slot_btn_new_clicked)
 
@@ -437,11 +417,6 @@ class TimelineTableView(TableViewExtended):
             # self.setFixedWidth(self.width())
             # self.setMaximumHeight(self.height())
             return super().exec_()
-
-        # def take_label(self):
-        #     take = self.label_changed
-        #     self.label_changed = None
-        #     return take
 
 
 class TimelineTableModel(QStandardItemModel):

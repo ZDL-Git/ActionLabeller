@@ -5,7 +5,6 @@ from zdl.utils.io.log import logger
 from model import File
 from model.PosePlotting import PosePlotting
 from presenter.CommonUnit import CommonUnit
-from presenter.MySignals import mySignals
 
 
 class PosePlottingUnit(QObject):
@@ -20,24 +19,6 @@ class PosePlottingUnit(QObject):
 
         self._init_pyqtgraph()
         self.main_plotting_model = PosePlotting().set_view(self.main_plotter)
-
-        (
-            # self.mw.btn_play_plotting.clicked.connect(self.slot_play),
-        )
-
-        (
-            # mySignals.timer_plotting.timeout.connect(self.slot_timer_flush),
-        )
-
-        # self.mw.slider_frame: QSlider
-        # self.mw.slider_frame.valueChanged.connect(self.slot_slider_changed)
-        # self.mw.btn_open_pose.clicked.connect(self.slot_open_file)
-        # self.mw.btn_clear.clicked.connect(self.slot_btn_clear)
-
-        # self.mw.ckb_clear: QCheckBox
-        # self.main_plotting.clear_per_frame = self.mw.ckb_clear.checkState() == Qt.Checked
-        # self.mw.ckb_clear.stateChanged.connect(self.slot_ckb_clear)
-        # global_.mySignals.timer_video.timeout.connect()
 
     def _init_pyqtgraph(self):
         pg.setConfigOptions(antialias=True)
@@ -78,7 +59,6 @@ class PosePlottingUnit(QObject):
     def slot_open_file(self):
         # TODO: remove native directory
         got = CommonUnit.get_open_name(filter_="(*.json)")
-        # got = ['../sequence_poses_008-part2-count388-dur16s.npy']
         logger.info(got)
         self.fname = got
         if not self.fname:
@@ -96,7 +76,6 @@ class PosePlottingUnit(QObject):
 
         self.mw.table_timeline.set_column_num(int(self.main_plotting_model.indices[-1]) + 1)
 
-        mySignals.timer_plotting.start()
         self.flag_plotting = True
 
     def slot_slider_changed(self, v):

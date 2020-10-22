@@ -45,10 +45,6 @@ class PlayingUnit(QObject):
             self.mw.table_labeled.cellDoubleClicked.connect(self.table_labeled_cell_double_clicked),
         )
         (
-            # mySignals.video_pause_or_resume.connect(self.pause_or_resume),
-            # mySignals.video_start.connect(self.slot_start),
-            # mySignals.video_pause.connect(self.slot_pause),
-            # mySignals.follow_to.connect(self.mw.slot_follow_to),
             mySignals.schedule.connect(self.slot_schedule),
         )
         (
@@ -185,9 +181,6 @@ class PlayingUnit(QObject):
                 self.media_model.fps = self.media_model.get_info()['fps'] * factor
             elif isinstance(self.media_model, PosePlotting):
                 self.media_model.fps = 20 * factor
-            # if self.media_model:
-            #     new_speed = 1000 / self.media_model.get_info()['fps'] / factor
-            #     mySignals.timer_video.setInterval(new_speed)
         except Exception:
             logger.warning('slot_speed_changed fail.', exc_info=True)
 

@@ -27,17 +27,12 @@ class ActionLabellingUnit:
         )
 
         (
-            mySignals.follow_to.connect(self.mw.table_timeline.slot_follow_to),
-            # mySignals.labeled_selected.connect(self.mw.table_timeline.slot_label_play),
-            mySignals.labeled_update.connect(self.mw.table_timeline.slot_label_update),
             mySignals.labeled_delete.connect(self.mw.table_timeline.slot_label_delete),
         )
         (
             mySignals.label_created.connect(self.mw.table_labeled.slot_label_created),
             mySignals.label_selected.connect(self.mw.table_labeled.slot_label_select),
-            mySignals.label_delete.connect(self.mw.table_labeled.slot_label_delete),
             mySignals.label_cells_delete.connect(self.mw.table_labeled.slot_label_cells_delete),
-            # mySignals.action_update.connect(self.mw.table_labeled.slot_action_update),
         )
         (
             self.mw.btn_new_action.clicked.connect(self.mw.table_action.slot_insert_action),
@@ -167,7 +162,6 @@ class ActionLabellingUnit:
                 return
         self.mw.table_action.slot_delete_selected()
         self.slot_sync_action_update()
-        # mySignals.action_update.emit(MySignals.Emitter.T_TEMP)
 
     def table_timeline_cell_double_clicked(self, qindex):
         logger.debug('')
