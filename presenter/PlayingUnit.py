@@ -203,7 +203,7 @@ class PlayingUnit(QObject):
     def slot_schedule(self, jump_to, bias, stop_at, emitter):
         # index: related signal defined to receive int parameters, None will be cast to large number 146624904,
         #        hence replace None with -1
-        logger.info(jump_to, bias, stop_at, emitter)
+        logger.info(f'{jump_to}, {bias}, {stop_at}, {emitter}')
         if self.media_model is None:
             return
         if jump_to != -1:
