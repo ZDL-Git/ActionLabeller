@@ -380,6 +380,7 @@ class TimelineTableView(TableViewExtended):
             if not self._commit_label(label):
                 return
             del self.labels_unfinished[index_in_labels_unfinished]
+            self.adjustSize()
 
             if self.checkb_autoclose.isChecked():
                 self.buttonBox.accepted.emit()
@@ -419,8 +420,7 @@ class TimelineTableView(TableViewExtended):
             return True
 
         def exec_(self):
-            # self.setFixedWidth(self.width())
-            # self.setMaximumHeight(self.height())
+            self.setFixedWidth(self.width())
             return super().exec_()
 
 
