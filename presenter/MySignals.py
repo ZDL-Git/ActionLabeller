@@ -1,8 +1,10 @@
 from enum import Enum
 
-from PyQt5.QtCore import pyqtSignal, QObject, QTimer
+from PyQt5.QtCore import pyqtSignal, QObject
 
 from model.ActionLabel import ActionLabel
+
+__all__ = ['Emitter', 'mySignals']
 
 
 class MySignals(QObject):
