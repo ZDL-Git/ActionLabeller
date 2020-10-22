@@ -27,7 +27,6 @@ class PlayingUnit(QObject):
         self.__class__.only_ins = self
         self.mw = mwindow
 
-        # self.entry_row_index = None
         self.media_model = None  # type:Optional[AbcPlayable]
         self.video_model = None
         self.images_model = None
@@ -137,15 +136,6 @@ class PlayingUnit(QObject):
             return
         self.media_model.start()
 
-    # def slot_schedule(self, jump_to, bias, stop_at, emitter):
-    #     # index: related signal defined to receive int parameters, None will be cast to large number 146624904,
-    #     #        hence replace None with -1
-    #     Log.info(jump_to, bias, stop_at, emitter)
-    #     if jump_to != -1:
-    #         bias = None
-    #     if self.media_model:
-    #         self.media_model.schedule(jump_to, bias, stop_at, emitter)
-
     def set_model(self, model):
         logger.debug(type(model))
         self.media_model = model
@@ -211,10 +201,14 @@ class PlayingUnit(QObject):
         self.slot_schedule(i, -1, -1, MySignals.Emitter.T_HSCROLL)
 
     def slot_schedule(self, jump_to, bias, stop_at, emitter):
-        logger.debug('')
+        # index: related signal defined to receive int parameters, None will be cast to large number 146624904,
+        #        hence replace None with -1
+        logger.info(jump_to, bias, stop_at, emitter)
         if self.media_model is None:
             return
-        self.media_model.schedule(jump_to, bias, stop_at, MySignals.Emitter.T_HSCROLL)
+        if jump_to != -1:
+            bias = None
+        self.media_model.schedule(jump_to, bias, stop_at, emitter)
 
     def _init_pyqtgraph(self):
         pg.setConfigOptions(antialias=True)
