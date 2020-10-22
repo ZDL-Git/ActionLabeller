@@ -36,16 +36,21 @@ class TimelineTableView(TableViewExtended):
     def __init_later__(self):
         self.setModel(TimelineTableModel(20, 50))
         self.setSortingEnabled(False)
-        table_height = 20 * self.rowHeight(0) + self.horizontalHeader().height() + 2 * self.frameWidth()
-        self.setMinimumHeight(table_height)
-        self.setMaximumHeight(table_height)
 
         header = self.horizontalHeader()
         header.sectionPressed.disconnect()
 
-        # self.horizontalScrollBar().installEventFilter(self)
         self.horizontalScrollBar().sliderMoved.connect(self.slot_sliderMoved)
-        # self.installEventFilter(self)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollbar_h = 6
+        self.horizontalScrollBar().setStyleSheet(
+            f'height: {scrollbar_h}px;'
+            f'color: red;'
+            f'background-color: lightgray;')
+        self.setFixedHeight(self.model().rowCount() * self.rowHeight(0)
+                            + self.horizontalHeader().height()
+                            + 2 * self.frameWidth()
+                            + scrollbar_h)
 
         self.ckb_follow = QCheckBox('Follow', self)
         self.ckb_follow.setToolTip('Table column scrolling follows the video playing, will consume a lot of resources')
