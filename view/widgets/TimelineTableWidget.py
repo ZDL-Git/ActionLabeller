@@ -401,10 +401,10 @@ class TimelineTableView(TableViewExtended):
                                 end, None)
             if not label.is_valid(['action', 'begin']):
                 return
-            if end:
-                self._commit_label(label)
-            else:
+            if end is None:
                 self.labels_unfinished.append(label)
+            else:
+                self._commit_label(label)
 
             if self.checkb_autoclose.isChecked():
                 self.buttonBox.accepted.emit()
