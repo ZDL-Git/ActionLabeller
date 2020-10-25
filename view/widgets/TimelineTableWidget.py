@@ -311,7 +311,7 @@ class TimelineTableView(TableViewExtended):
             self.cur_frame_index = None
             self.labels_unfinished = []  # type:typing.List
 
-            self.btn_new.clicked.connect(self.slot_btn_new_clicked)
+            self.btn_new.clicked.connect(self.slot_dialog_btn_new_clicked)
 
         def load(self, cur_frame_index):
             self.cur_frame_index = cur_frame_index
@@ -327,9 +327,9 @@ class TimelineTableView(TableViewExtended):
             if actions:
                 _action_names = [a.name for a in actions]
                 self.combo_action_names.addItems(_action_names)
-                default: Action = next(filter(lambda action: action.default, actions))
+                default: typing.List[Action] = list(filter(lambda action: action.default, actions))
                 if default:
-                    self.combo_action_names.setCurrentIndex(_action_names.index(default.name))
+                    self.combo_action_names.setCurrentIndex(_action_names.index(default[0].name))
 
         def _load_unfinished(self):
             clear_layout(self.instore_layout)
@@ -365,10 +365,11 @@ class TimelineTableView(TableViewExtended):
             end_editor.setStyleSheet("QLineEdit { color: darkred;}")
 
             btn_finish.clicked.connect(
-                lambda: self.slot_btn_finish_clicked(combox, begin_editor, end_editor, index_in_labels_unfinished))
+                lambda: self.slot_dialog_btn_finish_clicked(combox, begin_editor, end_editor,
+                                                            index_in_labels_unfinished))
 
         # FIXME
-        def slot_btn_finish_clicked(self, w_action, w_begin, w_end, index_in_labels_unfinished):
+        def slot_dialog_btn_finish_clicked(self, w_action, w_begin, w_end, index_in_labels_unfinished):
             logger.debug('')
             action_name = w_action.currentText()
             action = list(filter(lambda a: a.name == action_name, self.actions))[0]
@@ -387,7 +388,7 @@ class TimelineTableView(TableViewExtended):
             else:
                 self._load_unfinished()
 
-        def slot_btn_new_clicked(self):
+        def slot_dialog_btn_new_clicked(self):
             logger.debug('')
             action_name = self.combo_action_names.currentText()
             if not action_name:
