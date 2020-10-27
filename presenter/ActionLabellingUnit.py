@@ -166,7 +166,7 @@ class ActionLabellingUnit:
     def table_timeline_cell_double_clicked(self, qindex):
         logger.debug('')
         r, c = qindex.row(), qindex.column()
-        label = self.mw.table_timeline._detect_label(r, c)  # type:ActionLabel
+        label = self.mw.table_timeline.detect_label(r, c)  # type:ActionLabel
         if not label:
             self.mw.table_timeline.col_to_center(self.mw.table_timeline.current_column)
             CommonUnit.status_prompt(str(f'Current Frame {self.mw.table_timeline.current_column}'))

@@ -122,7 +122,7 @@ class TimelineTableView(TableViewExtended):
                 item.setWhatsThis(str(id))
 
         if changed:
-            found_label = self._detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
+            found_label = self.detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
             if found_label is not None:
                 mySignals.label_created.emit(found_label, MySignals.Emitter.T_LABEL)
 
@@ -159,7 +159,7 @@ class TimelineTableView(TableViewExtended):
     def slot_cellClicked(self, qindex):
         r, c = qindex.row(), qindex.column()
         logger.debug(f'{r}, {c}')
-        label = self._detect_label(r, c)
+        label = self.detect_label(r, c)
         if label is None:
             self.label_clicked = None
         else:
@@ -233,7 +233,7 @@ class TimelineTableView(TableViewExtended):
             item.setWhatsThis(str(label.action_id))
         return True
 
-    def _detect_label(self, row, col):
+    def detect_label(self, row, col):
         item = self.model().item(row, col)
         if not item or item.background() == Qt.white:
             return None

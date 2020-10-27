@@ -255,7 +255,7 @@ class PlayingUnit(QObject):
     def table_timeline_cell_double_clicked(self, qindex):
         logger.debug('')
         r, c = qindex.row(), qindex.column()
-        label = self.mw.table_timeline._detect_label(r, c)  # type:ActionLabel
+        label = self.mw.table_timeline.detect_label(r, c)  # type:ActionLabel
         if label:
             self.label_play(label)
 
