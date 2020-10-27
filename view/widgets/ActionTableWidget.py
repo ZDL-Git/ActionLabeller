@@ -98,15 +98,24 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
             return max([action.id for action in actions]) + 1
         return 0
 
-    def slot_insert_action(self, action: Action):
+    def slot_insert_action(self, action: Union[Action, str, None]):
+        logger.debug(action)
         if isinstance(action, Action):
             self.RowAction(action)
+        elif isinstance(action, str):
+            action = Action(self.generate_id(),
+                            action,
+                            QColor(QRandomGenerator().global_().generate()),
+                            False)
+            self.RowAction(action)
         else:
+            # called by signal
             action = Action(self.generate_id(),
                             '',
                             QColor(QRandomGenerator().global_().generate()),
                             False)
             self.RowAction(action).to_edit(self.Cols.name)
+        return action
 
     def _unselect_others(self, except_):
         for r in range(self.rowCount()):
@@ -118,8 +127,8 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         logger.debug(*arg)
 
     class Cols(EnumColsHelper):
-        id = EnumColsHelper.ColType()(0, int, 'Action Id', False, True, False)
-        name = EnumColsHelper.ColType()(1, str, 'Action Name', True, True, True)
+        id = EnumColsHelper.ColType()(0, int, 'Id', False, True, True)
+        name = EnumColsHelper.ColType()(1, str, 'Name', True, True, True)
         color = EnumColsHelper.ColType()(2, QColor, 'Label Color', False, False, True)
         default = EnumColsHelper.ColType()(3, bool, 'Default', True, True, True)
         xml_ymin = EnumColsHelper.ColType()(4, int, 'Y-min', True, True, False)
