@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QVariant, QRect, QItemSelection, QItemSelectionMode
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEvent, QIntValidator
 from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
     QPushButton
-from zdl.utils.helper.qt import TableDecorators, clear_layout
+from zdl.utils.helper.qt import TableDecorators, clearLayout
 from zdl.utils.io.log import logger
 
 from model.Action import Action
@@ -176,7 +176,7 @@ class TimelineTableView(TableViewExtended):
     def set_column_num(self, c):
         self.model().setColumnCount(c)
 
-    @TableDecorators.block_signals
+    @TableDecorators.blockSignals
     def slot_follow_to(self, index):
         self.current_column = index
         # if emitter == MySignals.Emitter.T_HSCROLL:
@@ -184,14 +184,14 @@ class TimelineTableView(TableViewExtended):
         if self.b_scroll_follow:
             self.col_to_center(index)
 
-    @TableDecorators.block_signals
+    @TableDecorators.blockSignals
     def slot_label_delete(self, action_labels: typing.List[ActionLabel], emitter):
         logger.debug(f'{action_labels}, {emitter}')
         self.unselect_all()
         for label in action_labels:
             self._del_label(label)
 
-    @TableDecorators.block_signals
+    @TableDecorators.blockSignals
     def slot_label_update(self, action_labels: typing.List[ActionLabel], emitter):
         logger.debug(f'{action_labels}, {emitter}')
         self.unselect_all()
@@ -332,7 +332,7 @@ class TimelineTableView(TableViewExtended):
                     self.combo_action_names.setCurrentIndex(_action_names.index(default[0].name))
 
         def _load_unfinished(self):
-            clear_layout(self.instore_layout)
+            clearLayout(self.instore_layout)
             for i, label in enumerate(self.labels_unfinished):
                 self._add_comb(label, i)
 
@@ -368,7 +368,6 @@ class TimelineTableView(TableViewExtended):
                 lambda: self.slot_dialog_btn_finish_clicked(combox, begin_editor, end_editor,
                                                             index_in_labels_unfinished))
 
-        # FIXME
         def slot_dialog_btn_finish_clicked(self, w_action, w_begin, w_end, index_in_labels_unfinished):
             logger.debug('')
             action_name = w_action.currentText()

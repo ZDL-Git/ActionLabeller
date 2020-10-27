@@ -6,7 +6,7 @@ from PyQt5.QtCore import QItemSelection, QItemSelectionModel, QModelIndex, Qt
 from PyQt5.QtGui import QIntValidator, QBrush, QColor
 from PyQt5.QtWidgets import QTableView, QItemDelegate, QWidget, QStyleOptionViewItem, QLineEdit, QTableWidgetItem, \
     QTableWidget, QStyledItemDelegate
-from zdl.utils.helper.python import except_as_None
+from zdl.utils.helper.python import ZDecorators
 
 
 class TableViewExtended(QTableView):
@@ -123,7 +123,7 @@ class RowHelper(ABC):
             self.table.setItem(r, c, item)
         return self.table.item(r, c)
 
-    @except_as_None()
+    @ZDecorators.exceptAsNone()
     def _col_value(self, col: EnumColsHelper):
         vt = col.value.value_type
         if vt in [QBrush, QColor]:

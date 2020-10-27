@@ -51,7 +51,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         # label = self.label_at(r)
 
     @TableDecorators.dissort()
-    @TableDecorators.block_signals
+    @TableDecorators.blockSignals
     def slot_label_created(self, action_label: ActionLabel, emitter):
         logger.debug(f'{action_label}, {emitter}')
         self._label_cells_delete({action_label.timeline_row: list(range(action_label.begin, action_label.end + 1))})
@@ -59,7 +59,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         self._select_row(row_i)
 
     @TableDecorators.dissort()
-    @TableDecorators.block_signals
+    @TableDecorators.blockSignals
     def slot_label_select(self, action_label, emitter):
         logger.debug(f'{action_label}, {emitter}')
         label_row = self._get_label_row_num(action_label)
@@ -67,7 +67,7 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             self.selectRow(label_row)
 
     @TableDecorators.dissort()
-    @TableDecorators.block_signals
+    @TableDecorators.blockSignals
     def slot_label_delete(self, action_label, emitter):
         logger.debug(f'{action_label}, {emitter}')
         row_i = self._get_label_row_num(action_label)
@@ -75,18 +75,19 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
             self._delete_rows([row_i])
 
     @TableDecorators.dissort()
-    @TableDecorators.block_signals
+    @TableDecorators.blockSignals
     def slot_label_cells_delete(self, label_cells: Dict[int, List[int]], emitter):
         logger.debug(f'{label_cells}, {emitter}')
         self._label_cells_delete(label_cells)
 
     @TableDecorators.dissort()
-    @TableDecorators.block_signals
+    @TableDecorators.blockSignals
     def slot_label_action_info_update_by_row(self, r, action: Action, emitter):
         logger.debug(f'{r}, {action}, {emitter}')
         self.RowLabel(r).set_action(action.name).set_action_color(action.color)
 
-    def get_all_labels(self) -> list:
+    @TableDecorators.dissort()
+    def get_all_labels(self) -> List[ActionLabel]:
         labels = []
         for r in range(self.rowCount()):
             labels.append(self.label_at(r))
