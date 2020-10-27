@@ -29,9 +29,9 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         self.blockSignals(True)
         for i in range(2):
             action = Action(self.generate_id(), f"action{i + 1}",
-                            QColor('#fcba03') if i == 0 else QColor('#83bdc9'),
+                            QColor('red') if i == 0 else QColor('black'),
                             i == 0)
-            self.RowAction(action)
+            self.slot_insert_action(action)
         self.blockSignals(False)
 
     def slot_cellChanged(self, r, c):
