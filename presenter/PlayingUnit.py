@@ -91,6 +91,8 @@ class PlayingUnit(QObject):
             self.mw.table_timeline.set_column_num(video_model.get_info()['frame_c'])
             self.video_model = video_model
             self.set_model(video_model)
+
+            self.mw.video_textBrowser.append(file_uri)
         elif ext in Settings.plotting_exts:
             self.mw.tab_media.setCurrentIndex(2)
             content = StandardFile.loadJson(file_uri)
@@ -103,6 +105,8 @@ class PlayingUnit(QObject):
             self.mw.table_timeline.set_column_num(int(pose_model.indices[-1]) + 1)
             self.pose_model = pose_model
             self.set_model(pose_model)
+
+            self.mw.plotting_textBrowser.append(file_uri)
         else:
             logger.warn(file_uri)
             logger.warn(ext)
