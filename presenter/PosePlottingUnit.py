@@ -1,8 +1,8 @@
 import pyqtgraph as pg
 from PyQt5.QtCore import Qt, QObject
+from zdl.utils.io.file import StandardFile
 from zdl.utils.io.log import logger
 
-from model import File
 from model.PosePlotting import PosePlotting
 from presenter.CommonUnit import CommonUnit
 
@@ -64,7 +64,7 @@ class PosePlottingUnit(QObject):
         if not self.fname:
             return
 
-        self.main_plotting_model.set_data = File.load_dict(self.fname)
+        self.main_plotting_model.set_data = StandardFile.loadJson(self.fname)
 
         # self.mw.slider_frame: QSlider
         # self.mw.slider_frame.setRange(0, len(self.main_plotting.fdata) - 1)

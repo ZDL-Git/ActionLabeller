@@ -3,11 +3,11 @@ from typing import Optional
 
 import pyqtgraph as pg
 from PyQt5.QtCore import QEvent, QObject
+from zdl.utils.io.file import StandardFile
 from zdl.utils.io.log import logger
 
 from model.AbcPlayable import AbcPlayable
 from model.ActionLabel import ActionLabel
-from model.File import load_dict
 from model.PosePlotting import PosePlotting
 from model.Video import Video
 from presenter import MySignals
@@ -93,7 +93,7 @@ class PlayingUnit(QObject):
             self.set_model(video_model)
         elif ext in Settings.plotting_exts:
             self.mw.tab_media.setCurrentIndex(2)
-            content = load_dict(file_uri)
+            content = StandardFile.loadJson(file_uri)
             pose_data = content['poses']
             pose_type = content['info']['pose_type']
             pose_model = PosePlotting(pose_type) \
