@@ -10,7 +10,7 @@ class XmlSettingTableView(TableViewExtended):
 
     def __init_later__(self, model):
         self.setModel(model)
-        self.setSortingEnabled(True)
+        # self.setSortingEnabled(True) # has set in ActionTableWidget, here will trigger reverse sorting.
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         delegate = TableViewExtended.IntItemDelegate()
         self.setItemDelegateForColumn(ActionTableWidget.Cols.xml_ymin.value.index, delegate)
