@@ -26,7 +26,7 @@ class AbcPlotting(AbcPlayable, AbcScheduleable):
         logger.debug('')
         self._fdata = v
         if isinstance(self._fdata, np.ndarray):
-            self.indices = len(self._fdata)
+            self.indices = range(len(self._fdata))
         elif isinstance(self._fdata, dict):
             self.indices = sorted(list(self._fdata.keys()), key=lambda x: int(x))
             # assert type(self.indices[0]) == int, 'covert please!'
