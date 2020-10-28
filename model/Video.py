@@ -45,6 +45,13 @@ class Video(AbcPlayable, AbcScheduleable):
                           'Tms': 1000 / fps}
         return self._info
 
+    def to_head(self):
+        self.schedule(0, -1, 0, self.__class__)
+
+    def to_tail(self):
+        tail = self.get_info()['frame_c'] - 1
+        self.schedule(tail, -1, tail, self.__class__)
+
     def schedule(self, jump_to, bias, stop_at, emitter):
         logger.debug(f'{jump_to}, {bias}, {stop_at}, {emitter}, {self._flag_cur_index}')
 

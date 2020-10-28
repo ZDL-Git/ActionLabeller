@@ -18,18 +18,18 @@ class AbcPlotting(AbcPlayable, AbcScheduleable):
         self.indices = None  # type: List
 
         self.flag_plotting = False
-        self.flag_plotted_count = 0
+        self.flag_indices_index = -1
         # self.clear_per_frame = True
 
     def set_data(self, v):
         logger.debug('')
         self._fdata = v
         if isinstance(self._fdata, np.ndarray):
-            self.indices = range(len(self._fdata))
+            self.indices = list(range(len(self._fdata)))
         elif isinstance(self._fdata, dict):
-            self.indices = sorted(list(self._fdata.keys()), key=lambda x: int(x))
-            # assert type(self.indices[0]) == int, 'covert please!'
-
+            self.indices = sorted(self._fdata.keys())
+        else:
+            raise ValueError
         # self.plotter.setXRange(0, 1280, padding=0)
         # self.plotter.setYRange(0, 720, padding=0)
         # self.plotter.vb.setLimits(xMin=0, xMax=1280, yMin=0, yMax=720)
@@ -66,30 +66,26 @@ class AbcPlotting(AbcPlayable, AbcScheduleable):
         if not self._flag_playing and self.scheduled.jump_to is None:
             return None
         if self.scheduled.jump_to is not None:
-            dest_index = self.scheduled.jump_to
-            dest_key = str(dest_index)
-            self.scheduled.jump_to = None
+            dest_key, self.scheduled.jump_to = self.scheduled.jump_to, None
             if dest_key not in self.indices:
                 logger.error(f'frame {dest_key} not exists!')
                 return
-            self.flag_plotted_count = self.indices.index(dest_key) + 1
+            self.flag_indices_index = self.indices.index(dest_key)
         else:
-            if self.flag_plotted_count == len(self._fdata):
+            self.flag_indices_index += 1
+            if self.flag_indices_index == len(self._fdata):
                 return None
-            indices_index = self.flag_plotted_count
-            dest_key = self.indices[indices_index]
-            dest_index = int(dest_key)
-            self.flag_plotted_count += 1
+            dest_key = self.indices[self.flag_indices_index]
 
-        if self.scheduled.stop_at is not None and dest_index > self.scheduled.stop_at:
+        if self.scheduled.stop_at is not None and dest_key > self.scheduled.stop_at:
             self.scheduled.clear()
             self.stop()
             return None
 
         self.plot(dest_key)
-        self.signals.flushed.emit(dest_index)
-        self._flag_cur_index = dest_index
-        return dest_index
+        self._flag_cur_index = dest_key
+        self.signals.flushed.emit(dest_key)
+        return dest_key
 
     @abstractmethod
     def plot(self, index):

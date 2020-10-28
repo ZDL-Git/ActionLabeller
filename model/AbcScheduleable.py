@@ -21,8 +21,7 @@ class AbcScheduleable(ABC):
             self.emitter = emitter
             self.jump_to = jump_to
             self.stop_at = stop_at
-            logger.debug('scheduled--')
-            logger.debug(self)
+            logger.debug(f'scheduled: {self}')
 
         def clear(self):
             self.emitter = None

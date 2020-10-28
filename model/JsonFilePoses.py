@@ -25,3 +25,6 @@ class JsonFilePoses(JsonFile):
 
     def dump_hooks(self):
         self.content['timestamp'] = time.prettyYToMs()
+
+    def load_hooks(self):
+        self.content['poses'] = {int(k): v for k, v in self.content['poses'].items()}

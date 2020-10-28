@@ -25,6 +25,14 @@ class PosePlotting(AbcPlotting):
         self.plotter.addLegend()
         return self
 
+    def to_head(self):
+        head = self.indices[0]
+        self.schedule(head, -1, head, self.__class__)
+
+    def to_tail(self):
+        tail = self.indices[-1]
+        self.schedule(tail, -1, tail, self.__class__)
+
     def plot(self, key):
         pose_colors = ['#fe8a71', '#0e9aa7', 'gray']  # orange, green, gray
         pose_sections = self.pose_type.SECTIONS

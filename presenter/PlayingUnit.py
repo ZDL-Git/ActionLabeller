@@ -161,10 +161,12 @@ class PlayingUnit(QObject):
         self.media_model.schedule(-1, step, -1, MySignals.Emitter.BTN)
 
     def to_head(self):
-        pass
+        logger.debug('')
+        self.media_model.to_head()
 
     def to_tail(self):
-        pass
+        logger.debug('')
+        self.media_model.to_tail()
 
     def slot_interval_changed(self):
         Settings.v_interval = int(self.mw.spin_interval.text() or 1)

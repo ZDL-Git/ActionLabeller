@@ -49,6 +49,14 @@ class AbcPlayable(ABC):
         pass
 
     @abstractmethod
+    def to_head(self):
+        pass
+
+    @abstractmethod
+    def to_tail(self):
+        pass
+
+    @abstractmethod
     def schedule(self, jump_to, bias, stop_at, emitter):
         pass
 
