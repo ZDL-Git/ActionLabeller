@@ -3,11 +3,12 @@ from typing import Optional
 
 import pyqtgraph as pg
 from PyQt5.QtCore import QEvent, QObject
-from zdl.utils.io.file import StandardFile
+from zdl.utils.io.file import FileInfo
 from zdl.utils.io.log import logger
 
 from model.AbcPlayable import AbcPlayable
 from model.ActionLabel import ActionLabel
+from model.JsonFilePoses import JsonFilePoses
 from model.PosePlotting import PosePlotting
 from model.Video import Video
 from presenter import MySignals
@@ -28,9 +29,9 @@ class PlayingUnit(QObject):
         self.mw = mwindow
 
         self.media_model = None  # type:Optional[AbcPlayable]
-        self.video_model = None
+        self.video_model = None  # type:Optional[Video]
         self.images_model = None
-        self.pose_model = None
+        self.pose_model = None  # type:Optional[PosePlotting]
         self.video_playing = False
 
         self._init_pyqtgraph()
@@ -86,30 +87,31 @@ class PlayingUnit(QObject):
         ext = os.path.splitext(file_uri)[1]
         if ext in Settings.video_exts:
             self.mw.tab_media.setCurrentIndex(0)
-            video_model = Video(file_uri).set_view(self.mw.label_show)
+            video_model = Video(file_uri) \
+                .set_view(self.mw.label_show)
             video_model.fps = video_model.get_info()['fps'] * float(self.mw.combo_speed.currentText())
-            self.mw.table_timeline.set_column_num(video_model.get_info()['frame_c'])
+            video_model.file = FileInfo(file_uri)
             self.video_model = video_model
             self.set_model(video_model)
 
+            self.mw.table_timeline.set_column_num(video_model.get_info()['frame_c'])
             self.mw.video_textBrowser.append(file_uri)
         elif ext in Settings.plotting_exts:
             self.mw.tab_media.setCurrentIndex(2)
-            content = StandardFile.loadJson(file_uri)
-            pose_data = content['poses']
-            pose_type = content['info']['pose_type']
-            pose_model = PosePlotting(pose_type) \
-                .set_data(pose_data) \
+            file = JsonFilePoses.load(file_uri)
+            pose_model = PosePlotting(file['info.pose_type']) \
+                .set_data(file['poses']) \
                 .set_view(self.main_plotter) \
                 .set_range()
-            self.mw.table_timeline.set_column_num(int(pose_model.indices[-1]) + 1)
+            pose_model.file = file
             self.pose_model = pose_model
             self.set_model(pose_model)
 
+            self.mw.table_timeline.set_column_num(int(pose_model.indices[-1]) + 1)
             self.mw.plotting_textBrowser.append(file_uri)
         else:
-            logger.warn(file_uri)
-            logger.warn(ext)
+            logger.warn(f'{file_uri} type {ext} not supported.')
+            return
         self.media_model.signals.flushed.connect(self.mw.table_timeline.slot_follow_to)
         self.media_model.signals.flushed.connect(self.mw.slot_follow_to)
         self.media_model.start()

@@ -1,6 +1,9 @@
+from typing import Optional
+
 import numpy as np
 import pyqtgraph as pg
 from zdl.AI.pose_estimation.pose import *
+from zdl.utils.io.file import FileInfo
 from zdl.utils.io.log import logger
 
 from model.AbcPlotting import AbcPlotting
@@ -13,6 +16,7 @@ class PosePlotting(AbcPlotting):
         assert pose_type in all_sub_pose_types, f'pose_type {pose_type} not in {list(all_sub_pose_types.keys())}'
         self.pose_type = all_sub_pose_types[pose_type]
 
+        self.file = None  # type:Optional[FileInfo]
         # self.clear_per_frame = True
 
     def set_view(self, view):

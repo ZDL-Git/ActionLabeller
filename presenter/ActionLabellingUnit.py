@@ -2,15 +2,15 @@ import os
 import time
 
 import numpy as np
-from PyQt5.QtCore import QRandomGenerator, Qt
-from PyQt5.QtGui import QColor
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox
+from zdl.utils.helper.python import ZDict
 from zdl.utils.helper.qt import TableDecorators
-from zdl.utils.io.file import hashOfFile
+from zdl.utils.io.file import FileHelper
 from zdl.utils.io.log import logger
 
-from model.Action import Action
 from model.ActionLabel import ActionLabel
+from model.JsonFileLabels import JsonFileLabels
 from presenter import MySignals
 from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
@@ -51,51 +51,38 @@ class ActionLabellingUnit:
         save_as = CommonUnit.get_save_name(f'{video_name}.json')
         if not save_as:
             return
-        md5 = video_uri and hashOfFile(video_uri)
-        h = video_info and video_info['height']
-        w = video_info and video_info['width']
-        json_content = {
-            'video_info': {
-                'name': video_name,
-                'uri': video_uri,
-                'hash_md5': md5,
-                'h': h,
-                'w': w,
-            },
-            'timestamp': time.ctime(),
-            'labels': dict()
-        }
-        labels = self.mw.table_labeled.get_all_labels()
-        for i, label in enumerate(labels):
-            json_content['labels'][i] = {'action': label.action,
-                                         'begin': label.begin,
-                                         'end': label.end,
-                                         'pose_index': label.pose_index, }
-        logger.debug(json_content)
-        CommonUnit.save_dict(json_content, fname=save_as)
+        pose_obj = PlayingUnit.only_ins.pose_model
+        pose_file_uri = pose_obj and pose_obj.file.uri
+        pose_file_md5 = pose_file_uri and FileHelper.hashOfFile(pose_file_uri)
+        json_file_labels = JsonFileLabels()
+        json_file_labels['video_info.uri'] = video_uri
+        json_file_labels['video_info.hash_md5'] = video_uri and FileHelper.hashOfFile(video_uri)
+        json_file_labels['video_info.w'] = video_info and video_info['width']
+        json_file_labels['video_info.h'] = video_info and video_info['height']
+        json_file_labels['pose_info.uri'] = pose_file_uri
+        json_file_labels['pose_info.hash_md5'] = pose_file_md5
+        json_file_labels['labels'] = {i + 1: {'action': label.action,
+                                              'begin': label.begin,
+                                              'end': label.end,
+                                              'pose_index': label.pose_index, }
+                                      for i, label in enumerate(self.mw.table_labeled.get_all_labels())}
+        json_file_labels.dump(save_as)
 
     def slot_import_labeled(self):
         logger.debug('')
-        CommonUnit.status_prompt('Importing labels...')
-        json_content = CommonUnit.load_dict()
-        all_actions = {action.name: action for action in CommonUnit.get_all_actions()}
-        for i in json_content['labels']:
-            action_name = json_content['labels'][i]['action']
-            begin = json_content['labels'][i]['begin']
-            end = json_content['labels'][i]['end']
-            pose_index = json_content['labels'][i].get('pose_index', -1)
-            if action_name not in all_actions:
-                action = Action(self.mw.table_action.generate_id(), action_name,
-                                QColor(QRandomGenerator().global_().generate()), False)
-                self.mw.table_action.slot_insert_action(action)
-                all_actions[action_name] = action
+        json_file_labels = JsonFileLabels.load(CommonUnit.get_open_name())
+        existed_actions = {action.name: action for action in CommonUnit.get_all_actions()}
+        for i, label in json_file_labels['labels'].items():
+            action_name, begin, end, pose_index = ZDict(label)['action', 'begin', 'end', ('pose_index', -1)]
+            if action_name not in existed_actions:
+                action = self.mw.table_action.slot_insert_action(action_name)
+                existed_actions[action_name] = action
             else:
-                action = all_actions[action_name]
+                action = existed_actions[action_name]
             action_label = ActionLabel(action.name, action.id, action.color, begin, end, None, pose_index)
             logger.debug(action_label)
             self.mw.table_timeline.settle_label(action_label)
             self.mw.table_labeled.add_label(action_label)
-        CommonUnit.status_prompt('Importing finished.')
 
     def slot_export_npy_and_label(self):
         poses = PlayingUnit.only_ins.pose_model._fdata
