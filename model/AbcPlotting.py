@@ -1,47 +1,42 @@
 from abc import abstractmethod
-from typing import List
+from typing import List, Optional
 
 import numpy as np
 import pyqtgraph as pg
 from zdl.utils.io.log import logger
 
 from model.AbcPlayable import AbcPlayable
-from model.AbcScheduleable import AbcScheduleable
 
 
-class AbcPlotting(AbcPlayable, AbcScheduleable):
+class AbcPlotting(AbcPlayable):
     def __init__(self):
         super().__init__()
         self.plotter = None
         self._fdata = None
-        self._flag_clear_per_frame = True
-        self.indices = None  # type: List
+        self._indices = None  # type: Optional[List]
 
         self.flag_plotting = False
         self.flag_indices_index = -1
+        self.flag_clear_per_frame = True
         # self.clear_per_frame = True
+
+    @property
+    def indices(self):
+        return self._indices
 
     def set_data(self, v):
         logger.debug('')
         self._fdata = v
         if isinstance(self._fdata, np.ndarray):
-            self.indices = list(range(len(self._fdata)))
+            self._indices = list(range(len(self._fdata)))
         elif isinstance(self._fdata, dict):
-            self.indices = sorted(self._fdata.keys())
+            self._indices = sorted(self._fdata.keys())
         else:
             raise ValueError
         # self.plotter.setXRange(0, 1280, padding=0)
         # self.plotter.setYRange(0, 720, padding=0)
         # self.plotter.vb.setLimits(xMin=0, xMax=1280, yMin=0, yMax=720)
         return self
-
-    @property
-    def clear_per_frame(self):
-        return self._flag_clear_per_frame
-
-    @clear_per_frame.setter
-    def clear_per_frame(self, v):
-        self._flag_clear_per_frame = v
 
     def set_range(self, x_range=None, y_range=None):
         logger.debug('')
@@ -52,15 +47,6 @@ class AbcPlotting(AbcPlayable, AbcScheduleable):
         self.plotter: pg.PlotItem
         self.plotter.setRange(xRange=x_range, yRange=y_range, padding=False, disableAutoRange=True)
         return self
-
-    def schedule(self, jump_to, bias, stop_at, emitter):
-        logger.debug(f'{jump_to}, {bias}, {stop_at}, {emitter}, {self._flag_cur_index}')
-        if jump_to != -1:
-            bias = None
-
-        jump_to = self._flag_cur_index + bias if jump_to == -1 else max(0, min(jump_to, int(self.indices[-1])))
-        stop_at = None if stop_at == -1 else max(0, min(stop_at, int(self.indices[-1])))
-        self.scheduled.set(emitter, jump_to, stop_at)
 
     def flush(self):
         if not self._flag_playing and self.scheduled.jump_to is None:

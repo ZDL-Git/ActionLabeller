@@ -19,7 +19,7 @@ class PosePlotting(AbcPlotting):
         self.file = None  # type:Optional[FileInfo]
         # self.clear_per_frame = True
 
-    def set_view(self, view):
+    def set_viewer(self, view):
         logger.debug('')
         self.plotter = view
         self.plotter.addLegend()
@@ -37,7 +37,7 @@ class PosePlotting(AbcPlotting):
         pose_colors = ['#fe8a71', '#0e9aa7', 'gray']  # orange, green, gray
         pose_sections = self.pose_type.SECTIONS
 
-        if self.clear_per_frame:
+        if self.flag_clear_per_frame:
             self.plotter.clear()
 
         frame_points = self._fdata[key]

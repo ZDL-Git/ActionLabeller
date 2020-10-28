@@ -1,30 +1,27 @@
-import queue
-
 import cv2
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
 from zdl.utils.helper.opencv import countFrames
-from zdl.utils.io.log import logger
 
 from model.AbcPlayable import AbcPlayable
-from model.AbcScheduleable import AbcScheduleable
 from presenter import MySignals
 from presenter.Settings import Settings
 
 
-class Video(AbcPlayable, AbcScheduleable):
+class Video(AbcPlayable):
     def __init__(self, fname):
         super().__init__()
         self.fname = fname
         self._cap = cv2.VideoCapture(self.fname)
         self._info = None
-        self.frames_buffer = queue.Queue(maxsize=100)
+        self._indices = list(range(self.get_info()['frame_c']))
+        # self.frames_buffer = queue.Queue(maxsize=100)
 
     def __del__(self):
         self._cap.release()
 
-    def set_view(self, view):
-        self.label_show = view
+    def set_viewer(self, viewer):
+        self.viewer = viewer
         return self
 
     def get_info(self):
@@ -45,19 +42,16 @@ class Video(AbcPlayable, AbcScheduleable):
                           'Tms': 1000 / fps}
         return self._info
 
+    @property
+    def indices(self):
+        return self._indices
+
     def to_head(self):
         self.schedule(0, -1, 0, self.__class__)
 
     def to_tail(self):
         tail = self.get_info()['frame_c'] - 1
         self.schedule(tail, -1, tail, self.__class__)
-
-    def schedule(self, jump_to, bias, stop_at, emitter):
-        logger.debug(f'{jump_to}, {bias}, {stop_at}, {emitter}, {self._flag_cur_index}')
-
-        jump_to = self._flag_cur_index + bias if jump_to == -1 else max(0, min(jump_to, self.get_info()['frame_c'] - 1))
-        stop_at = None if stop_at == -1 else max(0, min(stop_at, self.get_info()['frame_c'] - 1))
-        self.scheduled.set(emitter, jump_to, stop_at)
 
     def flush(self):
         if not self._flag_playing and self.scheduled.jump_to is None:
@@ -68,12 +62,9 @@ class Video(AbcPlayable, AbcScheduleable):
             _interval = Settings.v_interval
 
         if self.scheduled.jump_to is not None:
-            dest_index = self.scheduled.jump_to
-            # emitter = self.scheduled.emitter
-            self.scheduled.jump_to = None
+            dest_index, self.scheduled.jump_to = self.scheduled.jump_to, None
         else:
             dest_index = self._flag_cur_index + _interval
-            # emitter = MySignals.Emitter.TIMER
 
         if self.scheduled.stop_at is not None and dest_index > self.scheduled.stop_at:
             self.scheduled.clear()
@@ -98,9 +89,9 @@ class Video(AbcPlayable, AbcScheduleable):
         height, width, bytesPerComponent = frame.shape
         bytesPerLine = bytesPerComponent * width
         q_image = QImage(frame.data, width, height, bytesPerLine,
-                         QImage.Format_RGB888).scaled(self.label_show.width(), self.label_show.height(),
+                         QImage.Format_RGB888).scaled(self.viewer.width(), self.viewer.height(),
                                                       Qt.KeepAspectRatio, Qt.SmoothTransformation)
         q_pixmap = QPixmap.fromImage(q_image)
-        self.label_show.setPixmap(q_pixmap)
+        self.viewer.setPixmap(q_pixmap)
         self.signals.flushed.emit(self._flag_cur_index)
         return self._flag_cur_index

@@ -7,6 +7,7 @@ from model.PosePlotting import PosePlotting
 from presenter.CommonUnit import CommonUnit
 
 
+# not using
 class PosePlottingUnit(QObject):
     # inheriting QObject, required by pyqtSlot decorator
     def __init__(self, mwindow):
@@ -18,7 +19,7 @@ class PosePlottingUnit(QObject):
         self.flag_plotting = False
 
         self._init_pyqtgraph()
-        self.main_plotting_model = PosePlotting().set_view(self.main_plotter)
+        self.main_plotting_model = PosePlotting().set_viewer(self.main_plotter)
 
     def _init_pyqtgraph(self):
         pg.setConfigOptions(antialias=True)

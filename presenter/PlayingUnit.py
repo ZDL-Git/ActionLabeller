@@ -88,7 +88,7 @@ class PlayingUnit(QObject):
         if ext in Settings.video_exts:
             self.mw.tab_media.setCurrentIndex(0)
             video_model = Video(file_uri) \
-                .set_view(self.mw.label_show)
+                .set_viewer(self.mw.label_show)
             video_model.fps = video_model.get_info()['fps'] * float(self.mw.combo_speed.currentText())
             video_model.file = FileInfo(file_uri)
             self.video_model = video_model
@@ -101,7 +101,7 @@ class PlayingUnit(QObject):
             file = JsonFilePoses.load(file_uri)
             pose_model = PosePlotting(file['info.pose_type']) \
                 .set_data(file['poses']) \
-                .set_view(self.main_plotter) \
+                .set_viewer(self.main_plotter) \
                 .set_range()
             pose_model.file = file
             self.pose_model = pose_model
