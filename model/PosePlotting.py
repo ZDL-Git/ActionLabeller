@@ -13,7 +13,6 @@ class PosePlotting(AbcPlotting):
         assert pose_type in all_sub_pose_types, f'pose_type {pose_type} not in {list(all_sub_pose_types.keys())}'
         self.pose_type = all_sub_pose_types[pose_type]
 
-        self.flag_playing = False
         # self.clear_per_frame = True
 
     def set_view(self, view):
