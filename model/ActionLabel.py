@@ -3,8 +3,6 @@ from typing import Optional
 from PyQt5.QtGui import QBrush
 from zdl.utils.io.log import logger
 
-from presenter.CommonUnit import CommonUnit
-
 
 class ActionLabel:
     def __init__(self, action: str, action_id: int, color, begin: int, end: int,
@@ -38,12 +36,10 @@ class ActionLabel:
             value = eval(f'self.{attr}')
             if value in [None, '', []]:
                 warn_ = f"Label's attr [{attr}]  is [{value}], invalid!"
-                CommonUnit.status_prompt(warn_)
                 logger.warn(warn_)
                 return False
         if self.begin is not None and self.end is not None and self.begin > self.end:
             warn_ = f"Label's begin[{self.begin}] exceeds end[{self.end}], invalid!"
-            CommonUnit.status_prompt(warn_)
             logger.warn(warn_)
             return False
         return True

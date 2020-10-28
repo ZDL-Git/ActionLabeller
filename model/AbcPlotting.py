@@ -7,7 +7,6 @@ from zdl.utils.io.log import logger
 
 from model.AbcPlayable import AbcPlayable
 from model.AbcScheduleable import AbcScheduleable
-from presenter.CommonUnit import CommonUnit
 
 
 class AbcPlotting(AbcPlayable, AbcScheduleable):
@@ -71,7 +70,7 @@ class AbcPlotting(AbcPlayable, AbcScheduleable):
             dest_key = str(dest_index)
             self.scheduled.jump_to = None
             if dest_key not in self.indices:
-                CommonUnit.status_prompt(f'frame {dest_key} not exists!')
+                logger.error(f'frame {dest_key} not exists!')
                 return
             self.flag_plotted_count = self.indices.index(dest_key) + 1
         else:
