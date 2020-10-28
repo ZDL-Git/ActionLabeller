@@ -5,7 +5,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, QVariant, QRect, QItemSelection, QItemSelectionModel
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEvent, QIntValidator
 from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
-    QPushButton
+    QPushButton, QHeaderView
 from zdl.utils.helper.qt import TableDecorators, clearLayout
 from zdl.utils.io.log import logger
 
@@ -36,6 +36,7 @@ class TimelineTableView(TableViewExtended):
     def __init_later__(self):
         self.setModel(TimelineTableModel(20, 50))
         self.setSortingEnabled(False)
+        self.horizontalHeader().setMinimumSectionSize(20)
 
         header = self.horizontalHeader()
         header.sectionPressed.disconnect()
@@ -175,6 +176,11 @@ class TimelineTableView(TableViewExtended):
 
     def set_column_num(self, c):
         self.model().setColumnCount(c)
+        self.horizontalHeader().setSectionResizeMode(
+            QHeaderView.Stretch
+            if c and c * self.columnWidth(0) < self.width() else
+            QHeaderView.Interactive
+        )
 
     @TableDecorators.blockSignals
     def slot_follow_to(self, index):
