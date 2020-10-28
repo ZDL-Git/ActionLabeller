@@ -44,6 +44,7 @@ class AbcPlayable(ABC):
     def start(self):
         logger.debug('')
         self._flag_playing = True
+        self.scheduled.clear()
         if not self.timer.isActive():
             self.timer.start()
 
