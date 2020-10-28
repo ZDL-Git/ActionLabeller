@@ -101,6 +101,7 @@ class ActionLabellingUnit:
         poses = PlayingUnit.only_ins.pose_model._fdata
         logger.debug(list(poses.keys()))
         labels = self.mw.table_labeled.get_all_labels()
+        labels = [l for l in labels if l.pose_index != -1]
         logger.debug(len(labels))
         npy = []
         label_len_max = 0
@@ -120,17 +121,15 @@ class ActionLabellingUnit:
         logger.info(npy.shape)
         time_stamp = int(time.time())
         CommonUnit.save_ndarray(npy, f'train_data_{time_stamp}.npy')
-        CommonUnit.save_pkl(([f'name{i}' for i in range(len(npy))], [l.action for l in labels]),
+        CommonUnit.save_pkl(([f'name{i}' for i in range(len(npy))], [l.action_id for l in labels]),
                             f'train_label_{time_stamp}.pkl')
 
     @TableDecorators.dissort(table_lambda=lambda self: self.mw.table_labeled)
-    @TableDecorators.dissort(table_lambda=lambda self: self.mw.table_timeline)
-    def slot_sync_action_update(self, r, c):
+    @TableDecorators.dissort(table_lambda=lambda self: self.mw.table_timeline, resume_sortable=False)
+    def slot_sync_action_update(self, r=None, c=None):
         logger.debug(f'{r} {c}')
-        actions = CommonUnit.get_all_actions()
-        action_dict = {a.id: a for a in actions}
-        table_labeled = self.mw.table_labeled
-        table_timeline = self.mw.table_timeline
+        action_dict = {a.id: a for a in CommonUnit.get_all_actions()}
+        table_labeled, table_timeline = self.mw.table_labeled, self.mw.table_timeline
         for r in reversed(range(table_labeled.rowCount())):
             label = table_labeled.label_at(r)
             id_ = label.action_id
@@ -146,8 +145,8 @@ class ActionLabellingUnit:
                 table_labeled.slot_label_delete(label, MySignals.Emitter.T_ACTION)
                 table_timeline.slot_label_delete([label], MySignals.Emitter.T_ACTION)
 
-    def slot_del_selected_actions(self,
-                                  checked):  # if use decorator, must receive checked param of button clicked event
+    # if use decorator, must receive checked param of button clicked event
+    def slot_del_selected_actions(self, checked):
         logger.debug('')
         if not self.mw.table_action.selectedIndexes():
             QMessageBox().information(self.mw, 'ActionLabeller Warning',
