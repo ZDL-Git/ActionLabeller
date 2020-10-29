@@ -8,12 +8,13 @@ import numpy as np
 from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit
 from zdl.utils.io.log import logger
 
+from view.MainWindow import MainWindow
+
 
 class CommonUnit:
-    get_default_action: Callable
-    get_all_actions: Callable
+    mw: MainWindow
+
     status_prompt: Callable
-    get_all_labels: Callable
 
     last_save_directory: str = ''
     last_open_directory: str = ''
@@ -23,10 +24,7 @@ class CommonUnit:
         logger.debug('')
         cls.mw = mwindow
 
-        cls.get_default_action = cls.mw.table_action.get_default_action
-        cls.get_all_actions = cls.mw.table_action.get_all_actions
         cls.status_prompt = cls.mw.label_note.setText
-        cls.get_all_labels = cls.mw.table_labeled.get_all_labels
 
     @classmethod
     def get_save_name(cls, default=None):

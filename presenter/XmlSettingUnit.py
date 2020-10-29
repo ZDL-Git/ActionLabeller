@@ -7,7 +7,6 @@ from zdl.utils.io.log import logger
 from model.Action import Action
 from model.ActionLabel import ActionLabel
 from model.Xml_ import AnnotationXml
-from presenter.CommonUnit import CommonUnit
 
 
 class XmlSettingUnit:
@@ -20,9 +19,9 @@ class XmlSettingUnit:
 
     def slot_export_xml(self):
         logger.debug('')
-        labels = CommonUnit.get_all_labels()  # type:List[ActionLabel]
+        labels = self.mw.table_labeled.get_all_labels()  # type:List[ActionLabel]
         labels.sort(key=lambda l: l.begin)
-        actions = CommonUnit.get_all_actions()  # type:List[Action]
+        actions = self.mw.table_action.get_all_actions()  # type:List[Action]
         id_action_dict = {a.id: a for a in actions}  # type:Dict[int,Action]
         framespan = int(self.mw.line_framespan.text())
         overlap = int(self.mw.line_overlap.text())

@@ -12,7 +12,6 @@ from zdl.utils.io.log import logger
 from model.Action import Action
 from model.ActionLabel import ActionLabel
 from presenter import MySignals
-from presenter.CommonUnit import CommonUnit
 from presenter.MySignals import mySignals
 from view.widgets.TableHelpers import TableViewExtended
 
@@ -32,6 +31,9 @@ class TimelineTableView(TableViewExtended):
         self.pressed.connect(self.slot_cellPressed)
 
         self.label_create_dialog = self.TimelineDialog(self)
+        self.get_all_actions = lambda: (_ for _ in ()).throw(NotImplementedError('Please inject this from Unit!'))
+        self.get_default_action = lambda: (_ for _ in ()).throw(NotImplementedError('Please inject this from Unit!'))
+        self.status_prompt = lambda: (_ for _ in ()).throw(NotImplementedError('Please inject this from Unit!'))
 
     def __init_later__(self):
         self.setModel(TimelineTableModel(20, 50))
@@ -104,12 +106,12 @@ class TimelineTableView(TableViewExtended):
             return
         entry_item = self.model().item(*self.entry_cell_pos)
         if entry_item.background() == Qt.white:
-            default_action = CommonUnit.get_default_action()
+            default_action = self.get_default_action()
             if not default_action:
                 return
-            name, color, id = default_action.name, default_action.color, default_action.id
+            name, color, id_ = default_action.name, default_action.color, default_action.id
         else:
-            name, color, id = entry_item.toolTip(), entry_item.background(), entry_item.whatsThis()
+            name, color, id_ = entry_item.toolTip(), entry_item.background(), entry_item.whatsThis()
         changed = False
         for c in range(l, r + 1):
             item = self.model().item(self.entry_cell_pos[0], c)
@@ -120,7 +122,7 @@ class TimelineTableView(TableViewExtended):
                 changed = True
                 item.setBackground(color)
                 item.setToolTip(name)
-                item.setWhatsThis(str(id))
+                item.setWhatsThis(str(id_))
 
         if changed:
             found_label = self.detect_label(*self.entry_cell_pos)  # redetect after update, for sections connection
@@ -219,7 +221,7 @@ class TimelineTableView(TableViewExtended):
         if t_r is None:
             warn_ = 'All related rows are already occupied and new ones cannot be placed!'
             logger.warn(warn_)
-            CommonUnit.status_prompt(warn_)
+            self.status_prompt(warn_)
             return None
         label.timeline_row = t_r
         if not self._plot_label(label):
@@ -311,6 +313,7 @@ class TimelineTableView(TableViewExtended):
         def __init__(self, parent=None):
             QDialog.__init__(self, parent, flags=Qt.Dialog)
             self.setupUi(self)
+            self.parent = parent
             self.line_begin.setValidator(QIntValidator())
             self.line_end.setValidator(QIntValidator())
 
@@ -329,7 +332,7 @@ class TimelineTableView(TableViewExtended):
             self.line_begin.setText(str(self.cur_frame_index))
             self.line_end.clear()
             self.combo_action_names.clear()
-            self.actions = actions = CommonUnit.get_all_actions()
+            self.actions = actions = self.parent.get_all_actions()
             if actions:
                 _action_names = [a.name for a in actions]
                 self.combo_action_names.addItems(_action_names)
@@ -355,7 +358,7 @@ class TimelineTableView(TableViewExtended):
             layout.setSpacing(5)
             self.instore_layout.addLayout(layout, 1)
 
-            _action_names = [a.name for a in CommonUnit.get_all_actions()]
+            _action_names = [a.name for a in self.parent.get_all_actions()]
             combox.addItems(_action_names)
             combox.setCurrentIndex(
                 action_label.action in _action_names and _action_names.index(action_label.action)

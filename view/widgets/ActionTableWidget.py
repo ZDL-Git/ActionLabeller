@@ -8,7 +8,6 @@ from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.log import logger
 
 from model.Action import Action
-from presenter.CommonUnit import CommonUnit
 from view.widgets.TableHelpers import TableViewExtended, EnumColsHelper, RowHelper
 
 
@@ -20,6 +19,8 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
 
         self.cellChanged.connect(self.slot_cellChanged)
         self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
+
+        self.status_prompt = lambda: (_ for _ in ()).throw(NotImplementedError('Please inject this from Unit!'))
 
     def __init_later__(self):
         self.Cols.to_table(self)
@@ -48,7 +49,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
             color = QColorDialog().getColor(initial=QColor(row_action.color()))  # type:QColor
             if color.isValid():
                 if color == Qt.white:
-                    CommonUnit.status_prompt('Cannot set white color to action!')
+                    self.status_prompt('Cannot set white color to action!')
                     logger.warn('Cannot set white color to action!')
                     return
                 row_action.set_color(color)

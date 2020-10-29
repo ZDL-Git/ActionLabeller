@@ -42,6 +42,11 @@ class ActionLabellingUnit:
             self.mw.btn_export_npy_and_label.clicked.connect(self.slot_export_npy_and_label),
         )
 
+        self.mw.table_timeline.get_all_actions = self.mw.table_action.get_all_actions
+        self.mw.table_timeline.get_default_action = self.mw.table_action.get_default_action
+        self.mw.table_timeline.status_prompt = CommonUnit.status_prompt
+        self.mw.table_action.status_prompt = CommonUnit.status_prompt
+
     def slot_export_labeled(self):
         logger.debug('')
         video_obj = PlayingUnit.only_ins.video_model
@@ -71,7 +76,7 @@ class ActionLabellingUnit:
     def slot_import_labeled(self):
         logger.debug('')
         json_file_labels = JsonFileLabels.load(CommonUnit.get_open_name())
-        existed_actions = {action.name: action for action in CommonUnit.get_all_actions()}
+        existed_actions = {action.name: action for action in self.mw.table_action.get_all_actions()}
         for i, label in json_file_labels['labels'].items():
             action_name, begin, end, pose_index = ZDict(label)['action', 'begin', 'end', ('pose_index', -1)]
             if action_name not in existed_actions:
@@ -115,7 +120,7 @@ class ActionLabellingUnit:
     @TableDecorators.dissort(table_lambda=lambda self: self.mw.table_timeline, resume_sortable=False)
     def slot_sync_action_update(self, r=None, c=None):
         logger.debug(f'{r} {c}')
-        action_dict = {a.id: a for a in CommonUnit.get_all_actions()}
+        action_dict = {a.id: a for a in self.mw.table_action.get_all_actions()}
         table_labeled, table_timeline = self.mw.table_labeled, self.mw.table_timeline
         for r in reversed(range(table_labeled.rowCount())):
             label = table_labeled.label_at(r)
