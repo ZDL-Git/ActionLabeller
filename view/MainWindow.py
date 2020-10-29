@@ -73,9 +73,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def common_slot(self, *arg):
         logger.debug(f'common slot print:{arg}')
 
-    def slot_follow_to(self, to):
-        CommonUnit.status_prompt(f'Frame {to}')
-
     def eventFilter(self, source, event):
         # if event.type() == 12:  # paint
         #     return False

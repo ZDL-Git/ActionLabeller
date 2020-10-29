@@ -56,8 +56,8 @@ class PlayingUnit(QObject):
             self.mw.input_jumpto.textChanged.connect(self.slot_input_jumpto_changed),
         )
         (
-            self.mw.btn_to_head.clicked.connect(self.to_head),
-            self.mw.btn_to_tail.clicked.connect(self.to_tail),
+            self.mw.btn_to_head.clicked.connect(self.slot_to_head),
+            self.mw.btn_to_tail.clicked.connect(self.slot_to_tail),
             self.mw.btn_backward.clicked.connect(self.slot_fast_backward),
             self.mw.btn_rewind.clicked.connect(self.slot_fast_rewind),
             self.mw.btn_open_video.clicked.connect(self.slot_open_file),
@@ -113,7 +113,7 @@ class PlayingUnit(QObject):
             logger.warn(f'{file_uri} type {ext} not supported.')
             return
         self.media_model.signals.flushed.connect(self.mw.table_timeline.slot_follow_to)
-        self.media_model.signals.flushed.connect(self.mw.slot_follow_to)
+        self.media_model.signals.flushed.connect(self.slot_follow_to)
         self.media_model.start()
 
     def slot_btn_stop(self):
@@ -160,11 +160,11 @@ class PlayingUnit(QObject):
         step = CommonUnit.get_value(self.mw.input_step, int)
         self.media_model.schedule(-1, step, -1, MySignals.Emitter.BTN)
 
-    def to_head(self):
+    def slot_to_head(self):
         logger.debug('')
         self.media_model.to_head()
 
-    def to_tail(self):
+    def slot_to_tail(self):
         logger.debug('')
         self.media_model.to_tail()
 
@@ -217,6 +217,9 @@ class PlayingUnit(QObject):
         if jump_to != -1:
             bias = None
         self.media_model.schedule(jump_to, bias, stop_at, emitter)
+
+    def slot_follow_to(self, to):
+        CommonUnit.status_prompt(f'Frame {to}')
 
     def _init_pyqtgraph(self):
         pg.setConfigOptions(antialias=True)
