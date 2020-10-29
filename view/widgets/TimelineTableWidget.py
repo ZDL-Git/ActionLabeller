@@ -404,7 +404,7 @@ class TimelineTableView(TableViewExtended):
                 return
             action = list(filter(lambda a: a.name == action_name, self.actions))[0]
             begin = self.line_begin.text() and int(self.line_begin.text())
-            end = self.line_end.text() and int(self.line_end.text()) or None
+            end = (self.line_end.text() or None) and int(self.line_end.text())
             label = ActionLabel(action.name, action.id, action.color, begin,
                                 end, None)
             if not label.is_valid(['action', 'begin']):
