@@ -423,7 +423,7 @@ class TimelineTableView(TableViewExtended):
             logger.debug(label)
             if not label.is_valid(['action', 'action_id', 'color', 'begin', 'end']):
                 return False
-            if self.parent().settle_label(label) is None:
+            if self.parent.settle_label(label) is None:
                 return False
             mySignals.label_created.emit(label, MySignals.Emitter.T_LABEL)
             return True
