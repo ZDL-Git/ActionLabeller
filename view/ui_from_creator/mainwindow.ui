@@ -1155,9 +1155,11 @@ QTabBar::tab:selected {
              </widget>
             </item>
             <item row="0" column="0">
-             <widget class="QPlainTextEdit" name="ptext_eval_in">
+             <widget class="QPlainTextEdit"
+                     name="eval_input">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <sizepolicy hsizetype="Expanding"
+                           vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -1171,9 +1173,11 @@ QTabBar::tab:selected {
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QTextBrowser" name="textb_eval_out">
+             <widget class="QTextBrowser"
+                     name="eval_output">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <sizepolicy hsizetype="Expanding"
+                           vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>

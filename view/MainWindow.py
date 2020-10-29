@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
 from zdl.utils.io.log import logger
 
 from presenter.ActionLabellingUnit import ActionLabellingUnit
+from presenter.ApplicationUnit import ApplicationUnit
 from presenter.CommonUnit import CommonUnit
 from presenter.PlayingUnit import PlayingUnit
 from presenter.Settings import Settings
@@ -29,17 +30,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.combo_speed.setCurrentIndex(3)
         self.combo_sortby.addItems(['filename', 'timestamp'])
         self.combo_sortby.setCurrentIndex(0)
-        # self.line_xml_file_parttern.setText('action_{begin index}-{end index}.xml')
-
-        self.label_show.installEventFilter(self)
 
         def init_buttons():
             self.btn_open_video.setFocus()
-            self.btn_eval.clicked.connect(self.slot_eval)
 
         def init_settings():
             Settings.v_interval = int(self.spin_interval.text())
-            # global_.Settings.v_speed = float(self.combo_speed.currentText())
 
         def prettify():
             shadowEffect = QGraphicsDropShadowEffect()
@@ -64,11 +60,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         CommonUnit.set_mw(self)
         # Hold to avoid being destroyed
-        # self._holder0 = ApplicationUnit(self)
+        self._holder0 = ApplicationUnit(self)
         self._holder1 = XmlSettingUnit(self)
         self._holder2 = PlayingUnit(self)
         self._holder3 = ActionLabellingUnit(self)
-        # self._holder4 = PosePlottingUnit(self)
 
     def common_slot(self, *arg):
         logger.debug(f'common slot print:{arg}')
@@ -87,18 +82,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                               QMessageBox.Cancel):
             e.ignore()
         logger.debug('Main window closed.')
-
-    # def resizeEvent(self, e):
-    #     pass
-    #     Log.warn(self.table_timeline.width())
-    #     super(MyApp, self).resizeEvent(e)
-
-    def slot_eval(self):
-        eval_content = self.ptext_eval_in.toPlainText()
-        try:
-            resp = eval(eval_content)
-            logger.info(f'{eval_content} -> {resp}')
-        except Exception as e:
-            resp = e.__str__()
-            logger.error(f'{eval_content} -> {resp}')
-        self.textb_eval_out.setText(str(resp))

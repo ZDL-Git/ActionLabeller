@@ -7,13 +7,14 @@ class ApplicationUnit:
         logger.debug('')
         self.mw = mwindow
 
-        (
-            # self.mw.tool_box.currentChanged.connect(self.slot_toolbox_index_changed)
-        )
+        self.mw.btn_eval.clicked.connect(self.slot_eval),
 
-    # def slot_toolbox_index_changed(self, index):
-    #     Log.debug(index)
-    #     if index in [0, 1]:
-    #         self.mw.stacked_widget.setCurrentIndex(0)
-    #     elif index == 2:
-    #         self.mw.stacked_widget.setCurrentIndex(1)
+    def slot_eval(self):
+        eval_content = self.mw.eval_input.toPlainText()
+        try:
+            resp = eval(eval_content)
+            logger.info(f'{eval_content} -> {resp}')
+        except Exception as e:
+            resp = e.__str__()
+            logger.error(f'{eval_content} -> {resp}')
+        self.mw.eval_output.setText(str(resp))
