@@ -18,8 +18,7 @@ class PlotterGraphicWidget(pg.GraphicsLayoutWidget):
         # self.graphics_view.setAspectLocked(True)
 
         # plotter = self.Plotter(self.addPlot())  # type: PlotterGraphicWidget.Plotter
-        plotter = self.addPlot()  # type: pg.PlotItem
-        plotter.__class__ = self.Plotter
+        plotter = self.Plotter.from_(self.addPlot())  # type: pg.PlotItem
         plotter.hideButtons()
 
         # plotter.plot(np.random.normal(size=100), pen=(200, 200, 200), symbolBrush=(255, 0, 0), symbolPen='w')
@@ -50,6 +49,11 @@ class PlotterGraphicWidget(pg.GraphicsLayoutWidget):
     class Plotter(pg.PlotItem):
         def __init__(self):
             super().__init__()
+
+        @classmethod
+        def from_(cls, plot_item: pg.PlotItem):
+            plot_item.__class__ = cls
+            return plot_item
 
         def set_range(self, x_range=None, y_range=None):
             logger.debug(f'{x_range} {y_range}')
