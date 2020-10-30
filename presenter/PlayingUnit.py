@@ -2,6 +2,7 @@ import os
 from typing import Optional
 
 from PyQt5.QtCore import QEvent, QObject
+from PyQt5.QtGui import QKeySequence
 from zdl.utils.io.file import FileInfo
 from zdl.utils.io.log import logger
 
@@ -26,6 +27,7 @@ class PlayingUnit(QObject):
         super().__init__()
         self.__class__.only_ins = self
         self.mw = mwindow
+        self.mw.btn_play.setShortcut(QKeySequence(' '))
 
         self.media_model = None  # type:Optional[AbcPlayable]
         self.video_model = None  # type:Optional[Video]
@@ -36,7 +38,7 @@ class PlayingUnit(QObject):
             self.mw.tab_media.currentChanged.connect(self.slot_tabmedia_current_changed),
             self.mw.table_timeline.horizontalHeader().sectionClicked.connect(
                 self.slot_tabletimeline_header_clicked),
-            self.mw.table_timeline.pressed.connect(self.slot_stop),
+            self.mw.table_timeline.pressed.connect(self.slot_pause),
             self.mw.table_timeline.doubleClicked.connect(self.table_timeline_cell_double_clicked),
             self.mw.table_labeled.cellDoubleClicked.connect(self.table_labeled_cell_double_clicked),
         )
@@ -111,7 +113,7 @@ class PlayingUnit(QObject):
             return
         self.media_model.signals.flushed.connect(self.mw.table_timeline.slot_follow_to)
         self.media_model.signals.flushed.connect(self.slot_follow_to)
-        self.media_model.start(clear_schedule=True)
+        self.slot_start()
 
     def slot_btn_stop(self):
         logger.debug('')
@@ -126,24 +128,26 @@ class PlayingUnit(QObject):
             return
         if self.media_model.is_playing():
             logger.info('pause.')
-            self.media_model.pause()
-            self.mw.btn_play.setText('Play')
+            self.slot_pause()
         else:
             logger.info('start.')
-            self.media_model.start(clear_schedule=True)
-            self.mw.btn_play.setText('Pause')
+            self.slot_start()
 
-    def slot_stop(self):
+    def slot_pause(self):
         logger.debug('')
         if self.media_model is None:
             return
         self.media_model.pause()
+        self.mw.btn_play.setText('Play')
+        self.mw.btn_play.setShortcut(QKeySequence(' '))
 
     def slot_start(self):
         logger.debug('')
         if self.media_model is None:
             return
         self.media_model.start(clear_schedule=True)
+        self.mw.btn_play.setText('Pause')
+        self.mw.btn_play.setShortcut(QKeySequence(' '))
 
     def set_model(self, model):
         logger.debug(type(model))

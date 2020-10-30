@@ -317,9 +317,6 @@ border: 1 solid gray;</string>
                 <property name="text">
                  <string>Play</string>
                 </property>
-                <property name="shortcut">
-                 <string>Space</string>
-                </property>
                </widget>
               </item>
               <item>
