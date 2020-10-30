@@ -2,7 +2,6 @@ from abc import abstractmethod
 from typing import List, Optional
 
 import numpy as np
-import pyqtgraph as pg
 from zdl.utils.io.log import logger
 
 from model.AbcPlayable import AbcPlayable
@@ -20,9 +19,11 @@ class AbcPlotting(AbcPlayable):
         self.flag_clear_per_frame = True
         # self.clear_per_frame = True
 
-    @property
-    def indices(self):
-        return self._indices
+    def set_viewer(self, view):
+        logger.debug('')
+        self.plotter = view
+        self.plotter.addLegend()
+        return self
 
     def set_data(self, v):
         logger.debug('')
@@ -38,15 +39,17 @@ class AbcPlotting(AbcPlayable):
         # self.plotter.vb.setLimits(xMin=0, xMax=1280, yMin=0, yMax=720)
         return self
 
-    def set_range(self, x_range=None, y_range=None):
-        logger.debug('')
-        if x_range is None:
-            x_range = [0, 1280]
-        if y_range is None:
-            y_range = [0, 720]
-        self.plotter: pg.PlotItem
-        self.plotter.setRange(xRange=x_range, yRange=y_range, padding=False, disableAutoRange=True)
-        return self
+    def to_head(self):
+        head = self.indices[0]
+        self.schedule(head, -1, head, self.__class__)
+
+    def to_tail(self):
+        tail = self.indices[-1]
+        self.schedule(tail, -1, tail, self.__class__)
+
+    @property
+    def indices(self):
+        return self._indices
 
     def flush(self):
         if not self._flag_playing and self.scheduled.jump_to is None:
@@ -59,7 +62,7 @@ class AbcPlotting(AbcPlayable):
             self.flag_indices_index = self.indices.index(dest_key)
         else:
             self.flag_indices_index += 1
-            if self.flag_indices_index == len(self._fdata):
+            if self.flag_indices_index >= len(self._indices):
                 return None
             dest_key = self.indices[self.flag_indices_index]
 

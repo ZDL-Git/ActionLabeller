@@ -4,7 +4,6 @@ import numpy as np
 import pyqtgraph as pg
 from zdl.AI.pose_estimation.pose import *
 from zdl.utils.io.file import FileInfo
-from zdl.utils.io.log import logger
 
 from model.AbcPlotting import AbcPlotting
 
@@ -18,20 +17,6 @@ class PosePlotting(AbcPlotting):
 
         self.file = None  # type:Optional[FileInfo]
         # self.clear_per_frame = True
-
-    def set_viewer(self, view):
-        logger.debug('')
-        self.plotter = view
-        self.plotter.addLegend()
-        return self
-
-    def to_head(self):
-        head = self.indices[0]
-        self.schedule(head, -1, head, self.__class__)
-
-    def to_tail(self):
-        tail = self.indices[-1]
-        self.schedule(tail, -1, tail, self.__class__)
 
     def plot(self, key):
         pose_colors = ['#fe8a71', '#0e9aa7', 'gray']  # orange, green, gray

@@ -1,7 +1,6 @@
 import os
 from typing import Optional
 
-import pyqtgraph as pg
 from PyQt5.QtCore import QEvent, QObject
 from zdl.utils.io.file import FileInfo
 from zdl.utils.io.log import logger
@@ -33,8 +32,6 @@ class PlayingUnit(QObject):
         self.images_model = None
         self.pose_model = None  # type:Optional[PosePlotting]
         self.video_playing = False
-
-        self._init_pyqtgraph()
 
         (
             self.mw.tab_media.currentChanged.connect(self.slot_tabmedia_current_changed),
@@ -99,10 +96,11 @@ class PlayingUnit(QObject):
         elif ext in Settings.plotting_exts:
             self.mw.tab_media.setCurrentIndex(2)
             file = JsonFilePoses.load(file_uri)
+            plotter = self.mw.graphics_view.main_plotter
+            plotter.set_range([0, int(file['video_info.w'])], [0, int(file['video_info.h'])])
             pose_model = PosePlotting(file['info.pose_type']) \
                 .set_data(file['poses']) \
-                .set_viewer(self.main_plotter) \
-                .set_range()
+                .set_viewer(plotter)
             pose_model.file = file
             self.pose_model = pose_model
             self.set_model(pose_model)
@@ -220,42 +218,6 @@ class PlayingUnit(QObject):
 
     def slot_follow_to(self, to):
         CommonUnit.status_prompt(f'Frame {to}')
-
-    def _init_pyqtgraph(self):
-        pg.setConfigOptions(antialias=True)
-
-        # p3 = self.graphics_view.addPlot(title="Drawing with points")  # type: pg.PlotItem
-
-        # self.mw.graphics_view.setBackground('w')
-        # self.graphics_view.setAspectLocked(True)
-
-        h, w = 200, 300
-        self.main_plotter = self.mw.graphics_view.addPlot()  # type: pg.PlotItem
-        self.main_plotter.hideButtons()
-
-        # self.main_plotter.plot(np.random.normal(size=100), pen=(200, 200, 200), symbolBrush=(255, 0, 0), symbolPen='w')
-
-        # self.main_plot.setFixedHeight(h)
-        # self.main_plot.setFixedWidth(w)
-
-        # view_box = pg.ViewBox(p3)
-        # view_box.setRange(xRange=[0, 200], yRange=[0, 100], padding=0)
-        # self.main_plot.setAxisItems({'left': pg.AxisItem(orientation='left', linkView=view_box)})
-        self.main_plotter.setRange(xRange=[0, 200], yRange=[0, 100], padding=False, disableAutoRange=True)
-        # self.main_plot.vb.setLimits(xMax=w, yMax=h)
-
-        view_box = self.main_plotter.getViewBox()  # type:pg.ViewBox
-        view_box.setMouseEnabled(False, False)
-        view_box.invertY(True)
-        view_box.setAspectLocked(True, ratio=1)  # keep the content's x y scale consistent, not window
-
-        left_axis = self.main_plotter.getAxis('left')  # type:pg.AxisItem
-        bottom_axis = self.main_plotter.getAxis('bottom')  # type:pg.AxisItem
-        left_axis.setWidth(22)
-        bottom_axis.setHeight(4)
-
-        # left_axis.setTicks([[(i, str(i)) for i in range(0, h + 1, 20)], []])
-        # bottom_axis.setTicks([[(i, str(i)) for i in range(0, w + 1, 20)], []])
 
     def table_labeled_cell_double_clicked(self, r, c):
         logger.debug('')
