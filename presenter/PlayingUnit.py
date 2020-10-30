@@ -31,7 +31,6 @@ class PlayingUnit(QObject):
         self.video_model = None  # type:Optional[Video]
         self.images_model = None
         self.pose_model = None  # type:Optional[PosePlotting]
-        self.video_playing = False
 
         (
             self.mw.tab_media.currentChanged.connect(self.slot_tabmedia_current_changed),
@@ -112,33 +111,39 @@ class PlayingUnit(QObject):
             return
         self.media_model.signals.flushed.connect(self.mw.table_timeline.slot_follow_to)
         self.media_model.signals.flushed.connect(self.slot_follow_to)
-        self.media_model.start()
+        self.media_model.start(clear_schedule=True)
 
     def slot_btn_stop(self):
         logger.debug('')
-        self.video_playing = False
+        if self.media_model is None:
+            return
+        self.media_model.pause()
         self.mw.label_show.clear()
 
     def slot_play_toggle(self):
-        logger.debug('')
         if self.media_model is None:
+            logger.debug('media_model is None.')
             return
         if self.media_model.is_playing():
-            self.media_model.stop()
+            logger.info('pause.')
+            self.media_model.pause()
+            self.mw.btn_play.setText('Play')
         else:
-            self.media_model.start()
+            logger.info('start.')
+            self.media_model.start(clear_schedule=True)
+            self.mw.btn_play.setText('Pause')
 
     def slot_stop(self):
         logger.debug('')
         if self.media_model is None:
             return
-        self.media_model.stop()
+        self.media_model.pause()
 
     def slot_start(self):
         logger.debug('')
         if self.media_model is None:
             return
-        self.media_model.start()
+        self.media_model.start(clear_schedule=True)
 
     def set_model(self, model):
         logger.debug(type(model))
@@ -191,7 +196,7 @@ class PlayingUnit(QObject):
 
     def slot_tabmedia_current_changed(self, index):
         logger.debug(index)
-        self.media_model and self.media_model.stop()
+        self.media_model and self.media_model.pause()
         if index == 0:
             self.mw.stacked_widget.setCurrentIndex(0)
             self.set_model(self.video_model)
@@ -222,8 +227,7 @@ class PlayingUnit(QObject):
     def table_labeled_cell_double_clicked(self, r, c):
         logger.debug('')
         label = self.mw.table_labeled.label_at(r)
-        if not self.label_play(label):
-            self.mw.table_timeline.col_to_center(label.begin)
+        self.label_play(label) or self.mw.table_timeline.col_to_center(label.begin)
 
     def table_timeline_cell_double_clicked(self, qindex):
         logger.debug('')

@@ -68,7 +68,7 @@ class Video(AbcPlayable):
 
         if self.scheduled.stop_at is not None and dest_index > self.scheduled.stop_at:
             self.scheduled.clear()
-            self.stop()
+            self.pause()
             return None
 
         _gap = dest_index - self._flag_cur_index
@@ -81,11 +81,9 @@ class Video(AbcPlayable):
             if not ret:
                 self.schedule(0, -1, 0, MySignals.Emitter.V_PLAYER)
                 return None
-        self._flag_cur_index = dest_index
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # self.frames_buffer.append((self.cur_index, frame))
-
         height, width, bytesPerComponent = frame.shape
         bytesPerLine = bytesPerComponent * width
         q_image = QImage(frame.data, width, height, bytesPerLine,
@@ -93,5 +91,7 @@ class Video(AbcPlayable):
                                                       Qt.KeepAspectRatio, Qt.SmoothTransformation)
         q_pixmap = QPixmap.fromImage(q_image)
         self.viewer.setPixmap(q_pixmap)
+
+        self._flag_cur_index = dest_index
         self.signals.flushed.emit(self._flag_cur_index)
         return self._flag_cur_index

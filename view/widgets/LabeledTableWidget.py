@@ -20,8 +20,8 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
 
         self.RowLabel = partial(self._Row, table=self)
 
-        self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
-        self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
+        # self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
+        # self.itemSelectionChanged.connect(self.slot_itemSelectionChanged)
         # self.cellChanged.connect(self.slot_cellChanged)
 
     def __init_later__(self):
@@ -30,8 +30,8 @@ class LabeledTableWidget(QTableWidget, TableViewExtended):
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         self.horizontalHeader().setStretchLastSection(True)
 
-    # def slot_cellChanged(self, r, c):
-    #     Log.debug(r, c)
+    def slot_cellChanged(self, r, c):
+        logger.debug(f'{r}, {c}')
 
     def keyReleaseEvent(self, e: QKeyEvent) -> None:
         if self.state() == QAbstractItemView.EditingState:

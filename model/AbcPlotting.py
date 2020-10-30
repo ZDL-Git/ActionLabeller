@@ -68,7 +68,7 @@ class AbcPlotting(AbcPlayable):
 
         if self.scheduled.stop_at is not None and dest_key > self.scheduled.stop_at:
             self.scheduled.clear()
-            self.stop()
+            self.pause()
             return None
 
         self.plot(dest_key)

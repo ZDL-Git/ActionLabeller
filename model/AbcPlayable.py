@@ -36,17 +36,18 @@ class AbcPlayable(ABC):
     def is_playing(self):
         return self._flag_playing
 
-    def stop(self):
+    def start(self, clear_schedule=False):
+        logger.debug('')
+        self._flag_playing = True
+        if clear_schedule:
+            self.scheduled.clear()
+        if not self.timer.isActive():
+            self.timer.start()
+
+    def pause(self):
         logger.debug('')
         self._flag_playing = False
         # self.timer.stop()
-
-    def start(self):
-        logger.debug('')
-        self._flag_playing = True
-        self.scheduled.clear()
-        if not self.timer.isActive():
-            self.timer.start()
 
     @abstractmethod
     def set_viewer(self, view):
