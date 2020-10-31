@@ -47,8 +47,12 @@ class PlotterGraphicWidget(pg.GraphicsLayoutWidget):
         return plotter
 
     class Plotter(pg.PlotItem):
-        def __init__(self):
-            super().__init__()
+        """Wrapping for appending the set_range method.
+
+        Usage:
+            plotter = Plotter.from_(pyqtgraph.PlotItem())
+            plotter.set_range([0,100],[0,200])
+        """
 
         @classmethod
         def from_(cls, plot_item: pg.PlotItem):

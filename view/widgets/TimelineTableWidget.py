@@ -229,7 +229,6 @@ class TimelineTableView(TableViewExtended):
         return t_r
 
     def _plot_label(self, label: ActionLabel):
-        # Log.debug(label)
         for c in range(max(0, label.begin), label.end + 1):
             item = self.model().item(label.timeline_row, c)
             if item is None:

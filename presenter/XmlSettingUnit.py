@@ -13,7 +13,6 @@ class XmlSettingUnit:
     def __init__(self, mwindow):
         logger.debug('')
         self.mw = mwindow
-        # Log.debug(self.parent())
         self.mw.btn_export_xml.clicked.connect(self.slot_export_xml)
         self.mw.btn_xml_template.clicked.connect(self.slot_xml_template)
 

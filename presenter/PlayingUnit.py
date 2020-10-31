@@ -64,7 +64,6 @@ class PlayingUnit(QObject):
         )
 
     def eventFilter(self, source, event):
-        # Log.debug(source, event)
         if source == self.mw.label_show:
             if event.type() == QEvent.MouseButtonPress:
                 logger.debug(source)
