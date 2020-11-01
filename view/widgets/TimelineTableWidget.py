@@ -317,28 +317,32 @@ class TimelineTableView(TableViewExtended):
             self.line_begin.setValidator(QIntValidator())
             self.line_end.setValidator(QIntValidator())
 
-            self.cur_frame_index = None
             self.labels_unfinished = []  # type:typing.List
 
             self.btn_new.clicked.connect(self.slot_dialog_btn_new_clicked)
 
-        def load(self, cur_frame_index):
-            self.cur_frame_index = cur_frame_index
+        def load(self):
+            self.cur_frame_index = self.parent.current_column
+            self.actions = {ac.name: ac for ac in self.parent.get_all_actions()}
+            if not self.actions:
+                warn_ = 'Please add action first!'
+                logger.warning(warn_)
+                self.parent.status_prompt(warn_, True)
+                return False
             self._load_new_comb()
             self._load_unfinished()
+            return True
 
         def _load_new_comb(self):
             # created in qt creator IDE
             self.line_begin.setText(str(self.cur_frame_index))
             self.line_end.clear()
             self.combo_action_names.clear()
-            self.actions = actions = self.parent.get_all_actions()
-            if actions:
-                _action_names = [a.name for a in actions]
-                self.combo_action_names.addItems(_action_names)
-                default: typing.List[Action] = list(filter(lambda action: action.default, actions))
-                if default:
-                    self.combo_action_names.setCurrentIndex(_action_names.index(default[0].name))
+            action_names = list(self.actions.keys())
+            self.combo_action_names.addItems(action_names)
+            default: Action = self.parent.get_default_action(dialog=False)
+            if default:
+                self.combo_action_names.setCurrentIndex(action_names.index(default.name))
 
         def _load_unfinished(self):
             clearLayout(self.instore_layout)
@@ -380,12 +384,10 @@ class TimelineTableView(TableViewExtended):
         def slot_dialog_btn_finish_clicked(self, w_action, w_begin, w_end, index_in_labels_unfinished):
             logger.debug('')
             action_name = w_action.currentText()
-            action = list(filter(lambda a: a.name == action_name, self.actions))[0]
+            action = self.actions[action_name]
             begin = w_begin.text() and int(w_begin.text())
             end = w_end.text() and int(w_end.text())
             label = ActionLabel(action.name, action.id, action.color, begin, end, None)
-            if not label.is_valid(['action', 'begin', 'end']):
-                return
             if not self._commit_label(label):
                 return
             del self.labels_unfinished[index_in_labels_unfinished]
@@ -402,12 +404,14 @@ class TimelineTableView(TableViewExtended):
             if not action_name:
                 logger.info('Please add action first!')
                 return
-            action = list(filter(lambda a: a.name == action_name, self.actions))[0]
+            action = self.actions[action_name]
             begin = self.line_begin.text() and int(self.line_begin.text())
             end = (self.line_end.text() or None) and int(self.line_end.text())
             label = ActionLabel(action.name, action.id, action.color, begin,
                                 end, None)
-            if not label.is_valid(['action', 'begin']):
+            bresult = label.is_valid(['action', 'begin'])
+            if not bresult:
+                self.parent.status_prompt(bresult, True)
                 return
             if end is None:
                 self.labels_unfinished.append(label)
@@ -432,7 +436,7 @@ class TimelineTableView(TableViewExtended):
 
         def exec_(self):
             self.setFixedWidth(self.width())
-            return super().exec_()
+            self.load() and super().exec_()
 
 
 class TimelineTableModel(QStandardItemModel):

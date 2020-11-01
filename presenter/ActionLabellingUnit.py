@@ -161,5 +161,4 @@ class ActionLabellingUnit:
         if not label:
             self.mw.table_timeline.col_to_center(self.mw.table_timeline.current_column)
             CommonUnit.status_prompt(str(f'Current Frame {self.mw.table_timeline.current_column}'))
-            self.mw.table_timeline.label_create_dialog.load(self.mw.table_timeline.current_column)
             self.mw.table_timeline.label_create_dialog.exec_()
