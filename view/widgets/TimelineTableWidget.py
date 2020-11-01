@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt, QVariant, QRect, QItemSelection, QItemSelectionMode
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEvent, QIntValidator
 from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
     QPushButton, QHeaderView
+from zdl.utils.helper.python import BResult
 from zdl.utils.helper.qt import TableDecorators, clearLayout
 from zdl.utils.io.log import logger
 
@@ -418,14 +419,16 @@ class TimelineTableView(TableViewExtended):
             else:
                 self._load_unfinished()
 
-        def _commit_label(self, label: ActionLabel):
+        def _commit_label(self, label: ActionLabel) -> BResult:
             logger.debug(label)
-            if not label.is_valid(['action', 'action_id', 'color', 'begin', 'end']):
-                return False
+            bresult = label.is_valid(['action', 'action_id', 'color', 'begin', 'end'])
+            if not bresult:
+                self.parent.status_prompt(bresult, True)
+                return bresult
             if self.parent.settle_label(label) is None:
-                return False
+                return BResult(False, 'label settle failed.')
             mySignals.label_created.emit(label, MySignals.Emitter.T_LABEL)
-            return True
+            return BResult(True)
 
         def exec_(self):
             self.setFixedWidth(self.width())

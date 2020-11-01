@@ -1,6 +1,7 @@
 from typing import Optional
 
 from PyQt5.QtGui import QBrush
+from zdl.utils.helper.python import BResult
 from zdl.utils.io.log import logger
 
 
@@ -30,19 +31,19 @@ class ActionLabel:
         else:
             logger.error('actions not continuous')
 
-    def is_valid(self, checklist: list) -> bool:
+    def is_valid(self, checklist: list) -> BResult:
         logger.debug(self)
         for attr in checklist:
             value = eval(f'self.{attr}')
             if value in [None, '', []]:
-                warn_ = f"Label's attr [{attr}]  is [{value}], invalid!"
+                warn_ = f"Label's attr {attr}={value}, invalid."
                 logger.warn(warn_)
-                return False
+                return BResult(False, warn_)
         if self.begin is not None and self.end is not None and self.begin > self.end:
-            warn_ = f"Label's begin[{self.begin}] exceeds end[{self.end}], invalid!"
+            warn_ = f"Label's begin[{self.begin}] exceeds end[{self.end}], invalid."
             logger.warn(warn_)
-            return False
-        return True
+            return BResult(False, warn_)
+        return BResult(True)
 
     def __repr__(self):
         return f"{self.__class__.__name__}: " \
