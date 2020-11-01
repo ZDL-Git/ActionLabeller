@@ -75,9 +75,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         logger.debug('')
         rows = self.rowCount()
         if rows == 0:
-            QMessageBox().information(self, 'ActionLabeller',
-                                      "Please add action first!",
-                                      QMessageBox.Ok, QMessageBox.Ok)
+            self.status_prompt("Please add action first!", True)
             return None
 
         actions = self.get_all_actions()

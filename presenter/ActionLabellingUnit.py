@@ -141,9 +141,7 @@ class ActionLabellingUnit:
     def slot_del_selected_actions(self, checked):
         logger.debug('')
         if not self.mw.table_action.selectedIndexes():
-            QMessageBox().information(self.mw, 'ActionLabeller Warning',
-                                      "Select action first!",
-                                      QMessageBox.Ok, QMessageBox.Ok)
+            CommonUnit.status_prompt('Select actions first!', True)
             return
         if self.mw.table_labeled.rowCount():
             if QMessageBox.Cancel == QMessageBox().warning(self.mw, 'ActionLabeller Warning',
