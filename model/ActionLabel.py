@@ -16,7 +16,10 @@ class ActionLabel:
         self.color = color
         self.begin = begin
         self.end = end
-        self.duration = self.end - self.begin + 1 if self.begin is not None and self.end is not None else None
+        try:
+            self.duration = self.end - self.begin + 1
+        except TypeError:
+            self.duration = None
         self.pose_index = pose_index  # pose index from 0, within one frame.
         self.timeline_row = timeline_row
 
