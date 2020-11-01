@@ -4,6 +4,7 @@ from typing import Union, Callable
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from zdl.utils.helper.python import raise_
 from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.log import logger
 
@@ -20,7 +21,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
         self.cellChanged.connect(self.slot_cellChanged)
         self.cellDoubleClicked.connect(self.slot_cellDoubleClicked)
 
-        self.status_prompt = lambda: (_ for _ in ()).throw(NotImplementedError('Please inject this from Unit!'))
+        self.status_prompt = lambda msg, dialog=False: raise_(NotImplementedError('Please inject this from Unit!'))
 
     def __init_later__(self):
         self.Cols.to_table(self)

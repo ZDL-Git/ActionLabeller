@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QVariant, QRect, QItemSelection, QItemSelectionMode
 from PyQt5.QtGui import QStandardItemModel, QKeyEvent, QStandardItem, QWheelEvent, QIntValidator
 from PyQt5.QtWidgets import QCheckBox, QAbstractItemView, QDialog, QHBoxLayout, QComboBox, QLineEdit, \
     QPushButton, QHeaderView
-from zdl.utils.helper.python import BResult
+from zdl.utils.helper.python import BResult, raise_
 from zdl.utils.helper.qt import TableDecorators, clearLayout
 from zdl.utils.io.log import logger
 
@@ -32,9 +32,9 @@ class TimelineTableView(TableViewExtended):
         self.pressed.connect(self.slot_cellPressed)
 
         self.label_create_dialog = self.TimelineDialog(self)
-        self.get_all_actions = lambda: (_ for _ in ()).throw(NotImplementedError('Please inject this from Unit!'))
-        self.get_default_action = lambda: (_ for _ in ()).throw(NotImplementedError('Please inject this from Unit!'))
-        self.status_prompt = lambda: (_ for _ in ()).throw(NotImplementedError('Please inject this from Unit!'))
+        self.get_all_actions = lambda: raise_(NotImplementedError('Please inject this from Unit!'))
+        self.get_default_action = lambda dialog=True: raise_(NotImplementedError('Please inject this from Unit!'))
+        self.status_prompt = lambda msg, dialog=False: raise_(NotImplementedError('Please inject this from Unit!'))
 
     def __init_later__(self):
         self.setModel(TimelineTableModel(20, 50))
