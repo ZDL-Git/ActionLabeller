@@ -221,7 +221,7 @@ class TimelineTableView(TableViewExtended):
         if t_r is None:
             warn_ = 'All related rows are already occupied and new ones cannot be placed!'
             logger.warn(warn_)
-            self.status_prompt(warn_)
+            self.status_prompt(warn_, True)
             return None
         label.timeline_row = t_r
         if not self._plot_label(label):

@@ -5,7 +5,7 @@ import pickle
 from typing import Callable
 
 import numpy as np
-from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit
+from PyQt5.QtWidgets import QFileDialog, QComboBox, QLineEdit, QMessageBox
 from zdl.utils.io.log import logger
 
 
@@ -22,7 +22,14 @@ class CommonUnit:
         logger.debug('')
         cls.mw = mwindow
 
-        cls.status_prompt = cls.mw.label_note.setText
+    @classmethod
+    def status_prompt(cls, msg, dialog=False):
+        msg = str(msg)
+        cls.mw.label_note.setText(msg)
+        if dialog:
+            QMessageBox().information(cls.mw, 'ActionLabeller',
+                                      msg,
+                                      QMessageBox.Ok, QMessageBox.Ok)
 
     @classmethod
     def get_save_name(cls, default=None):

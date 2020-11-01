@@ -49,7 +49,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
             color = QColorDialog().getColor(initial=QColor(row_action.color()))  # type:QColor
             if color.isValid():
                 if color == Qt.white:
-                    self.status_prompt('Cannot set white color to action!')
+                    self.status_prompt('Cannot set white color to action!', True)
                     logger.warn('Cannot set white color to action!')
                     return
                 row_action.set_color(color)
