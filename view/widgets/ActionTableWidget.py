@@ -70,7 +70,7 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
                 logger.error(e.__str__())
         return actions
 
-    def get_default_action(self):
+    def get_default_action(self, dialog=True):
         logger.debug('')
         rows = self.rowCount()
         if rows == 0:
@@ -84,12 +84,13 @@ class ActionTableWidget(QTableWidget, TableViewExtended):
             if action.default:
                 return action
         # 2.select from dialog
-        action_name, ok_pressed = QInputDialog().getItem(self, "ActionLabeller",
-                                                         "Select or check as default in Action Setting:",
-                                                         [a.name for a in actions], 0,
-                                                         False)
-        if ok_pressed and action_name:
-            return list(filter(lambda a: a.name == action_name, actions))[0]
+        if dialog:
+            action_name, ok_pressed = QInputDialog().getItem(self, "ActionLabeller",
+                                                             "Select or check as default in Action Setting:",
+                                                             [a.name for a in actions], 0,
+                                                             False)
+            if ok_pressed and action_name:
+                return next(filter(lambda a: a.name == action_name, actions))
 
         return None
 
