@@ -185,17 +185,18 @@ class PlayingUnit(QObject):
                 self.media_model.fps = self.media_model.get_info()['fps'] * factor
             elif isinstance(self.media_model, PosePlotting):
                 self.media_model.fps = 20 * factor
-        except Exception:
+        except (ValueError,):
             logger.warning('slot_speed_changed fail.', exc_info=True)
 
     def slot_input_jumpto_changed(self, text):
+        if self.media_model is None:
+            return
         try:
-            if self.media_model is None:
-                return
             jump_to = int(text)
-            self.media_model.schedule(jump_to, -1, -1, MySignals.Emitter.INPUT_JUMPTO)
-        except Exception:
+        except ValueError:
             logger.warn('Only int number supported!')
+            return
+        self.media_model.schedule(jump_to, -1, -1, MySignals.Emitter.INPUT_JUMPTO)
 
     def slot_tabmedia_current_changed(self, index):
         logger.debug(index)
