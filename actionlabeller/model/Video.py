@@ -3,9 +3,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
 from zdl.utils.helper.opencv import countFrames
 
-from model.AbcPlayable import AbcPlayable
-from presenter import MySignals
-from presenter.Settings import Settings
+from actionlabeller.model.AbcPlayable import AbcPlayable
+from actionlabeller.presenter import MySignals
+from actionlabeller.presenter.Settings import Settings
 
 
 class Video(AbcPlayable):

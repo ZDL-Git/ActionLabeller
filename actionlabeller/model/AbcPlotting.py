@@ -4,7 +4,7 @@ from typing import List, Optional
 import numpy as np
 from zdl.utils.io.log import logger
 
-from model.AbcPlayable import AbcPlayable
+from actionlabeller.model.AbcPlayable import AbcPlayable
 
 
 class AbcPlotting(AbcPlayable):

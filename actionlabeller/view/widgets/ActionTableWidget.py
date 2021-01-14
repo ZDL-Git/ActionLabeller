@@ -8,8 +8,8 @@ from zdl.utils.helper.python import raise_
 from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.log import logger
 
-from model.Action import Action
-from view.widgets.TableHelpers import TableViewExtended, EnumColsHelper, RowHelper
+from actionlabeller.model.Action import Action
+from actionlabeller.view.widgets.TableHelpers import TableViewExtended, EnumColsHelper, RowHelper
 
 
 class ActionTableWidget(QTableWidget, TableViewExtended):

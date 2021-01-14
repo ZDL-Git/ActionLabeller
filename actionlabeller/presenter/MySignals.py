@@ -2,7 +2,7 @@ from enum import Enum
 
 from PyQt5.QtCore import pyqtSignal, QObject
 
-from model.ActionLabel import ActionLabel
+from actionlabeller.model.ActionLabel import ActionLabel
 
 __all__ = ['Emitter', 'mySignals']
 

@@ -10,11 +10,11 @@ from zdl.utils.helper.python import BResult, raise_
 from zdl.utils.helper.qt import TableDecorators, clearLayout
 from zdl.utils.io.log import logger
 
-from model.Action import Action
-from model.ActionLabel import ActionLabel
-from presenter import MySignals
-from presenter.MySignals import mySignals
-from view.widgets.TableHelpers import TableViewExtended
+from actionlabeller.model.Action import Action
+from actionlabeller.model.ActionLabel import ActionLabel
+from actionlabeller.presenter import MySignals
+from actionlabeller.presenter.MySignals import mySignals
+from actionlabeller.view.widgets.TableHelpers import TableViewExtended
 
 
 class TimelineTableView(TableViewExtended):
@@ -307,7 +307,7 @@ class TimelineTableView(TableViewExtended):
         t_width = self.width()
         return self.columnAt(int(t_width / 2))
 
-    Ui_Dialog, _ = uic.loadUiType("view/ui_from_creator/timelinedialog.ui")
+    Ui_Dialog, _ = uic.loadUiType("actionlabeller/view/ui_from_creator/timelinedialog.ui")
 
     class TimelineDialog(QDialog, Ui_Dialog):
         def __init__(self, parent=None):

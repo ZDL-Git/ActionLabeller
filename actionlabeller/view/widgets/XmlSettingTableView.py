@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QHeaderView
 
-from view.widgets.ActionTableWidget import ActionTableWidget
-from view.widgets.TableHelpers import TableViewExtended
+from actionlabeller.view.widgets.ActionTableWidget import ActionTableWidget
+from actionlabeller.view.widgets.TableHelpers import TableViewExtended
 
 
 class XmlSettingTableView(TableViewExtended):

@@ -5,14 +5,14 @@ from PyQt5.QtWidgets import QMainWindow, QGraphicsDropShadowEffect, \
     QHeaderView, QComboBox, QMessageBox
 from zdl.utils.io.log import logger
 
-from presenter.ActionLabellingUnit import ActionLabellingUnit
-from presenter.ApplicationUnit import ApplicationUnit
-from presenter.CommonUnit import CommonUnit
-from presenter.PlayingUnit import PlayingUnit
-from presenter.Settings import Settings
-from presenter.XmlSettingUnit import XmlSettingUnit
+from actionlabeller.presenter.ActionLabellingUnit import ActionLabellingUnit
+from actionlabeller.presenter.ApplicationUnit import ApplicationUnit
+from actionlabeller.presenter.CommonUnit import CommonUnit
+from actionlabeller.presenter.PlayingUnit import PlayingUnit
+from actionlabeller.presenter.Settings import Settings
+from actionlabeller.presenter.XmlSettingUnit import XmlSettingUnit
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType("view/ui_from_creator/mainwindow.ui")
+Ui_MainWindow, QtBaseClass = uic.loadUiType("actionlabeller/view/ui_from_creator/mainwindow.ui")
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):

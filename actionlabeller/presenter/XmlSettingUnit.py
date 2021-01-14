@@ -4,9 +4,9 @@ from PyQt5.QtCore import QSize, Qt
 from PyQt5.QtWidgets import QGridLayout, QTextBrowser, QDialog
 from zdl.utils.io.log import logger
 
-from model.Action import Action
-from model.ActionLabel import ActionLabel
-from model.Xml_ import AnnotationXml
+from actionlabeller.model.Action import Action
+from actionlabeller.model.ActionLabel import ActionLabel
+from actionlabeller.model.Xml_ import AnnotationXml
 
 
 class XmlSettingUnit:

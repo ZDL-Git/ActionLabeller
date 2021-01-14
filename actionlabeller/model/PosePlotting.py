@@ -5,7 +5,7 @@ import pyqtgraph as pg
 from zdl.AI.pose_estimation.pose import *
 from zdl.utils.io.file import FileInfo
 
-from model.AbcPlotting import AbcPlotting
+from actionlabeller.model.AbcPlotting import AbcPlotting
 
 
 class PosePlotting(AbcPlotting):

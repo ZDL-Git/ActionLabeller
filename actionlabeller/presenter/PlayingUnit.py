@@ -6,15 +6,15 @@ from PyQt5.QtGui import QKeySequence
 from zdl.utils.io.file import FileInfo
 from zdl.utils.io.log import logger
 
-from model.AbcPlayable import AbcPlayable
-from model.ActionLabel import ActionLabel
-from model.JsonFilePoses import JsonFilePoses
-from model.PosePlotting import PosePlotting
-from model.Video import Video
-from presenter import MySignals
-from presenter.CommonUnit import CommonUnit
-from presenter.MySignals import mySignals
-from presenter.Settings import Settings
+from actionlabeller.model.AbcPlayable import AbcPlayable
+from actionlabeller.model.ActionLabel import ActionLabel
+from actionlabeller.model.JsonFilePoses import JsonFilePoses
+from actionlabeller.model.PosePlotting import PosePlotting
+from actionlabeller.model.Video import Video
+from actionlabeller.presenter import MySignals
+from actionlabeller.presenter.CommonUnit import CommonUnit
+from actionlabeller.presenter.MySignals import mySignals
+from actionlabeller.presenter.Settings import Settings
 
 
 class PlayingUnit(QObject):

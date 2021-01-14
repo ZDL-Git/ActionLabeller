@@ -9,12 +9,12 @@ from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.file import FileHelper
 from zdl.utils.io.log import logger
 
-from model.ActionLabel import ActionLabel
-from model.JsonFileLabels import JsonFileLabels
-from presenter import MySignals
-from presenter.CommonUnit import CommonUnit
-from presenter.MySignals import mySignals
-from presenter.PlayingUnit import PlayingUnit
+from actionlabeller.model.ActionLabel import ActionLabel
+from actionlabeller.model.JsonFileLabels import JsonFileLabels
+from actionlabeller.presenter import MySignals
+from actionlabeller.presenter.CommonUnit import CommonUnit
+from actionlabeller.presenter.MySignals import mySignals
+from actionlabeller.presenter.PlayingUnit import PlayingUnit
 
 
 class ActionLabellingUnit:

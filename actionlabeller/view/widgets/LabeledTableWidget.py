@@ -7,11 +7,11 @@ from PyQt5.QtWidgets import QTableWidget, QHeaderView, QAbstractItemView
 from zdl.utils.helper.qt import TableDecorators
 from zdl.utils.io.log import logger
 
-from model.Action import Action
-from model.ActionLabel import ActionLabel
-from presenter import MySignals
-from presenter.MySignals import mySignals
-from view.widgets.TableHelpers import TableViewExtended, EnumColsHelper, RowHelper
+from actionlabeller.model.Action import Action
+from actionlabeller.model.ActionLabel import ActionLabel
+from actionlabeller.presenter import MySignals
+from actionlabeller.presenter.MySignals import mySignals
+from actionlabeller.view.widgets.TableHelpers import TableViewExtended, EnumColsHelper, RowHelper
 
 
 class LabeledTableWidget(QTableWidget, TableViewExtended):
